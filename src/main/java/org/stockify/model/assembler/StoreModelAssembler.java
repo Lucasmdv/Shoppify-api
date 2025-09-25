@@ -19,11 +19,8 @@ public class StoreModelAssembler implements RepresentationModelAssembler<StoreRe
     public EntityModel<StoreResponse> toModel(@NotNull StoreResponse storeResponse) {
         return EntityModel.of(storeResponse,
                 linkTo(methodOn(StoreController.class)
-                        .getStoreById(storeResponse.id()))
-                        .withSelfRel(),
-                linkTo(methodOn(StoreController.class)
-                        .getAllStores(PageRequest.of(0, 10), null))
-                        .withRel("stores")
+                        .getStore())
+                        .withSelfRel()
         );
     }
 }

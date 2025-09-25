@@ -30,33 +30,22 @@ import java.net.URI;
 @SecurityRequirement(name = "bearerAuth")
 public class StoreController {
 
+    private static final long STORE_ID = 1L;
+
     private final StoreService storeService;
     private final StoreModelAssembler storeModelAssembler;
 
-    @Operation(summary = "List all stores")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Paged list of stores returned successfully")
-    })
-    @GetMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('READ')")
-    public ResponseEntity<PagedModel<EntityModel<StoreResponse>>> getAllStores(
-            @Parameter(hidden = true) Pageable pageable,
-            PagedResourcesAssembler<StoreResponse> assembler) {
-        Page<StoreResponse> stores = storeService.findAll(pageable);
-        return ResponseEntity.ok(assembler.toModel(stores, storeModelAssembler));
-    }
 
-    @Operation(summary = "Get store by ID")
+    @Operation(summary = "Get singleton store")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Store found"),
             @ApiResponse(responseCode = "404", description = "Store not found")
     })
-    @GetMapping("/{storeID}")
+    @GetMapping("/singleton")
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('READ') or " +
             "hasRole('ROLE_MANAGER') and hasAuthority('READ')")
-    public ResponseEntity<EntityModel<StoreResponse>> getStoreById(
-            @Parameter(description = "ID of the store") @PathVariable Long storeID) {
-        StoreResponse store = storeService.findById(storeID);
+    public ResponseEntity<EntityModel<StoreResponse>> getStore() {
+        StoreResponse store = storeService.findById(STORE_ID);
         return ResponseEntity.ok(storeModelAssembler.toModel(store));
     }
 
@@ -71,48 +60,34 @@ public class StoreController {
             @Valid @RequestBody StoreRequest request) {
         StoreResponse store = storeService.save(request);
         EntityModel<StoreResponse> storeModel = storeModelAssembler.toModel(store);
-        return ResponseEntity.created(URI.create("/stores/" + store.id())).body(storeModel);
+        return ResponseEntity.created(URI.create("/stores/singleton")).body(storeModel);
     }
 
-    @Operation(summary = "Update store by ID")
+    @Operation(summary = "Update singleton store")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Store updated successfully"),
             @ApiResponse(responseCode = "404", description = "Store not found"),
             @ApiResponse(responseCode = "400", description = "Validation error")
     })
-    @PutMapping("/{storeID}")
+    @PutMapping
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE')")
     public ResponseEntity<EntityModel<StoreResponse>> updateStore(
-            @Parameter(description = "ID of the store") @PathVariable Long storeID,
             @Valid @RequestBody StoreRequest request) {
-        StoreResponse store = storeService.update(storeID, request);
+        StoreResponse store = storeService.update(STORE_ID, request);
         return ResponseEntity.ok(storeModelAssembler.toModel(store));
     }
 
-    @Operation(summary = "Delete store by ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Store deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Store not found")
-    })
-    @DeleteMapping("/{storeID}")
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('DELETE')")
-    public ResponseEntity<Void> deleteStore(
-            @Parameter(description = "ID of the store") @PathVariable Long storeID) {
-        storeService.deleteById(storeID);
-        return ResponseEntity.noContent().build();
-    }
 
-    @Operation(summary = "Patch store by ID")
+    @Operation(summary = "Patch singleton store")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Store patched successfully"),
             @ApiResponse(responseCode = "404", description = "Store not found")
     })
-    @PatchMapping("/{storeID}")
+    @PatchMapping
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE')")
     public ResponseEntity<EntityModel<StoreResponse>> patchStore(
-            @Parameter(description = "ID of the store") @PathVariable Long storeID,
             @RequestBody StoreRequest request) {
-        StoreResponse store = storeService.patch(storeID, request);
+        StoreResponse store = storeService.patch(STORE_ID, request);
         return ResponseEntity.ok(storeModelAssembler.toModel(store));
     }
 }

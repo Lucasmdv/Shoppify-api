@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.stockify.dto.request.store.StoreRequest;
 import org.stockify.dto.response.StoreResponse;
 import org.stockify.model.entity.StoreEntity;
+import org.stockify.model.exception.DuplicatedUniqueConstraintException;
 import org.stockify.model.exception.NotFoundException;
 import org.stockify.model.mapper.StoreMapper;
 import org.stockify.model.repository.StoreRepository;
@@ -53,6 +54,9 @@ public class StoreService {
      * @return a {@link StoreResponse} representing the newly created store
      */
     public StoreResponse save(StoreRequest request) {
+        if(storeRepository.existsById(1L)){
+            throw new DuplicatedUniqueConstraintException("Ya existe una store.");
+        }
         StoreEntity store = storeMapper.toEntity(request);
         store = storeRepository.save(store);
         return storeMapper.toResponse(store);
