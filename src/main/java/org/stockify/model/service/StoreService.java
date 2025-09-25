@@ -113,4 +113,8 @@ public class StoreService {
         return storeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Store not found with id: " + id));
     }
+
+    public boolean existsById(Long id){
+        return storeRepository.existsById(id);
+    }
 }
