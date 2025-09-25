@@ -8,23 +8,24 @@ import org.stockify.model.entity.CategoryEntity;
 import org.stockify.model.entity.ProductEntity;
 import org.stockify.model.entity.ProviderEntity;
 
+import java.math.BigDecimal;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Mapper(componentModel = "spring", uses = {StockMapper.class})
+@Mapper(componentModel = "spring")
 public interface ProductMapper {
 
     @Mapping(source = "categories", target = "categories", qualifiedByName = "entitiesToNames")
     @Mapping(source = "providers", target = "providers", qualifiedByName = "providerEntitiesToIds")
-    @Mapping(source = "stocks", target = "stocks")
+    @Mapping(target = "stock", expression = "java(mapStock(entity.getStock()))")
     ProductResponse toResponse(ProductEntity entity);
 
     @Mapping(target = "detailTransactions", ignore = true)
-    @Mapping(target = "stocks", ignore = true)
     @Mapping(target = "providers", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "categories", ignore = true)
+    @Mapping(target = "stock", expression = "java(normalizeStock(request.stock()))")
     ProductEntity toEntity(ProductRequest request);
 
     /**
@@ -33,13 +34,15 @@ public interface ProductMapper {
     default void updateEntityFromRequest(ProductRequest dto, @MappingTarget ProductEntity entity) {
         updateFromRequest(dto, entity);
         entity.setCategories(namesToEntities(dto.categories()));
+        if (dto.stock() != null) {
+            entity.setStock(normalizeStock(dto.stock()));
+        }
     }
 
     /**
-     * Lógica interna del update (excepto categorías)
+     * L�gica interna del update (excepto categor�as)
      */
     @Mapping(target = "detailTransactions", ignore = true)
-    @Mapping(target = "stocks", ignore = true)
     @Mapping(target = "providers", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "categories", ignore = true)
@@ -50,7 +53,6 @@ public interface ProductMapper {
      * PATCH: ignora campos nulos, actualiza los que vienen con datos
      */
     @Mapping(target = "detailTransactions", ignore = true)
-    @Mapping(target = "stocks", ignore = true)
     @Mapping(target = "providers", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
@@ -86,11 +88,12 @@ public interface ProductMapper {
     }
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "stocks", ignore = true)
-    @Mapping(target = "categories", ignore = true)
     @Mapping(target = "providers", ignore = true)
+    @Mapping(target = "categories", ignore = true)
     @Mapping(target = "detailTransactions", ignore = true)
+    @Mapping(target = "stock", expression = "java(normalizeStock(dto.getStock()))")
     ProductEntity toEntity(ProductCSVRequest dto);
+
     @Mapping(target = "categories", source = "categories", qualifiedByName = "stringToCategorySet")
     ProductRequest toRequest(ProductCSVRequest dto);
 
@@ -101,5 +104,13 @@ public interface ProductMapper {
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toSet());
+    }
+
+    default double mapStock(BigDecimal stock) {
+        return stock == null ? 0d : stock.doubleValue();
+    }
+
+    default BigDecimal normalizeStock(BigDecimal stock) {
+        return stock == null ? BigDecimal.ZERO : stock;
     }
 }

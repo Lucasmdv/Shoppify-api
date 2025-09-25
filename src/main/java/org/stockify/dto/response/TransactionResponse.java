@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
+
 @Value
 public class TransactionResponse {
 
@@ -29,20 +30,6 @@ public class TransactionResponse {
     @Schema(description = "Type of the transaction", example = "SALE")
     TransactionType type;
 
-    @Schema(description = "Identifier of the POS session where the transaction occurred", example = "10")
-    Long sessionPosId;
-
-    @Schema(description = "Identifier of the employee who performed the transaction", example = "45")
-    Long employeeId;
-
-    @Schema(description = "Employee's DNI", example = "12345678")
-    String employeeDni;
-
-    @Schema(description = "Identifier of the POS terminal", example = "5")
-    Long idPos;
-
-    @Schema(description = "Identifier of the store where the transaction took place", example = "3")
-    Long storeId;
 
     @Schema(description = "Name of the store where the transaction took place", example = "Downtown Store")
     String storeName;

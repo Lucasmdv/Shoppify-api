@@ -252,7 +252,7 @@ public class AuditService {
             .filter(audit -> filter.getPaymentMethod() == null || audit.getPaymentMethod() == filter.getPaymentMethod())
             .filter(audit -> filter.getType() == null || audit.getType() == filter.getType())
             .filter(audit -> filter.getStoreId() == null || (audit.getStoreId() != null && audit.getStoreId().equals(filter.getStoreId())))
-            .filter(audit -> filter.getSessionPosId() == null || (audit.getSessionPosId() != null && audit.getSessionPosId().equals(filter.getSessionPosId())))
+
             .filter(audit -> filter.getFromDate() == null || (audit.getDateTime() != null && !audit.getDateTime().isBefore(filter.getFromDate())))
             .filter(audit -> filter.getToDate() == null || (audit.getDateTime() != null && !audit.getDateTime().isAfter(filter.getToDate())))
             .collect(Collectors.toList());

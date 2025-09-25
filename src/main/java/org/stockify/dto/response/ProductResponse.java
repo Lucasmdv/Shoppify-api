@@ -17,6 +17,9 @@ public record ProductResponse(
         @Schema(description = "Unit price of the product", example = "5.20")
         double unitPrice,
 
+        @Schema(description = "Available stock quantity", example = "100.0")
+        double stock,
+
         @Schema(description = "SKU (Stock Keeping Unit) code", example = "WM-12345")
         String sku,
 
@@ -33,14 +36,10 @@ public record ProductResponse(
         Set<String> categories,
 
         @Schema(description = "Provider IDs associated with the product")
-        Set<Long> providers,
-
-        @Schema(description = "Stock details per store or location")
-        Set<StockResponse> stocks
+        Set<Long> providers
 ) {
     public ProductResponse {
         if (categories == null) categories = Set.of();
         if (providers == null) providers = Set.of();
-        if (stocks == null) stocks = Set.of();
     }
 }

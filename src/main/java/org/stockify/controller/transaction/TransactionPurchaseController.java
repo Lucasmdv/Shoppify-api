@@ -19,7 +19,7 @@ import org.stockify.model.service.PurchaseService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/stores/pos/{posID}/transactions/purchases")
+@RequestMapping("/transactions/purchases")
 @Tag(name = "Purchases", description = "Endpoints for managing purchase transactions")
 @SecurityRequirement(name = "bearerAuth")
 public class TransactionPurchaseController {
@@ -29,18 +29,16 @@ public class TransactionPurchaseController {
     @Operation(summary = "Create a purchase transaction")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Purchase created successfully"),
-            @ApiResponse(responseCode = "400", description = "Validation error"),
-            @ApiResponse(responseCode = "404", description = "Store or POS not found")
+            @ApiResponse(responseCode = "400", description = "Validation error")
     })
     @PostMapping
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE') or " +
             "hasRole('ROLE_MANAGER') and hasAuthority('WRITE')")
     @Transactional
     public ResponseEntity<PurchaseResponse> create(
-            @Parameter(description = "Purchase request body") @Valid @RequestBody PurchaseRequest request,
-            @Parameter(description = "ID of the POS") @PathVariable Long posID) {
+            @Parameter(description = "Purchase request body") @Valid @RequestBody PurchaseRequest request) {
 
-        PurchaseResponse response = purchaseService.createPurchase(request,posID);
+        PurchaseResponse response = purchaseService.createPurchase(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 }

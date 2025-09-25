@@ -1,14 +1,19 @@
 package org.stockify.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
@@ -22,13 +27,6 @@ import org.stockify.dto.request.sale.SaleRequest;
 import org.stockify.dto.response.SaleResponse;
 import org.stockify.model.assembler.SaleModelAssembler;
 import org.stockify.model.service.SaleService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.media.Schema;
-
-
 
 @RestController
 @RequestMapping("/sales")
@@ -37,6 +35,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 public class SaleController {
+
     private final SaleService saleService;
     private final SaleModelAssembler saleModelAssembler;
 
@@ -82,9 +81,6 @@ public class SaleController {
         SaleResponse saleResponse = saleService.findById(saleID);
         return ResponseEntity.ok(saleModelAssembler.toModel(saleResponse));
     }
-
-
-
 
     @Operation(
             summary = "Delete a sale by ID",
@@ -153,8 +149,9 @@ public class SaleController {
 
             @Parameter(description = "Sale request body", required = true)
             @Valid @RequestBody SaleRequest saleRequest) {
-        SaleResponse updatedSale = saleService.updateShiftPartial(saleID, saleRequest);
+        SaleResponse updatedSale = saleService.updateSalePartial(saleID, saleRequest);
         EntityModel<SaleResponse> entityModel = saleModelAssembler.toModel(updatedSale);
         return ResponseEntity.ok(entityModel);
     }
 }
+

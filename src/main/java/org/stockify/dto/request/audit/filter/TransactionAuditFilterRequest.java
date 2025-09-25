@@ -35,9 +35,6 @@ public class TransactionAuditFilterRequest {
     @Schema(description = "Filter by store ID", example = "3")
     private Long storeId;
 
-    @Schema(description = "Filter by session POS ID", example = "18")
-    private Long sessionPosId;
-
     @Schema(description = "Filter by transactions after this date", example = "2025-01-01T00:00:00")
     private LocalDateTime fromDate;
 

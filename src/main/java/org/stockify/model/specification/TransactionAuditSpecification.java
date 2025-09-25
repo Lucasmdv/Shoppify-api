@@ -39,11 +39,6 @@ public class TransactionAuditSpecification {
                 storeId == null ? null : criteriaBuilder.equal(root.get("store").get("id"), storeId);
     }
 
-    public static Specification<TransactionEntity> bySessionPosId(Long sessionPosId) {
-        return (root, query, criteriaBuilder) ->
-                sessionPosId == null ? null : criteriaBuilder.equal(root.get("sessionPosEntity").get("id"), sessionPosId);
-    }
-
     public static Specification<TransactionEntity> byDateAfter(LocalDateTime fromDate) {
         return (root, query, criteriaBuilder) ->
                 fromDate == null ? null : criteriaBuilder.greaterThanOrEqualTo(root.get("dateTime"), fromDate);

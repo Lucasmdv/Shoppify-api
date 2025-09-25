@@ -1,9 +1,9 @@
 package org.stockify.model.entity;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
-
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -16,11 +16,10 @@ import java.util.Set;
 public class ProductEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name", unique = true ,nullable = false)
+    @Column(name = "name", unique = true, nullable = false)
     private String name;
 
     @Column(name = "description", length = Integer.MAX_VALUE)
@@ -31,29 +30,28 @@ public class ProductEntity {
     private BigDecimal price;
 
     @ColumnDefault("0")
-    @Column(name = "unit_price", precision = 10,scale = 2)
+    @Column(name = "unit_price", precision = 10, scale = 2)
     private BigDecimal unitPrice;
 
-    //Check
     @ColumnDefault("-1")
     @Column(name = "sku", unique = false)
     private String sku;
 
-    @Column(name = "barcode" , unique = true)
+    @Column(name = "barcode", unique = true)
     private String barcode;
 
     @Column(name = "brand")
     private String brand;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-    private Set<StockEntity> stocks;
-
+    @ColumnDefault("0")
+    @Column(name = "stock_quantity", precision = 15, scale = 2)
+    private BigDecimal stock = BigDecimal.ZERO;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "products_categories",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id"))
-    private Set<CategoryEntity> categories;
+    private Set<CategoryEntity> categories = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -61,12 +59,12 @@ public class ProductEntity {
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "provider_id")
     )
-    private Set<ProviderEntity> providers;
-    // Relationship with DetailTransactionEntity
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-    private Set<DetailTransactionEntity> detailTransactions;
+    private Set<ProviderEntity> providers = new HashSet<>();
 
-    public ProductEntity(){
-        categories = new HashSet<>();
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private Set<DetailTransactionEntity> detailTransactions = new HashSet<>();
+
+    public ProductEntity() {
+        this.stock = BigDecimal.ZERO;
     }
 }

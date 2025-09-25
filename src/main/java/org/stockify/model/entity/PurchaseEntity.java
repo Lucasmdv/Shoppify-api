@@ -6,6 +6,8 @@ import lombok.Setter;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Entity
@@ -26,4 +28,6 @@ public class PurchaseEntity {
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private ProviderEntity provider;
 
+    @Column(name = "unit_price", nullable = false, precision = 19, scale = 2)
+    private BigDecimal unitPrice;
 }

@@ -20,7 +20,7 @@ import org.stockify.model.assembler.SaleModelAssembler;
 import org.stockify.model.service.SaleService;
 
 @RestController
-@RequestMapping("/stores/{storeID}/pos/{posID}/transactions/sales")
+@RequestMapping("/transactions/sales")
 @RequiredArgsConstructor
 @Tag(name = "Sales", description = "Endpoints for managing sales transactions")
 @SecurityRequirement(name = "bearerAuth")
@@ -31,24 +31,20 @@ public class TransactionSaleController {
 
     @Operation(
             summary = "Create a new sale",
-            description = "Creates a sale for a given store and POS"
+            description = "Creates a sale without requiring a store context"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Sale created successfully",
                     content = @Content(schema = @Schema(implementation = SaleResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Store or POS not found", content = @Content)
+            @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content)
     })
     @PostMapping
     @PreAuthorize("hasAuthority('WRITE')")
     public ResponseEntity<EntityModel<SaleResponse>> create(
             @Parameter(description = "Sale request body", required = true)
-            @Valid @RequestBody SaleRequest request,
+            @Valid @RequestBody SaleRequest request) {
 
-            @Parameter(description = "ID of the POS", required = true, example = "10")
-            @PathVariable Long posID) {
-
-        SaleResponse saleResponse = saleService.createSale(request,posID);
+        SaleResponse saleResponse = saleService.createSale(request);
         EntityModel<SaleResponse> entityModel = saleModelAssembler.toModel(saleResponse);
 
         return ResponseEntity

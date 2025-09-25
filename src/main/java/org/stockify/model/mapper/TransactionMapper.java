@@ -1,14 +1,17 @@
 package org.stockify.model.mapper;
 
-import org.mapstruct.*;
-import org.mapstruct.Named;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.stockify.dto.request.transaction.TransactionCreatedRequest;
 import org.stockify.dto.request.transaction.TransactionRequest;
-import org.stockify.dto.response.TransactionCreatedResponse;
+
 import org.stockify.dto.response.TransactionResponse;
 import org.stockify.model.entity.TransactionEntity;
 
-@Mapper(componentModel = "spring", uses = {ProviderMapper.class})
+@Mapper(componentModel = "spring", uses = {ProviderMapper.class, DetailTransactionMapper.class})
 public interface TransactionMapper {
     @Mapping(target = "type", ignore = true)
     @Mapping(target = "total", ignore = true)
@@ -17,16 +20,13 @@ public interface TransactionMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dateTime", ignore = true)
     TransactionEntity toEntity(TransactionRequest transactionRequest);
+
     TransactionEntity toEntity(TransactionCreatedRequest transactionCreatedRequest);
 
     @Mapping(target = "storeName", source = "store.storeName")
-    @Mapping(target = "storeId", source = "store.id")
-    @Named("toTransactionResponse")
     TransactionResponse toDto(TransactionEntity transactionEntity);
-    @Mapping(target = "storeName", source = "store.storeName")
-    @Mapping(target = "storeId", source = "store.id")
-    @Named("toTransactionResponse")
-    TransactionCreatedResponse toDtoCreated(TransactionEntity transactionEntity);
+
+
 
     @Mapping(target = "type", ignore = true)
     @Mapping(target = "total", ignore = true)

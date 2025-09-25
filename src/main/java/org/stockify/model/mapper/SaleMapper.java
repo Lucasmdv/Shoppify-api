@@ -15,7 +15,7 @@ public interface SaleMapper {
 
     @Mapping(target = "clientDni", source = "client.dni")
     @Mapping(target = "clientId", source = "client.id")
-    @Mapping(target = "transaction", source = "transaction", qualifiedByName = "toTransactionResponse")
+    @Mapping(target = "transaction", source = "transaction")
     SaleResponse toResponseDTO (SaleEntity entity);
 
     @Mapping(target = "id", ignore = true)
@@ -25,5 +25,5 @@ public interface SaleMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "client", ignore = true)
-    void updateShiftEntity(SaleRequest saleRequest, @MappingTarget SaleEntity saleEntity);
+    void updateSaleEntity(SaleRequest saleRequest, @MappingTarget SaleEntity saleEntity);
 }

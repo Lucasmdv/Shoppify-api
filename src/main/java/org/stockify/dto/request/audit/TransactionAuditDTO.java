@@ -54,7 +54,4 @@ public class TransactionAuditDTO {
 
     @Schema(description = "ID of the store where the transaction was made", example = "3")
     private Long storeId;
-
-    @Schema(description = "ID of the POS session associated with the transaction", example = "18")
-    private Long sessionPosId;
 }
