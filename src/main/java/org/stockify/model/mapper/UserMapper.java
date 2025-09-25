@@ -1,30 +1,28 @@
 package org.stockify.model.mapper;
 
 import org.mapstruct.*;
-import org.stockify.dto.request.client.ClientRequest;
-import org.stockify.dto.response.ClientResponse;
-import org.stockify.model.entity.ClientEntity;
-
-import java.util.List;
+import org.stockify.dto.request.user.UserRequest;
+import org.stockify.dto.response.UserResponse;
+import org.stockify.model.entity.UserEntity;
 
 @Mapper(componentModel = "spring")
-public interface ClientMapper {
+public interface UserMapper {
 
     @Mapping(target = "sales", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dateOfRegistration", ignore = true)
-    ClientEntity toEntity(ClientRequest clientRequest);
+    UserEntity toEntity(UserRequest clientRequest);
     @Mapping(target = "links", ignore = true)
-    ClientResponse toDto(ClientEntity clientEntity);
+    UserResponse toDto(UserEntity clientEntity);
 
     @Mapping(target = "sales", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dateOfRegistration", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void partialUpdateClientEntity(ClientRequest clientRequest, @MappingTarget ClientEntity clientEntity);
+    void partialUpdateClientEntity(UserRequest clientRequest, @MappingTarget UserEntity clientEntity);
 
     @Mapping(target = "sales", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dateOfRegistration", ignore = true)
-    void updateClientEntity(ClientRequest clientRequest, @MappingTarget ClientEntity clientEntity);
+    void updateClientEntity(UserRequest clientRequest, @MappingTarget UserEntity clientEntity);
 }

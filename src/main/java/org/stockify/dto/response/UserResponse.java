@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ClientResponse extends RepresentationModel<ClientResponse> {
+public class UserResponse extends RepresentationModel<UserResponse> {
 
     @Schema(description = "Unique identifier of the client", example = "123")
     private Long id;

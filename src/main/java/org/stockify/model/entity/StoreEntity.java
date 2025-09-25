@@ -33,8 +33,6 @@ public class StoreEntity {
     @Column(name = "city", nullable = false, length = 100)
     private String city;
 
-    @OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
-    private Set<PosEntity> posEntities;
 
     @OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
     private Set<TransactionEntity> transactions;

@@ -5,13 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.stockify.dto.request.purchase.PurchaseFilterRequest;
 import org.stockify.dto.request.purchase.PurchaseRequest;
 import org.stockify.dto.response.PurchaseResponse;
-import org.stockify.model.entity.EmployeeEntity;
-import org.stockify.model.entity.PosEntity;
 import org.stockify.model.entity.PurchaseEntity;
 import org.stockify.model.entity.TransactionEntity;
 import org.stockify.model.enums.PaymentMethod;
@@ -19,14 +16,11 @@ import org.stockify.model.enums.TransactionType;
 import org.stockify.model.exception.InvalidSessionStatusException;
 import org.stockify.model.exception.NotFoundException;
 import org.stockify.model.mapper.PurchaseMapper;
-import org.stockify.model.repository.PosRepository;
 import org.stockify.model.repository.ProviderRepository;
 import org.stockify.model.repository.PurchaseRepository;
 import org.stockify.model.repository.TransactionRepository;
 import org.stockify.model.specification.PurchaseSpecification;
-import org.stockify.security.model.entity.CredentialsEntity;
-import org.stockify.security.repository.CredentialRepository;
-import org.stockify.security.service.JwtService;
+
 
 import java.math.BigDecimal;
 
@@ -46,10 +40,7 @@ public class PurchaseService {
     private final TransactionService transactionService;
     private final TransactionRepository transactionRepository;
     private final ProviderRepository providerRepository;
-    private final PosRepository posRepository;
-    private final SessionPosService sessionPosService;
-    private final JwtService jwtService;
-    private final CredentialRepository credentialRepository;
+
 
     /**
      * Creates a new purchase and updates the stock of the corresponding products.
@@ -62,37 +53,37 @@ public class PurchaseService {
     @Transactional
     public PurchaseResponse createPurchase(PurchaseRequest request, Long posID) {
         // Use the centralized validation method from TransactionService
-        PosEntity posEntity = transactionService.validatePosAndEmployee(posID);
-        Long localId = posEntity.getStore().getId();
+//        PosEntity posEntity = transactionService.validatePosAndEmployee(posID);
+//        Long localId = posEntity.getStore().getId();
 
-        request.getTransaction().getDetailTransactions()
-                .forEach(detail -> stockService.increaseStock(
-                        detail.getProductID(), localId, detail.getQuantity()));
-
-
-        TransactionEntity transaction = transactionService.createTransaction(
-                request.getTransaction(), localId, posID, TransactionType.PURCHASE);
-
-        // Check if payment method is CASH and verify if there's enough cash in the POS
-        if (request.getTransaction().getPaymentMethod() == PaymentMethod.CASH) {
-            BigDecimal transactionTotal = transaction.getTotal();
-            BigDecimal currentPosAmount = posEntity.getCurrentAmount();
-
-            // Verify if there's enough cash in the POS
-            if (currentPosAmount == null || currentPosAmount.compareTo(transactionTotal) < 0) {
-                throw new InvalidSessionStatusException("Not enough cash in the POS to complete this purchase. Available: " + 
-                    (currentPosAmount != null ? currentPosAmount : "0") + ", Required: " + transactionTotal);
-            }
-
-            // Deduct the cash from the POS
-            posEntity.setCurrentAmount(currentPosAmount.subtract(transactionTotal));
-            posRepository.save(posEntity);
-        }
+//        request.getTransaction().getDetailTransactions()
+//                .forEach(detail -> stockService.increaseStock(
+//                        detail.getProductID(), localId, detail.getQuantity()));
+//
+//
+//        TransactionEntity transaction = transactionService.createTransaction(
+//                request.getTransaction(), localId, posID, TransactionType.PURCHASE);
+//
+//        // Check if payment method is CASH and verify if there's enough cash in the POS
+//        if (request.getTransaction().getPaymentMethod() == PaymentMethod.CASH) {
+//            BigDecimal transactionTotal = transaction.getTotal();
+//            BigDecimal currentPosAmount = posEntity.getCurrentAmount();
+//
+//            // Verify if there's enough cash in the POS
+//            if (currentPosAmount == null || currentPosAmount.compareTo(transactionTotal) < 0) {
+//                throw new InvalidSessionStatusException("Not enough cash in the POS to complete this purchase. Available: " +
+//                    (currentPosAmount != null ? currentPosAmount : "0") + ", Required: " + transactionTotal);
+//            }
+//
+//            // Deduct the cash from the POS
+//            posEntity.setCurrentAmount(currentPosAmount.subtract(transactionTotal));
+//            posRepository.save(posEntity);
+//        }
 
         PurchaseEntity purchase = purchaseMapper.toEntity(request);
 
-        purchase.setTransaction(transactionRepository.findById(transaction.getId())
-                .orElseThrow(() -> new NotFoundException("Transaction not found")));
+//        purchase.setTransaction(transactionRepository.findById(transaction.getId())
+//                .orElseThrow(() -> new NotFoundException("Transaction not found")));
 
         purchase.setProvider(providerRepository.findById(request.getProviderId())
                 .orElseThrow(() -> new NotFoundException("Provider not found")));

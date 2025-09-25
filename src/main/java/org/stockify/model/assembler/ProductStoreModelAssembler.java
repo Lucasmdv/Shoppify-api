@@ -6,7 +6,6 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 import org.stockify.controller.product.ProductController;
-import org.stockify.controller.store.StoreStockController;
 import org.stockify.dto.response.ProductStoreResponse;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;

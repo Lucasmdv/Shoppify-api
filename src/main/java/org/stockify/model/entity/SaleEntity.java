@@ -25,5 +25,5 @@ public class SaleEntity {
     @ManyToOne
     @JoinColumn(name = "client_id")
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
-    private ClientEntity client;
+    private UserEntity client;
 }

@@ -238,7 +238,6 @@ public class AuditService {
                         .description(auditedTransaction.getDescription())
                         .type(auditedTransaction.getType())
                         .storeId(auditedTransaction.getStore() != null ? auditedTransaction.getStore().getId() : null)
-                        .sessionPosId(auditedTransaction.getSessionPosEntity() != null ? auditedTransaction.getSessionPosEntity().getId() : null)
                         .build();
 
                 auditList.add(auditDTO);

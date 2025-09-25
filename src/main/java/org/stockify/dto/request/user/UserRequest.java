@@ -1,4 +1,4 @@
-package org.stockify.dto.request.client;
+package org.stockify.dto.request.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -11,7 +11,7 @@ import lombok.*;
 @Getter
 @Setter
 @Schema(name = "ClientRequest", description = "Request body for creating or updating a client.")
-public class ClientRequest {
+public class UserRequest {
 
     @NotBlank
     @Size(max = 20, message = "Max length for first name is 20 characters")

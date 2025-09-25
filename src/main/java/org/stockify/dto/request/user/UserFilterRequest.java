@@ -1,4 +1,4 @@
-package org.stockify.dto.request.client;
+package org.stockify.dto.request.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Schema(name = "ClientFilterRequest", description = "Filter parameters for searching clients.")
-public class ClientFilterRequest {
+public class UserFilterRequest {
 
     @Schema(description = "Client's first name to filter by", example = "Lucas")
     private String firstName;

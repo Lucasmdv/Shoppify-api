@@ -5,14 +5,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.stockify.dto.request.client.ClientFilterRequest;
-import org.stockify.dto.request.client.ClientRequest;
-import org.stockify.dto.response.ClientResponse;
-import org.stockify.model.entity.ClientEntity;
+import org.stockify.dto.request.user.UserFilterRequest;
+import org.stockify.dto.request.user.UserRequest;
+import org.stockify.dto.response.UserResponse;
+import org.stockify.model.entity.UserEntity;
 import org.stockify.model.exception.ClientNotFoundException;
-import org.stockify.model.mapper.ClientMapper;
-import org.stockify.model.repository.ClientRepository;
-import org.stockify.model.specification.ClientSpecification;
+import org.stockify.model.mapper.UserMapper;
+import org.stockify.model.repository.UserRepository;
+import org.stockify.model.specification.UserSpecification;
 
 /**
  * Service class responsible for managing client-related operations,
@@ -20,9 +20,9 @@ import org.stockify.model.specification.ClientSpecification;
  */
 @Service
 @RequiredArgsConstructor
-public class ClientService {
-    private final ClientRepository clientRepository;
-    private final ClientMapper clientMapper;
+public class UserService {
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     /**
      * Finds a client by their ID.
@@ -31,10 +31,10 @@ public class ClientService {
      * @return a DTO containing the client data
      * @throws ClientNotFoundException if no client is found with the specified ID
      */
-    public ClientResponse findById(Long id) {
-        ClientEntity clientEntity = clientRepository.findById(id)
+    public UserResponse findById(Long id) {
+        UserEntity clientEntity = userRepository.findById(id)
                 .orElseThrow(() -> new ClientNotFoundException("Client with id " + id + " not found"));
-        return clientMapper.toDto(clientEntity);
+        return userMapper.toDto(clientEntity);
     }
 
     /**
@@ -44,15 +44,15 @@ public class ClientService {
      * @param pageable      pagination information
      * @return a paginated list of clients matching the filters
      */
-    public Page<ClientResponse> findAll(ClientFilterRequest filterRequest, Pageable pageable) {
-        Specification<ClientEntity> specification = Specification
-                .where(ClientSpecification.firstNameLike(filterRequest.getFirstName()))
-                .and(ClientSpecification.lastNameLike(filterRequest.getLastName()))
-                .and(ClientSpecification.dniEquals(filterRequest.getDni()))
-                .and(ClientSpecification.phoneLike(filterRequest.getPhone()));
+    public Page<UserResponse> findAll(UserFilterRequest filterRequest, Pageable pageable) {
+        Specification<UserEntity> specification = Specification
+                .where(UserSpecification.firstNameLike(filterRequest.getFirstName()))
+                .and(UserSpecification.lastNameLike(filterRequest.getLastName()))
+                .and(UserSpecification.dniEquals(filterRequest.getDni()))
+                .and(UserSpecification.phoneLike(filterRequest.getPhone()));
 
-        Page<ClientEntity> clients = clientRepository.findAll(specification, pageable);
-        return clients.map(clientMapper::toDto);
+        Page<UserEntity> clients = userRepository.findAll(specification, pageable);
+        return clients.map(userMapper::toDto);
     }
 
     /**
@@ -61,9 +61,9 @@ public class ClientService {
      * @param clientRequest DTO containing the client data to create
      * @return a DTO with the saved client data
      */
-    public ClientResponse save(ClientRequest clientRequest) {
-        ClientEntity clientEntity = clientMapper.toEntity(clientRequest);
-        return clientMapper.toDto(clientRepository.save(clientEntity));
+    public UserResponse save(UserRequest clientRequest) {
+        UserEntity clientEntity = userMapper.toEntity(clientRequest);
+        return userMapper.toDto(userRepository.save(clientEntity));
     }
 
     /**
@@ -73,10 +73,10 @@ public class ClientService {
      * @throws ClientNotFoundException if no client is found with the specified ID
      */
     public void delete(Long id) {
-        if (!clientRepository.existsById(id)) {
+        if (!userRepository.existsById(id)) {
             throw new ClientNotFoundException("Client with id " + id + " not found");
         }
-        clientRepository.deleteById(id);
+        userRepository.deleteById(id);
     }
 
     /**
@@ -87,14 +87,14 @@ public class ClientService {
      * @return a DTO with the updated client data
      * @throws ClientNotFoundException if no client is found with the specified ID
      */
-    public ClientResponse updateClientPartial(Long id, ClientRequest clientRequest) {
-        ClientEntity existingClient = clientRepository.findById(id)
+    public UserResponse updateClientPartial(Long id, UserRequest clientRequest) {
+        UserEntity existingClient = userRepository.findById(id)
                 .orElseThrow(() -> new ClientNotFoundException("Client with id " + id + " not found"));
 
-        clientMapper.partialUpdateClientEntity(clientRequest, existingClient);
+        userMapper.partialUpdateClientEntity(clientRequest, existingClient);
 
-        ClientEntity updatedClient = clientRepository.save(existingClient);
-        return clientMapper.toDto(updatedClient);
+        UserEntity updatedClient = userRepository.save(existingClient);
+        return userMapper.toDto(updatedClient);
     }
 
     /**
@@ -105,13 +105,13 @@ public class ClientService {
      * @return a DTO with the updated client data
      * @throws ClientNotFoundException if no client is found with the specified ID
      */
-    public ClientResponse updateClientFull(Long id, ClientRequest clientRequest) {
-        ClientEntity existingClient = clientRepository.findById(id)
+    public UserResponse updateClientFull(Long id, UserRequest clientRequest) {
+        UserEntity existingClient = userRepository.findById(id)
                 .orElseThrow(() -> new ClientNotFoundException("Client with id " + id + " not found"));
 
-        clientMapper.updateClientEntity(clientRequest, existingClient);
+        userMapper.updateClientEntity(clientRequest, existingClient);
 
-        ClientEntity updatedClient = clientRepository.save(existingClient);
-        return clientMapper.toDto(updatedClient);
+        UserEntity updatedClient = userRepository.save(existingClient);
+        return userMapper.toDto(updatedClient);
     }
 }

@@ -12,7 +12,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.stockify.dto.response.ErrorResponse;
-import org.stockify.security.exception.AuthenticationException;
 import org.zalando.problem.spring.web.advice.ProblemHandling;
 import java.time.LocalDateTime;
 
@@ -85,12 +84,6 @@ public class GlobalExceptionHandler implements ProblemHandling {
                 request);
     }
 
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleAuthenticationException(
-            AuthenticationException ex,
-            HttpServletRequest request) {
-        return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex, request);
-    }
     @ExceptionHandler(InsufficientAuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleInsufficientAuthenticationException(
             InsufficientAuthenticationException ex,

@@ -45,10 +45,6 @@ public class TransactionEntity {
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
-    @ManyToOne
-    @JoinColumn(name = "session_pos_id")
-    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
-    private SessionPosEntity sessionPosEntity;
 
     @ManyToOne
     @JoinColumn(name = "store_id")

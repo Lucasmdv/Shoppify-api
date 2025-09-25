@@ -4,7 +4,6 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.stockify.model.entity.EmployeeEntity;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,10 +28,6 @@ public class CredentialsEntity implements UserDetails {
     private String email;
     private String password;
 
-
-    @OneToOne
-    @JoinColumn(name = "employee_dni", referencedColumnName = "dni", unique = true)
-    private EmployeeEntity employee;
 
     @ManyToMany(cascade = CascadeType.MERGE,fetch = FetchType.EAGER)
     @JoinTable(

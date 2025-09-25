@@ -3,9 +3,6 @@ package org.stockify.dto.request.shift;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.stockify.dto.request.employee.EmployeeRequest;
-import org.stockify.dto.response.EmployeeResponse;
-import org.stockify.model.entity.EmployeeEntity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

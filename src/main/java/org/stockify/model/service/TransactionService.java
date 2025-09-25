@@ -9,8 +9,6 @@ import org.stockify.dto.request.transaction.TransactionRequest;
 import org.stockify.dto.response.TransactionCreatedResponse;
 import org.stockify.dto.response.TransactionResponse;
 import org.stockify.model.entity.DetailTransactionEntity;
-import org.stockify.model.entity.EmployeeEntity;
-import org.stockify.model.entity.PosEntity;
 import org.stockify.model.entity.ProductEntity;
 import org.stockify.model.entity.StoreEntity;
 import org.stockify.model.entity.TransactionEntity;
@@ -21,11 +19,7 @@ import org.stockify.model.mapper.TransactionMapper;
 import org.stockify.model.repository.ProductRepository;
 import org.stockify.model.repository.StoreRepository;
 import org.stockify.model.repository.TransactionRepository;
-import org.stockify.model.repository.PosRepository;
-import org.stockify.model.repository.SessionPosRepository;
-import org.stockify.security.model.entity.CredentialsEntity;
-import org.stockify.security.repository.CredentialRepository;
-import org.stockify.security.service.JwtService;
+
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -47,11 +41,7 @@ public class TransactionService {
     private final TransactionMapper transactionMapper;
     private final StoreRepository storeRepository;
     private final ProductRepository productRepository;
-    private final PosRepository posRepository;
-    private final SessionPosRepository sessionPosRepository;
-    private final SessionPosService sessionPosService;
-    private final JwtService jwtService;
-    private final CredentialRepository credentialRepository;
+
 
     /**
      * Creates and saves a monetary transaction without product details.
@@ -66,17 +56,17 @@ public class TransactionService {
      * @throws NotFoundException if the POS or store is not found
      */
     public TransactionCreatedResponse saveTransaction(TransactionCreatedRequest request, Long idLocal, Long idPos, TransactionType type) {
-        if (!posRepository.existsById(idPos)) {
-            throw new NotFoundException("POS with ID " + idPos + " not found.");
-        }
+//        if (!posRepository.existsById(idPos)) {
+//            throw new NotFoundException("POS with ID " + idPos + " not found.");
+//        }
 
         TransactionEntity transactionEntity = transactionMapper.toEntity(request);
         transactionEntity.setTotal(request.getTotalAmount());
 
-        transactionEntity.setSessionPosEntity(
-                sessionPosRepository.findByPosEntity_IdAndCloseTime(idPos, null)
-                        .orElseThrow(() -> new NotFoundException("POS with ID " + idPos + " not found."))
-        );
+//        transactionEntity.setSessionPosEntity(
+//                sessionPosRepository.findByPosEntity_IdAndCloseTime(idPos, null)
+//                        .orElseThrow(() -> new NotFoundException("POS with ID " + idPos + " not found."))
+//        );
 
         StoreEntity store = storeRepository.findById(idLocal)
                 .orElseThrow(() -> new NotFoundException("Store with ID " + idLocal + " not found."));
@@ -96,26 +86,26 @@ public class TransactionService {
      * @throws InvalidSessionStatusException if the POS is closed or the authenticated employee doesn't match
      * @throws NotFoundException if the POS is not found
      */
-    public PosEntity validatePosAndEmployee(Long posID) {
-        if (!sessionPosService.isOpened(posID, null)) {
-            throw new InvalidSessionStatusException("POS with ID " + posID + " is closed. Please open it before creating a transaction.");
-        }
-
-        String token = jwtService.extractTokenFromSecurityContext();
-        String userEmail = jwtService.extractUsername(token);
-        CredentialsEntity credentials = credentialRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-        EmployeeEntity authenticatedEmployee = credentials.getEmployee();
-
-        PosEntity posEntity = posRepository.findById(posID)
-                .orElseThrow(() -> new NotFoundException("POS with ID " + posID + " not found."));
-
-        if (posEntity.getEmployee().getId() != authenticatedEmployee.getId()) {
-            throw new InvalidSessionStatusException("The employee associated with the POS is not the same as the authenticated employee.");
-        }
-
-        return posEntity;
-    }
+//    public PosEntity validatePosAndEmployee(Long posID) {
+//        if (!sessionPosService.isOpened(posID, null)) {
+//            throw new InvalidSessionStatusException("POS with ID " + posID + " is closed. Please open it before creating a transaction.");
+//        }
+//
+//        String token = jwtService.extractTokenFromSecurityContext();
+//        String userEmail = jwtService.extractUsername(token);
+//        CredentialsEntity credentials = credentialRepository.findByEmail(userEmail)
+//                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+//        EmployeeEntity authenticatedEmployee = credentials.getEmployee();
+//
+//        PosEntity posEntity = posRepository.findById(posID)
+//                .orElseThrow(() -> new NotFoundException("POS with ID " + posID + " not found."));
+//
+//        if (posEntity.getEmployee().getId() != authenticatedEmployee.getId()) {
+//            throw new InvalidSessionStatusException("The employee associated with the POS is not the same as the authenticated employee.");
+//        }
+//
+//        return posEntity;
+//    }
 
     /**
      * Creates and saves a transaction that includes product details.
@@ -132,9 +122,9 @@ public class TransactionService {
     public TransactionEntity createTransaction(TransactionRequest request, Long idLocal, Long idPos, TransactionType type) {
         // The POS existence check is now handled by validatePosAndEmployee
         // We still need to check if the POS exists for backward compatibility
-        if (!posRepository.existsById(idPos)) {
-            throw new NotFoundException("POS with ID " + idPos + " not found.");
-        }
+//        if (!posRepository.existsById(idPos)) {
+//            throw new NotFoundException("POS with ID " + idPos + " not found.");
+//        }
 
         // Convert each detail to an entity, linking the product and calculating subtotal
         Set<DetailTransactionEntity> detailTransactions = request
@@ -162,10 +152,10 @@ public class TransactionService {
         // Link each detail to the parent transaction
         detailTransactions.forEach(detail -> detail.setTransaction(transactionEntity));
 
-        transactionEntity.setSessionPosEntity(
-                sessionPosRepository.findByPosEntity_IdAndCloseTime(idPos, null)
-                        .orElseThrow(() -> new NotFoundException("POS with ID " + idPos + " not found."))
-        );
+//        transactionEntity.setSessionPosEntity(
+//                sessionPosRepository.findByPosEntity_IdAndCloseTime(idPos, null)
+//                        .orElseThrow(() -> new NotFoundException("POS with ID " + idPos + " not found."))
+//        );
 
         StoreEntity store = storeRepository.findById(idLocal)
                 .orElseThrow(() -> new NotFoundException("Store with ID " + idLocal + " not found."));
