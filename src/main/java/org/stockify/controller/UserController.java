@@ -18,12 +18,15 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.stockify.dto.request.user.UserFilterRequest;
 import org.stockify.dto.request.user.UserRequest;
 import org.stockify.dto.response.UserResponse;
 import org.stockify.model.assembler.UserModelAssembler;
 import org.stockify.model.service.UserService;
+import org.stockify.security.model.dto.request.AuthRequest;
+import org.stockify.security.model.dto.response.AuthResponse;
 
 import java.net.URI;
 
@@ -126,5 +129,69 @@ public class UserController {
 
         UserResponse updatedClient = clientService.updateClientFull(clientID, client);
         return ResponseEntity.ok(clientModelAssembler.toModel(updatedClient));
+    }
+
+    @PostMapping("/create")
+    @Operation(
+            summary = "Create user with edit permits",
+            description = "Creates a new user with edit permits and returns a JWT token for authenticated requests"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Authentication successful"),
+            @ApiResponse(responseCode = "401", description = "Invalid credentials"),
+            @ApiResponse(responseCode = "400", description = "Invalid request format")
+    })
+    public ResponseEntity<AuthResponse> createUser(
+            @Parameter(description = "Authentication credentials") @RequestBody AuthRequest authRequest) {
+        UserDetails user = clientService.createUser(authRequest);
+        String token = clientService.generateToken(user);
+        return ResponseEntity.ok(new AuthResponse(token));
+    }
+
+    @PostMapping("/edit")
+    @Operation(
+            summary = "Edit permits from a user beign admin and get token",
+            description = "Validates user credentials and returns a JWT token for authenticated requests"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Authentication successful"),
+            @ApiResponse(responseCode = "401", description = "Invalid credentials"),
+            @ApiResponse(responseCode = "400", description = "Invalid request format")
+    })
+    public ResponseEntity<AuthResponse> editPermitsUser(
+            @Parameter(description = "Authentication credentials") @RequestBody AuthRequest authRequest) {
+        UserDetails user = clientService.editPermitsUser(authRequest);
+        String token = clientService.generateToken(user);
+        return ResponseEntity.ok(new AuthResponse(token));
+    }
+
+
+    //Esto es la combinacion del createClient y el createUser
+    //Crea el usuario y las credenciales en una sola llamada
+    //No necesita autenticacion porque es para el registro. fue pensado para un usuario de un Ecommerce
+    @PostMapping("/register")
+    @Operation(
+        summary = "Complete user registration",
+        description = "Registers a new user with both profile data and authentication credentials"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "User registered successfully"),
+        @ApiResponse(responseCode = "400", description = "Validation error")
+    })
+    public ResponseEntity<EntityModel<UserResponse>> registerUser(
+            @Valid @RequestBody UserRequest userRequest,
+            @RequestParam String email,
+            @RequestParam String password) {
+
+        // Registra credenciales (autenticación)
+        clientService.createUser(new AuthRequest(email, password));
+
+        // Registra datos de usuario
+        UserResponse userResponse = clientService.save(userRequest);
+        EntityModel<UserResponse> entityModel = clientModelAssembler.toModel(userResponse);
+
+        return ResponseEntity
+                .created(URI.create(entityModel.getRequiredLink("self").getHref()))
+                .body(entityModel);
     }
 }

@@ -25,7 +25,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = false, securedEnabled = false, jsr250Enabled = false) //ESTO DESACTIVA TODOOOOO
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true) //ESTO DESACTIVA TODOOOOO
 
 public class SecurityConfig {
 
@@ -43,14 +43,15 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
+                        .requestMatchers("/api/auth/**", "/api/swagger-ui/**", "/api/swagger-ui.html", "/api/v3/api-docs/**", "/api/user/register").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .cors(Customizer.withDefaults())
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable())
                 .headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .sessionManagement(m -> m.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        // NO agregar el filtro JWT
-        // NO configurar exceptionHandling con RestAuthenticationEntryPoint
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.exceptionHandling(ex -> ex.authenticationEntryPoint(restAuthenticationEntryPoint));
         return http.build();
     }
 
