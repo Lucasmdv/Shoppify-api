@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>DATABASE</ID>
+  <OriginalElement>87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.categories</OriginalElement>
+  <nodes>
+    <node x="1411.26804527208" y="265.3732557510149">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.providers</node>
+    <node x="427.51297428958037" y="826.4872746955343">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.clients</node>
+    <node x="-193.03991880920157" y="198.98353450608937">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.purchases_aud</node>
+    <node x="-311.45833288227334" y="-83.74425981055481">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.sales_aud</node>
+    <node x="197.99750473613" y="115.9366278755075">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.stores</node>
+    <node x="405.8605304465491" y="1099.1439621109607">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.roles</node>
+    <node x="1677.7030913538026" y="337.8732557510149">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.products_providers</node>
+    <node x="-99.57584844384306" y="-90.92215426251687">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.transactions_aud</node>
+    <node x="417.12225710419466" y="1359.1439621109607">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.role_permits</node>
+    <node x="705.3849797023004" y="79.9366278755075">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.transactions</node>
+    <node x="1972.807593502471" y="307.87266075947934">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.products</node>
+    <node x="10.50798376184028" y="989.2879242219215">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.credentials</node>
+    <node x="602.7316617050068" y="409.8632746955345">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.sales</node>
+    <node x="834.9633234100136" y="385.8632746955345">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.details_transactions</node>
+    <node x="977.2699594046007" y="79.9366278755075">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.details_transactions_aud</node>
+    <node x="96.23577807848443" y="1279.1439621109607">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.credentials_roles</node>
+    <node x="734.8315886332879" y="1286.1858782138024">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.permits</node>
+    <node x="1818.6677388362655" y="832.2584844384303">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.products_categories</node>
+    <node x="474.5" y="92.47056021650883">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.purchases</node>
+    <node x="1586.1817439489078" y="831.7584844384303">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.categories</node>
+    <node x="322.5" y="436.0">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.revinfo</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.products_providers" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.products" relationship="REFERENCES">
+      <point x="100.5001136671176" y="-2.55751014890393E-4" />
+      <point x="1924.0" y="381.373" />
+      <point x="1924.0" y="435.87310460251035" />
+      <point x="-106.50006630581856" y="4.438430310074182E-4" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.details_transactions" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.products" relationship="REFERENCES">
+      <point x="-3.2341001360691735E-4" y="79.99972530446553" />
+      <point x="937.963" y="599.363" />
+      <point x="1924.0" y="599.363" />
+      <point x="1924.0" y="435.87310460251035" />
+      <point x="-106.50006630581856" y="4.438430310074182E-4" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.transactions_aud" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.revinfo" relationship="REFERENCES">
+      <point x="111.99984844384306" y="1.5426251687244985E-4" />
+      <point x="923.746" y="37.078" />
+      <point x="923.746" y="337.0" />
+      <point x="386.0" y="337.0" />
+      <point x="0.0" y="-44.0" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.role_permits" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.permits" relationship="REFERENCES">
+      <point x="70.5" y="-11.958083897158303" />
+      <point x="-78.0" y="48.5" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.purchases" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.transactions" relationship="REFERENCES">
+      <point x="91.5" y="4.397834911742393E-4" />
+      <point x="682.0" y="160.471" />
+      <point x="682.0" y="183.937" />
+      <point x="-111.99997970230038" y="3.7212449251455837E-4" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.products_categories" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.categories" relationship="REFERENCES">
+      <point x="-97.5" y="43.5" />
+      <point x="1826.1677388362655" y="944.1710338294994" />
+      <point x="1720.6831160734002" y="944.1710338294994" />
+      <point x="59.50137212449249" y="-44.0" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.role_permits" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.roles" relationship="REFERENCES">
+      <point x="-2.5710419464530787E-4" y="-43.49996211096072" />
+      <point x="487.622" y="1322.0" />
+      <point x="502.361" y="1322.0" />
+      <point x="4.695534508982746E-4" y="92.00003788903928" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.details_transactions" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.transactions" relationship="REFERENCES">
+      <point x="-103.0003234100136" y="-2.7469553452874607E-4" />
+      <point x="798.0" y="465.863" />
+      <point x="798.0" y="322.0" />
+      <point x="682.0" y="322.0" />
+      <point x="682.0" y="183.937" />
+      <point x="-111.99997970230038" y="3.7212449251455837E-4" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.credentials_roles" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.roles" relationship="REFERENCES">
+      <point x="90.00022192151556" y="18.85603788903927" />
+      <point x="463.0" y="1341.5" />
+      <point x="463.0" y="1322.0" />
+      <point x="502.361" y="1322.0" />
+      <point x="4.695534508982746E-4" y="92.00003788903928" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.products_providers" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.providers" relationship="REFERENCES">
+      <point x="-100.4998863328824" y="-2.55751014890393E-4" />
+      <point x="1671.0" y="381.373" />
+      <point x="1671.0" y="381.37298105548035" />
+      <point x="106.000293640054" y="-2.7469553452874607E-4" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.sales" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.clients" relationship="REFERENCES">
+      <point x="-32.718687415426416" y="56.0" />
+      <point x="107.0" y="-104.0" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.credentials" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.clients" relationship="REFERENCES">
+      <point x="89.0" y="-42.30064952638713" />
+      <point x="-114.5" y="96.5" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.products_categories" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.products" relationship="REFERENCES">
+      <point x="-2.6251691497236607E-4" y="-43.50048443843025" />
+      <point x="1923.6674763193505" y="723.348" />
+      <point x="1924.0" y="723.348" />
+      <point x="1924.0" y="435.87310460251035" />
+      <point x="-106.50006630581856" y="4.438430310074182E-4" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.purchases" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.providers" relationship="REFERENCES">
+      <point x="-15.0" y="68.00043978349117" />
+      <point x="551.0" y="357.363" />
+      <point x="1329.77" y="357.363" />
+      <point x="1329.77" y="332.363" />
+      <point x="1671.0" y="332.363" />
+      <point x="1671.0" y="381.37298105548035" />
+      <point x="106.000293640054" y="-2.7469553452874607E-4" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.transactions_aud" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.stores" relationship="REFERENCES">
+      <point x="111.99984844384306" y="-14.999845737483131" />
+      <point x="162.0" y="22.078" />
+      <point x="162.0" y="183.937" />
+      <point x="-93.49950473613" y="3.7212449251455837E-4" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.details_transactions_aud" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.products" relationship="REFERENCES">
+      <point x="122.50004059539924" y="3.7212449251455837E-4" />
+      <point x="1924.0" y="147.937" />
+      <point x="1924.0" y="435.87310460251035" />
+      <point x="-106.50006630581856" y="4.438430310074182E-4" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.purchases_aud" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.transactions" relationship="REFERENCES">
+      <point x="91.49991880920157" y="-15.98353450608937" />
+      <point x="682.0" y="275.0" />
+      <point x="682.0" y="183.937" />
+      <point x="-111.99997970230038" y="3.7212449251455837E-4" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.sales_aud" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.transactions" relationship="REFERENCES">
+      <point x="3.3288227334082876E-4" y="80.00025981055481" />
+      <point x="-232.458" y="541.5" />
+      <point x="798.0" y="541.5" />
+      <point x="798.0" y="322.0" />
+      <point x="682.0" y="322.0" />
+      <point x="682.0" y="183.937" />
+      <point x="-111.99997970230038" y="3.7212449251455837E-4" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.purchases_aud" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.revinfo" relationship="REFERENCES">
+      <point x="91.49991880920157" y="-0.9835345060893701" />
+      <point x="321.0" y="290.0" />
+      <point x="321.0" y="337.0" />
+      <point x="386.0" y="337.0" />
+      <point x="0.0" y="-44.0" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.sales_aud" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.revinfo" relationship="REFERENCES">
+      <point x="3.3288227334082876E-4" y="-79.99974018944519" />
+      <point x="-232.458" y="-108.422" />
+      <point x="1239.77" y="-108.422" />
+      <point x="1239.77" y="337.0" />
+      <point x="386.0" y="337.0" />
+      <point x="0.0" y="-44.0" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.transactions" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.stores" relationship="REFERENCES">
+      <point x="0.0" y="-104.0" />
+      <point x="817.3849797023004" y="62.4366278755075" />
+      <point x="291.49750473613" y="62.4366278755075" />
+      <point x="0.0" y="-68.0" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.sales" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.transactions" relationship="REFERENCES">
+      <point x="79.00033829499318" y="-2.7469553452874607E-4" />
+      <point x="798.0" y="465.863" />
+      <point x="798.0" y="322.0" />
+      <point x="682.0" y="322.0" />
+      <point x="682.0" y="183.937" />
+      <point x="-111.99997970230038" y="3.7212449251455837E-4" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.details_transactions_aud" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.revinfo" relationship="REFERENCES">
+      <point x="4.05953992412833E-5" y="68.00037212449251" />
+      <point x="1099.77" y="337.0" />
+      <point x="386.0" y="337.0" />
+      <point x="0.0" y="-44.0" />
+    </edge>
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.credentials_roles" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.credentials" relationship="REFERENCES">
+      <point x="-82.5" y="-43.5" />
+      <point x="4.22779431664415" y="80.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Compact" zoom="0.47895791583166336" showDependencies="false" x="358.2131782426777" y="518.2322175732216" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Columns</Category>
+    <Category>Comments</Category>
+    <Category>Key columns</Category>
+    <Category>Virtual foreign keys</Category>
+  </Categories>
+</Diagram>
+
