@@ -47,6 +47,14 @@ Este proyecto tiene un enfoque profesional con el objetivo de aplicar distintos 
 
 ## 📁 Estructura del proyecto
 ```plaintext
+Sin especificar = Implementado
++ = A implementar.
+$$$ = Deseable (Baja prioridad)
+$$ = Deseable (Media prioridad)
+$ = Deseable (Alta prioridad)
+
+
+
 org.shoppify
 │
 ├── config
@@ -54,39 +62,30 @@ org.shoppify
 │
 ├── controller
 │   ├── product
-│   │   ├── ProductController
-│   │   ├── ProductCategoryController
-│   │   ├── ProductVariantController
-│   │   ├── ProductReviewController
+│   │   ├── ProductController 
+│   │   ├── ProductCategoryController 
+│   │   ├── ProductReviewController +
+│   │   ├── CategoryController
 │   ├── user
 │   │   ├── UserController
-│   │   ├── AdminController
-│   │   ├── CustomerController
 │   │   ├── RoleController
 │   │   ├── PermissionController
-│   ├── order
-│   │   ├── OrderController
-│   │   ├── OrderItemController
-│   │   ├── ShippingController
-│   │   ├── PaymentController
-│   ├── supplier
-│   │   ├── SupplierController
-│   │   ├── PurchaseOrderController
-│   ├── cart
-│   │   ├── CartController
-│   │   ├── WishlistController
+│   │   ├── WishlistController (Intermedia usuario-producto) +
+│   ├── Transaction
+│   │   ├── ShippingController (Envios)
+│   │   ├── SupplierController (Nuevo purchase)
+│   │   ├── PurchaseController (Nuevo Sell)
+│   │   ├── Transaction (Cart)
+
 │   ├── marketing
-│   │   ├── PromotionController
-│   │   ├── CouponController
-│   │   ├── DiscountController
+│   │   ├── CouponController $$$
+│   │   ├── DiscountController $
 │   ├── analytics
-│   │   ├── SalesMetricsController
-│   │   ├── CustomerMetricsController
-│   │   ├── InventoryMetricsController
-│   ├── CategoryController
-│   ├── SearchController
-│   ├── PdfGeneratorController
-│   ├── NotificationController
+│   │   ├── SalesMetricsController  + 
+│   │   ├── CustomerMetricsController +
+│   │   ├── InventoryMetricsController +
+
+│   ├── NotificationController $$
 │   ├── AuditController
 │
 ├── dto
