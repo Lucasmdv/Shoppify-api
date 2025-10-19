@@ -134,3 +134,8 @@ org.shoppify
 - [@Newbie1337x](https://github.com/Newbie1337x)
 - [@joacoloool](https://github.com/joacoloool)
 - [@Lucasmdv](https://github.com/Lucasmdv)
+
+## Búsquedas en filtros
+
+- Actualmente las búsquedas son insensibles a mayúsculas/minúsculas.
+- Para insensibilidad a acentos se recomienda habilitar la extensión `unaccent` en PostgreSQL o usar una columna normalizada de apoyo; no está habilitado por defecto.

@@ -22,8 +22,10 @@ public class ProductEntity {
     @Column(name = "name", unique = true, nullable = false)
     private String name;
 
+
     @Column(name = "description", length = Integer.MAX_VALUE)
     private String description;
+
 
     @ColumnDefault("0")
     @Column(name = "price", precision = 10, scale = 2)
@@ -42,6 +44,7 @@ public class ProductEntity {
 
     @Column(name = "brand")
     private String brand;
+
 
     @Column(name = "img_URL")
     private String imgURL;
@@ -70,4 +73,5 @@ public class ProductEntity {
     public ProductEntity() {
         this.stock = BigDecimal.ZERO;
     }
+
 }

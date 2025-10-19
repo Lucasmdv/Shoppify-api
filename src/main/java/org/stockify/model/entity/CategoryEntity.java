@@ -22,4 +22,5 @@ public class CategoryEntity {
 
     @Column(name = "name",unique = true, nullable = false)
     private String name;
+
 }

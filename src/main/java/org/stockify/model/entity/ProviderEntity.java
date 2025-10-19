@@ -24,11 +24,13 @@ public class ProviderEntity {
     @Column(name = "business_name", nullable = false ,unique = true)
     private String businessName;
 
+
     @Column(nullable = false, length = 100 , unique = true)
     private String taxId;
 
     @Column(name = "tax_address", nullable = false)
     private String taxAddress;
+
 
     @Column(unique = true)
     private String phone;
@@ -38,6 +40,7 @@ public class ProviderEntity {
 
     @Column(name = "contact_name", nullable = false)
     private String name;
+
 
     @Column(nullable = false)
     @ColumnDefault("true")
@@ -53,4 +56,5 @@ public class ProviderEntity {
 
     @OneToMany(mappedBy = "provider", fetch = FetchType.LAZY)
     private Set<PurchaseEntity> purchaseList;
+
 }

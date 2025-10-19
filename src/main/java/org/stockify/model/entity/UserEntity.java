@@ -23,8 +23,10 @@ public class UserEntity {
     @Column(name = "client_first_name", nullable = false, length = 20)
     private String firstName;
 
+
     @Column(name = "client_last_name", nullable = false, length = 20)
     private String lastName;
+
 
     @Column(name = "client_dni", nullable = false, length = 8)
     private String dni;

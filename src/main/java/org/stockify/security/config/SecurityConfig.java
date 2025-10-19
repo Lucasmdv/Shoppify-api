@@ -25,7 +25,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true) //ESTO DESACTIVA TODOOOOO
+@EnableMethodSecurity(prePostEnabled = false, securedEnabled = false, jsr250Enabled = false) //ESTO DESACTIVA TODOOOOO
 
 public class SecurityConfig {
 
@@ -44,7 +44,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/user/register").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())

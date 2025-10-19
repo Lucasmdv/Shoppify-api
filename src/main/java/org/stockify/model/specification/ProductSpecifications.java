@@ -9,25 +9,34 @@ import java.util.List;
 public class ProductSpecifications {
 
     public static Specification<ProductEntity> byName(String name) {
-        return (root, query, cb) -> cb.like(root.get("name"), "%" + name + "%");
+        return (root, query, cb) -> {
+            if (name == null) return null;
+            return cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%");
+        };
     }
 
     public static Specification<ProductEntity> byProvider(String provider) {
-        return (root, query, cb) ->
-                cb.like(cb.lower(root.join("providers").get("name")), "%" + provider.toLowerCase() + "%");
+        return (root, query, cb) -> {
+            if (provider == null) return null;
+            return cb.like(cb.lower(root.join("providers").get("name")), "%" + provider.toLowerCase() + "%");
+        };
     }
 
     public static Specification<ProductEntity> byCategory(String category) {
-        return (root, query, cb) ->
-                cb.like(cb.lower(root.join("categories").get("name")), "%" + category.toLowerCase() + "%");
+        return (root, query, cb) -> {
+            if (category == null) return null;
+            return cb.like(cb.lower(root.join("categories").get("name")), "%" + category.toLowerCase() + "%");
+        };
     }
 
     public static Specification<ProductEntity> bySku(String sku) {
-        return (root, query, cb) -> cb.like(root.get("sku"), "%" + sku + "%");
+        return (root, query, cb) ->
+                sku == null ? null : cb.like(cb.lower(root.get("sku")), "%" + sku.toLowerCase() + "%");
     }
 
     public static Specification<ProductEntity> byBarCode(String barCode) {
-        return (root, query, cb) -> cb.like(root.get("barcode"), "%" + barCode + "%");
+        return (root, query, cb) ->
+                barCode == null ? null : cb.like(cb.lower(root.get("barcode")), "%" + barCode.toLowerCase() + "%");
     }
 
     public static Specification<ProductEntity> byCategories(List<String> categories) {
@@ -55,7 +64,8 @@ public class ProductSpecifications {
     }
 
     public static Specification<ProductEntity> byBrand(String brand) {
-        return (root, query, cb) -> cb.like(root.get("brand"), "%" + brand + "%");
+        return (root, query, cb) ->
+                brand == null ? null : cb.like(cb.lower(root.get("brand")), "%" + brand.toLowerCase() + "%");
     }
 
     public static Specification<ProductEntity> byPrice(Double price) {
@@ -75,7 +85,8 @@ public class ProductSpecifications {
     }
 
     public static Specification<ProductEntity> byDescription(String description) {
-        return (root, query, cb) -> cb.like(root.get("description"), "%" + description + "%");
+        return (root, query, cb) ->
+                description == null ? null : cb.like(cb.lower(root.get("description")), "%" + description.toLowerCase() + "%");
     }
 
     public static Specification<ProductEntity> byStock(Double stock) {

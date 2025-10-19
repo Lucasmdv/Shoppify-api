@@ -10,7 +10,7 @@ public class UserSpecification {
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), "%" + lastName.toLowerCase() + "%");
     }
 
-    /// int ? Integer ? String
+    // int ? Integer ? String
     public static Specification<UserEntity> dniEquals(String dni) {
         return (root, query, criteriaBuilder) ->
                 dni == null ? null :
@@ -26,7 +26,6 @@ public class UserSpecification {
     public static Specification<UserEntity> firstNameLike(String firstName) {
         return (root, query, criteriaBuilder) ->
                 firstName == null ? null :
-                criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), "%" + firstName.toLowerCase() + "%");
-        };
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), "%" + firstName.toLowerCase() + "%");
     }
-
+}

@@ -7,28 +7,28 @@ import org.stockify.model.entity.ProviderEntity;
 public class ProviderSpecification {
 
     public static Specification<ProviderEntity> byName(String name) {
-        return (root,query, criteriaBuilder) ->
-                name== null ? null : criteriaBuilder.like(root.get("name"), "%" + name + "%");
+        return (root,query, cb) ->
+                name== null ? null : cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%");
     }
 
     public static Specification<ProviderEntity> byBusinessName(String businessName) {
-        return (root, query, criteriaBuilder) ->
-                businessName == null ? null : criteriaBuilder.like(root.get("businessName"), "%" + businessName + "%");
+        return (root, query, cb) ->
+                businessName == null ? null : cb.like(cb.lower(root.get("businessName")), "%" + businessName.toLowerCase() + "%");
     }
 
     public static Specification<ProviderEntity> byTaxId(String taxId) {
-        return (root, query, criteriaBuilder) ->
-                taxId == null ? null : criteriaBuilder.like(root.get("taxId"), "%" + taxId + "%");
+        return (root, query, cb) ->
+                taxId == null ? null : cb.like(cb.lower(root.get("taxId")), "%" + taxId.toLowerCase() + "%");
     }
 
     public static Specification<ProviderEntity> byEmail(String email) {
-        return (root, query, criteriaBuilder) ->
-                email == null ? null : criteriaBuilder.like(root.get("email"), "%" + email + "%");
+        return (root, query, cb) ->
+                email == null ? null : cb.like(cb.lower(root.get("email")), "%" + email.toLowerCase() + "%");
     }
 
     public static Specification<ProviderEntity> byPhone(String phone) {
-        return (root, query, criteriaBuilder) ->
-                phone == null ? null : criteriaBuilder.like(root.get("phone"), "%" + phone + "%");
+        return (root, query, cb) ->
+                phone == null ? null : cb.like(cb.lower(root.get("phone")), "%" + phone.toLowerCase() + "%");
     }
 
     public static Specification<ProviderEntity> byActive(String status) {
@@ -50,8 +50,8 @@ public class ProviderSpecification {
     }
 
     public static Specification<ProviderEntity> byTaxAddress(String taxAddress) {
-        return (root, query, criteriaBuilder) ->
-                taxAddress == null ? null : criteriaBuilder.like(root.get("taxAddress"), "%" + taxAddress + "%");
+        return (root, query, cb) ->
+                taxAddress == null ? null : cb.like(cb.lower(root.get("taxAddress")), "%" + taxAddress.toLowerCase() + "%");
     }
 
 }
