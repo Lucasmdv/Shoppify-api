@@ -8,5 +8,8 @@ public record CategoryResponse(
         int id,
 
         @Schema(description = "Name of the category", example = "Electronics")
-        String name
+        String name,
+
+        @Schema(description = "url of a image", example = "http//:asd.com")
+        String imgUrl
 ) {}

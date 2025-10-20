@@ -21,4 +21,7 @@ public class CategoryRequest {
             required = true
     )
     private String name;
+
+
+    private String imgUrl;
 }
