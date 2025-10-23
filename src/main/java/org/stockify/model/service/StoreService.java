@@ -117,4 +117,19 @@ public class StoreService {
     public boolean existsById(Long id){
         return storeRepository.existsById(id);
     }
+
+    /**
+     * Ensures that a singleton store with ID=1 exists. If it doesn't, it will be created
+     * with empty values for storeName, address, and city to allow later updates via PUT.
+     */
+    public void ensureSingletonDefault() {
+        if (!storeRepository.existsById(1L)) {
+            StoreEntity entity = new StoreEntity();
+            entity.setId(1L);
+            entity.setStoreName("");
+            entity.setAddress("");
+            entity.setCity("");
+            storeRepository.save(entity);
+        }
+    }
 }

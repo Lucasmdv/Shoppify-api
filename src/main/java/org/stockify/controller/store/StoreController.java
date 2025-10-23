@@ -49,20 +49,6 @@ public class StoreController {
         return ResponseEntity.ok(storeModelAssembler.toModel(store));
     }
 
-    @Operation(summary = "Create a new store")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Store created successfully"),
-            @ApiResponse(responseCode = "400", description = "Validation error")
-    })
-    @PostMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE')")
-    public ResponseEntity<EntityModel<StoreResponse>> createStore(
-            @Valid @RequestBody StoreRequest request) {
-        StoreResponse store = storeService.save(request);
-        EntityModel<StoreResponse> storeModel = storeModelAssembler.toModel(store);
-        return ResponseEntity.created(URI.create("/stores/singleton")).body(storeModel);
-    }
-
     @Operation(summary = "Update singleton store")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Store updated successfully"),
@@ -74,20 +60,6 @@ public class StoreController {
     public ResponseEntity<EntityModel<StoreResponse>> updateStore(
             @Valid @RequestBody StoreRequest request) {
         StoreResponse store = storeService.update(STORE_ID, request);
-        return ResponseEntity.ok(storeModelAssembler.toModel(store));
-    }
-
-
-    @Operation(summary = "Patch singleton store")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Store patched successfully"),
-            @ApiResponse(responseCode = "404", description = "Store not found")
-    })
-    @PatchMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE')")
-    public ResponseEntity<EntityModel<StoreResponse>> patchStore(
-            @RequestBody StoreRequest request) {
-        StoreResponse store = storeService.patch(STORE_ID, request);
         return ResponseEntity.ok(storeModelAssembler.toModel(store));
     }
 }

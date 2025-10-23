@@ -1,32 +1,26 @@
 package org.stockify.security.service;
 
 import jakarta.transaction.Transactional;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.stockify.model.entity.UserEntity;
+import org.stockify.model.repository.UserRepository;
 import org.stockify.security.exception.AuthenticationException;
-import org.stockify.security.model.dto.request.RoleAndPermitsDTO;
+import org.stockify.security.model.dto.request.RegisterCredentialsRequest;
+import org.stockify.security.model.dto.request.RegisterRequest;
 import org.stockify.security.model.entity.CredentialsEntity;
-import org.stockify.security.model.entity.PermitEntity;
 import org.stockify.security.model.entity.RoleEntity;
-import org.stockify.security.model.enums.Permit;
-import org.stockify.security.model.enums.Role;
 import org.stockify.security.repository.CredentialRepository;
 import org.stockify.security.model.dto.request.AuthRequest;
 import org.stockify.security.repository.PermitRepository;
 import org.stockify.security.repository.RolRepository;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -68,6 +62,8 @@ public class AuthService {
      */
     private final RolRepository rolRepository;
 
+        private final UserRepository userRepository;
+
     /**
      * Constructor for AuthService
      *
@@ -83,156 +79,129 @@ public class AuthService {
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService,
                        PermitRepository permitRepository,
-                       RolRepository rolRepository) {
+                       RolRepository rolRepository,
+                       UserRepository userRepository) {
         this.credentialsRepository = credentialsRepository;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.permitRepository = permitRepository;
         this.rolRepository = rolRepository;
+        this.userRepository = userRepository;
     }
 
+    // Removed legacy role+permit combined update methods from AuthService.
+
+    // Removed permit helper methods; permits are managed via roles.
+
     /**
-     * Creates or updates roles and permissions for a user.
-     *
-     * @param email Email of the user
-     * @param role Role to assign
-     * @param permits Permissions to assign
-     * @return The updated credentials
-     * @throws UsernameNotFoundException If no user is found with the provided email
+     * Registers a user profile together with credentials using a composite request.
+     * Assigns default CLIENT role which must exist.
      */
-    public CredentialsEntity updateUserRoleAndPermits(String email, Role role, Set<Permit> permits) {
-        // Get current user's authorities to check if they are admin or manager
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        boolean isAdmin = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
-        boolean isManager = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MANAGER"));
-
-        // If the current user is a MANAGER and trying to create an ADMIN account, throw an exception
-        if (isManager && !isAdmin && role == Role.ADMIN) {
-            throw new AuthenticationException("MANAGER role cannot create ADMIN accounts", null);
+    public CredentialsEntity register(RegisterRequest request) {
+        if (request == null || request.getCredentials() == null || request.getUser() == null) {
+            throw new AuthenticationException("Invalid register payload", null);
         }
 
-        // Process permissions
-        Set<PermitEntity> permitEntities = new HashSet<>();
-        for (Permit p : permits) {
-            // Find or create the permission
-            PermitEntity permitEntity = permitRepository.findByPermit(p)
-                    .orElseGet(() -> {
-                        PermitEntity newPermit = PermitEntity.builder()
-                                .permit(p)
-                                .build();
-                        return permitRepository.save(newPermit);
-                    });
-            permitEntities.add(permitEntity);
+        String email = request.getCredentials().getEmail();
+        if (credentialsRepository.existsByEmail(email)) {
+            throw new AuthenticationException("User already exists with email: " + email, null);
         }
 
-        // Find or create the role
-        RoleEntity roleEntity = rolRepository.findByRole(role)
-                .orElseGet(() -> {
-                    RoleEntity newRole = RoleEntity.builder()
-                            .role(role)
-                            .permits(permitEntities)
-                            .build();
-                    return rolRepository.save(newRole);
-                });
+        // Create user profile
+        UserEntity user = UserEntity.builder()
+                .firstName(request.getUser().getFirstName())
+                .lastName(request.getUser().getLastName())
+                .dni(request.getUser().getDni())
+                .phone(request.getUser().getPhone())
+                .img(request.getUser().getImg())
+                .build();
+        user = userRepository.save(user);
 
-        // Update the credentials
-        CredentialsEntity credentials = credentialsRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        // Create credentials linked to profile
+        CredentialsEntity credentials = CredentialsEntity.builder()
+                .username(request.getCredentials().getUsername())
+                .email(email)
+                .password(passwordEncoder.encode(request.getCredentials().getPassword()))
+                .user(user)
+                .build();
 
-        Set<RoleEntity> roles = credentials.getRoles();
-        if (roles == null) {
-            roles = new HashSet<>();
-        } else {
-            roles = new HashSet<>(roles);
-        }
-
-        roles.add(roleEntity);
+        // Assign default CLIENT role (must exist)
+        RoleEntity clientRole = rolRepository.findByName("CLIENT")
+                .orElseThrow(() -> new AuthenticationException("Default role CLIENT not found. Please create it first.", null));
+        Set<RoleEntity> roles = new HashSet<>();
+        roles.add(clientRole);
         credentials.setRoles(roles);
+
+        return credentialsRepository.save(credentials);
+    }
+    /**
+     * Registers new credentials and optionally links them to an existing user profile.
+     * Assigns default EMPLOYEE role with READ and WRITE permits.
+     */
+    public CredentialsEntity registerCredentials(RegisterCredentialsRequest request) {
+        if (credentialsRepository.existsByEmail(request.getEmail())) {
+            throw new AuthenticationException("User already exists with email: " + request.getEmail(), null);
+        }
+
+        CredentialsEntity credentials = CredentialsEntity.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .build();
+
+        // Assign default CLIENT role (must exist)
+        RoleEntity clientRole = rolRepository.findByName("CLIENT")
+                .orElseThrow(() -> new AuthenticationException("Default role CLIENT not found. Please create it first.", null));
+        Set<RoleEntity> roles = new HashSet<>();
+        roles.add(clientRole);
+        credentials.setRoles(roles);
+
+        // Optionally link to existing user profile
+        if (request.getUserId() != null) {
+            UserEntity user = userRepository.findById(request.getUserId())
+                    .orElseThrow(() -> new UsernameNotFoundException("User profile not found with id: " + request.getUserId()));
+            credentials.setUser(user);
+        }
+
         return credentialsRepository.save(credentials);
     }
 
     /**
-     * Updates the roles and permissions for a user identified by email.
-     * If the requested role or permissions don't exist, they will be created.
-     *
-     * @param email Email of the user to update
-     * @param roleAndPermitsDTO DTO containing the roles and permissions to assign
-     * @return Response containing the updated user information
-     * @throws UsernameNotFoundException If no user is found with the provided email
+     * Registers a new user profile along with credentials in a single transaction-like operation.
      */
-    public ResponseEntity<CredentialsEntity> setPermitsAndRole(String email, RoleAndPermitsDTO roleAndPermitsDTO) {
-        CredentialsEntity credentials = credentialsRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("No user found with email: " + email));
-
-        Set<Permit> requestedPermits = roleAndPermitsDTO.getPermits();
-        Set<PermitEntity> permitEntities = new HashSet<>();
-
-        for (Permit permit : requestedPermits) {
-            PermitEntity permitEntity = permitRepository.findByPermit(permit)
-                    .orElseGet(() -> permitRepository.save(
-                            PermitEntity.builder().permit(permit).build()
-                    ));
-            permitEntities.add(permitEntity);
+    public CredentialsEntity registerUserWithCredentials(org.stockify.security.model.dto.request.RegisterUserCredentialsRequest request) {
+        if (credentialsRepository.existsByEmail(request.getEmail())) {
+            throw new AuthenticationException("User already exists with email: " + request.getEmail(), null);
         }
 
-        Role requestedRole = roleAndPermitsDTO.getRoles();
-        RoleEntity roleEntity = rolRepository.findByRole(requestedRole)
-                .orElseGet(() -> rolRepository.save(
-                        RoleEntity.builder()
-                                .role(requestedRole)
-                                .permits(permitEntities)
-                                .build()
-                ));
+        // Create user profile first
+        UserEntity user = UserEntity.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .dni(request.getDni())
+                // email is managed by credentials only
+                .phone(request.getPhone())
+                .img(request.getImg())
+                .build();
+        user = userRepository.save(user);
 
-        // Si el rol ya existía pero no tiene estos permisos, actualizarlos:
-        if (!roleEntity.getPermits().containsAll(permitEntities)) {
-            roleEntity.getPermits().addAll(permitEntities);
-            rolRepository.save(roleEntity);
-        }
+        // Create credentials linked to the user
+        CredentialsEntity credentials = CredentialsEntity.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .user(user)
+                .build();
 
-        Set<RoleEntity> rolesActuales = credentials.getRoles();
+        // Assign default CLIENT role (must exist)
+        RoleEntity clientRole = rolRepository.findByName("CLIENT")
+                .orElseThrow(() -> new AuthenticationException("Default role CLIENT not found. Please create it first.", null));
+        Set<RoleEntity> roles = new HashSet<>();
+        roles.add(clientRole);
+        credentials.setRoles(roles);
 
-        if (rolesActuales == null) {
-            rolesActuales = new HashSet<>();
-        } else {
-            // En caso que sea un Set inmutable, lo hacemos mutable
-            rolesActuales = new HashSet<>(rolesActuales);
-        }
-
-        rolesActuales.add(roleEntity);
-        credentials.setRoles(rolesActuales);
-        credentialsRepository.save(credentials);
-
-        return ResponseEntity.ok(credentials);
-    }
-
-    /**
-     * Creates or retrieves the standard set of permissions for regular employees.
-     * This includes READ and WRITE permissions.
-     *
-     * @return List of permission entities for regular employees
-     */
-    public List<PermitEntity> permitUser(){
-        List<PermitEntity> permits = new ArrayList<>();
-
-        // Get or create READ permit
-        PermitEntity readPermit = permitRepository.findByPermit(Permit.READ)
-                .orElseGet(() -> {
-                    PermitEntity newPermit = PermitEntity.builder().permit(Permit.READ).build();
-                    return permitRepository.save(newPermit);
-                });
-        permits.add(readPermit);
-
-        // Get or create WRITE permit
-        PermitEntity writePermit = permitRepository.findByPermit(Permit.WRITE)
-                .orElseGet(() -> {
-                    PermitEntity newPermit = PermitEntity.builder().permit(Permit.WRITE).build();
-                    return permitRepository.save(newPermit);
-                });
-        permits.add(writePermit);
-
-        return permits;
+        return credentialsRepository.save(credentials);
     }
 
     /**

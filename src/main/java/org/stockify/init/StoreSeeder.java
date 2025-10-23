@@ -14,9 +14,6 @@ public class StoreSeeder {
     private final StoreService storeService;
 
     public void ensureDefault(){
-        if(!storeService.existsById(1L)){
-            StoreRequest storeDefault = new StoreRequest("default","placeholder","not specified");
-            storeService.save(storeDefault);
-        }
+        storeService.ensureSingletonDefault();
     }
 }

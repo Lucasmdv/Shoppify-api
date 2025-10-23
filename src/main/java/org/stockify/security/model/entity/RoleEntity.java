@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.stockify.security.model.enums.Role;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -19,15 +17,19 @@ public class RoleEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    @Enumerated(EnumType.STRING)
-    Role role;
+    private Long id;
+
+    @Column(name = "name", nullable = false, unique = true, length = 50)
+    private String name;
+
+    @Column(name = "description")
+    private String description;
 
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(
             name = "role_permits",
             joinColumns = @JoinColumn(name = "role_id"),
             inverseJoinColumns = @JoinColumn(name = "permit_id"))
-    Set<PermitEntity> permits;
+    private Set<PermitEntity> permits;
 }
 

@@ -2,9 +2,6 @@ package org.stockify.security.model.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import org.stockify.security.model.enums.Permit;
-import org.stockify.security.model.enums.Role;
-
 import java.util.Set;
 
 /**
@@ -28,9 +25,5 @@ public class CredentialRequest {
     @Schema(description = "User email address used for communication or account recovery.", example = "john@example.com")
     private String email;
 
-    @Schema(description = "Role assigned to the user determining access level.", example = "ADMIN")
-    private Role roles;
-
-    @Schema(description = "Set of fine-grained permissions assigned to the user.")
-    private Set<Permit> permits;
+    // Roles and permits are managed separately; not part of basic credential input
 }

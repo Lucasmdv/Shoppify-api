@@ -35,10 +35,7 @@ public class UserRequest {
     @Schema(description = "Client's DNI (National ID Number)", example = "33445566", maxLength = 8)
     private String dni;
 
-    @NotBlank
-    @Email(message = "Email format not valid", regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
-    @Schema(description = "Client's email address", example = "maria.rodriguez@example.com", format = "email")
-    private String email;
+    // Email is managed by credentials, not by the user profile
 
     @NotBlank
     @Size(min = 7, max = 20, message = "Phone number must be between 7 and 20 characters")

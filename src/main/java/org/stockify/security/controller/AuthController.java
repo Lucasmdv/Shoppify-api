@@ -12,6 +12,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.stockify.security.model.dto.request.AuthRequest;
 import org.stockify.security.model.dto.response.AuthResponse;
+import org.stockify.security.model.dto.response.LoginResponse;
+import org.stockify.security.model.dto.request.RegisterRequest;
+import org.stockify.security.model.dto.response.RegisterResponse;
+import org.stockify.dto.response.UserResponse;
+import org.stockify.model.mapper.UserMapper;
 
 import org.stockify.security.service.AuthService;
 import org.stockify.security.service.JwtService;
@@ -35,6 +40,7 @@ public class AuthController {
      * Service for JWT token operations
      */
     private final JwtService jwtService;
+    private final UserMapper userMapper;
 
     /**
      * Constructor for AuthController
@@ -42,9 +48,10 @@ public class AuthController {
      * @param authService Service for authentication operations
      * @param jwtService Service for JWT token operations
      */
-    public AuthController(AuthService authService, JwtService jwtService) {
+    public AuthController(AuthService authService, JwtService jwtService, UserMapper userMapper) {
         this.authService = authService;
         this.jwtService = jwtService;
+        this.userMapper = userMapper;
     }
 
     /**
@@ -85,10 +92,41 @@ public class AuthController {
         @ApiResponse(responseCode = "401", description = "Invalid credentials"),
         @ApiResponse(responseCode = "400", description = "Invalid request format")
     })
-    public ResponseEntity<AuthResponse> login(
+    public ResponseEntity<LoginResponse> login(
             @Parameter(description = "Authentication credentials") @RequestBody AuthRequest authRequest) {
-        UserDetails user = authService.authenticate(authRequest);
-        String token = jwtService.generateToken(user);
-        return ResponseEntity.ok(new AuthResponse(token));
+        UserDetails userDetails = authService.authenticate(authRequest);
+        String token = jwtService.generateToken(userDetails);
+        org.stockify.security.model.entity.CredentialsEntity cred = (org.stockify.security.model.entity.CredentialsEntity) userDetails;
+        org.stockify.dto.response.UserResponse profile = userMapper.toDto(cred.getUser());
+        // Sanitize potentially sensitive fields for login payload
+        profile.setDni(null);
+        profile.setPhone(null);
+        java.util.Set<String> roles = cred.getRoles().stream().map(r -> r.getName()).collect(java.util.stream.Collectors.toSet());
+        return ResponseEntity.ok(
+                LoginResponse.builder()
+                        .token(token)
+                        .user(profile)
+                        .roles(roles)
+                        .build()
+        );
+    }
+
+    @PostMapping("/register")
+    @Operation(
+        summary = "Register user profile and credentials",
+        description = "Registers a new user profile and credentials in one step and assigns default CLIENT role"
+    )
+    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
+        org.stockify.security.model.entity.CredentialsEntity saved = authService.register(request);
+        String token = jwtService.generateToken(saved);
+        UserResponse profile = userMapper.toDto(saved.getUser());
+        java.util.Set<String> roles = saved.getRoles().stream().map(r -> r.getName()).collect(java.util.stream.Collectors.toSet());
+        return ResponseEntity.status(201).body(
+                RegisterResponse.builder()
+                        .token(token)
+                        .user(profile)
+                        .roles(roles)
+                        .build()
+        );
     }
 }
