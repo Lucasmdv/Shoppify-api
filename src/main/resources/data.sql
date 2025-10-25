@@ -1,242 +1,137 @@
--- Script de inserción de datos para la base de datos Stockify
--- Este script debe ejecutarse después de que la base de datos haya sido creada
---
--- Propósito: Este script inserta datos iniciales en todas las tablas de la base de datos Stockify.
--- Incluye datos para:
---   - Permisos y roles
---   - Categorías de productos
---   - Tiendas
---   - Empleados y credenciales
---   - Proveedores
---   - Clientes
---   - Productos y stock
---   - Puntos de venta (POS)
---   - Turnos
---   - Sesiones de POS
---   - Transacciones (ventas y compras)
---
--- Uso: Ejecutar este script después de crear la base de datos y las tablas.
--- Ejemplo: psql -U usuario -d stockify -f insert_data.sql
---
--- Nota: Algunos inserts pueden requerir ajustes dependiendo del sistema de base de datos utilizado.
+-- Stockify seed data aligned with current schema
+-- DB: PostgreSQL | Entities: roles, permits, credentials, clients, stores, providers,
+-- categories, products (+joins), transactions (optional)
 
--- Inserción de datos en la tabla permits
-INSERT INTO permits (permit) VALUES ('READ');
-INSERT INTO permits (permit) VALUES ('WRITE');
-INSERT INTO permits (permit) VALUES ('DELETE');
-INSERT INTO permits (permit) VALUES ('ADMIN');
-INSERT INTO permits (permit) VALUES ('MANAGE_USERS');
-INSERT INTO permits (permit) VALUES ('MANAGE_ROLES');
-INSERT INTO permits (permit) VALUES ('GENERATE_REPORTS');
+-- 1) Permits (enum: READ, WRITE, DELETE, ADMIN, MANAGE_USERS, MANAGE_ROLES, GENERATE_REPORTS)
+-- Ensure both code and permit string are provided (code = lowercase of enum)
+INSERT INTO permits (code, permit) VALUES
+ ('read', 'READ'),
+ ('write', 'WRITE'),
+ ('delete', 'DELETE'),
+ ('admin', 'ADMIN'),
+ ('manage_users', 'MANAGE_USERS'),
+ ('manage_roles', 'MANAGE_ROLES'),
+ ('generate_reports', 'GENERATE_REPORTS');
 
--- Inserción de datos en la tabla roles
-INSERT INTO roles (role) VALUES ('ADMIN');
-INSERT INTO roles (role) VALUES ('MANAGER');
-INSERT INTO roles (role) VALUES ('EMPLOYEE');
+-- 2) Roles
+INSERT INTO roles (name, description) VALUES
+ ('ADMIN', 'System administrators with full access'),
+ ('MANAGER', 'Store managers with reporting access'),
+ ('EMPLOYEE', 'Employees with read access');
 
--- Inserción de datos en la tabla role_permits
--- ADMIN role permissions
-INSERT INTO role_permits (role_id, permit_id) VALUES (1, 1); -- READ
-INSERT INTO role_permits (role_id, permit_id) VALUES (1, 2); -- WRITE
-INSERT INTO role_permits (role_id, permit_id) VALUES (1, 3); -- DELETE
-INSERT INTO role_permits (role_id, permit_id) VALUES (1, 4); -- ADMIN
-INSERT INTO role_permits (role_id, permit_id) VALUES (1, 5); -- MANAGE_USERS
-INSERT INTO role_permits (role_id, permit_id) VALUES (1, 6); -- MANAGE_ROLES
-INSERT INTO role_permits (role_id, permit_id) VALUES (1, 7); -- GENERATE_REPORTS
+-- 3) Role -> Permit mapping
+-- ADMIN: all permits
+INSERT INTO role_permits (role_id, permit_id)
+SELECT r.id, p.id FROM roles r, permits p WHERE r.name='ADMIN' AND p.permit IN ('READ','WRITE','DELETE','ADMIN','MANAGE_USERS','MANAGE_ROLES','GENERATE_REPORTS');
 
--- MANAGER role permissions
-INSERT INTO role_permits (role_id, permit_id) VALUES (2, 1); -- READ
-INSERT INTO role_permits (role_id, permit_id) VALUES (2, 2); -- WRITE
-INSERT INTO role_permits (role_id, permit_id) VALUES (2, 7); -- GENERATE_REPORTS
+-- MANAGER: READ, WRITE, GENERATE_REPORTS
+INSERT INTO role_permits (role_id, permit_id)
+SELECT r.id, p.id FROM roles r, permits p WHERE r.name='MANAGER' AND p.permit IN ('READ','WRITE','GENERATE_REPORTS');
 
--- EMPLOYEE role permissions
-INSERT INTO role_permits (role_id, permit_id) VALUES (3, 1); -- READ
+-- EMPLOYEE: READ
+INSERT INTO role_permits (role_id, permit_id)
+SELECT r.id, p.id FROM roles r, permits p WHERE r.name='EMPLOYEE' AND p.permit IN ('READ');
 
--- Inserción de datos en la tabla categories
-INSERT INTO categories (name) VALUES ('Electrónicos');
-INSERT INTO categories (name) VALUES ('Ropa');
-INSERT INTO categories (name) VALUES ('Alimentos');
-INSERT INTO categories (name) VALUES ('Hogar');
-INSERT INTO categories (name) VALUES ('Juguetes');
+-- 4) Stores
+INSERT INTO stores (store_name, address, city) VALUES
+ ('Tienda Central', 'Av. Principal 123', 'Buenos Aires'),
+ ('Sucursal Norte', 'Calle Norte 456', 'Córdoba');
 
--- Inserción de datos en la tabla stores
-INSERT INTO stores (store_name, address, city) VALUES ('Tienda Central', 'Av. Principal 123', 'Buenos Aires');
-INSERT INTO stores (store_name, address, city) VALUES ('Sucursal Norte', 'Calle Norte 456', 'Córdoba');
-INSERT INTO stores (store_name, address, city) VALUES ('Sucursal Sur', 'Av. Sur 789', 'Rosario');
+-- 5) Clients (users)
+-- Using working avatar URLs
+INSERT INTO clients (client_first_name, client_last_name, client_dni, client_phone, client_img) VALUES
+ ('Juan',  'Pérez',   '12345678', '+54 11 3000-0001', 'https://placehold.co/300x300?text=Juan+P%C3%A9rez'),
+ ('María', 'González','23456789', '+54 11 3000-0002', 'https://placehold.co/300x300?text=Mar%C3%ADa+Gonz%C3%A1lez'),
+ ('Ana',   'Martínez','34567890', '+54 11 3000-0003', 'https://placehold.co/300x300?text=Ana+Mart%C3%ADnez');
 
--- Inserción de datos en la tabla employee
-INSERT INTO employee (name, last_name, dni, status, active) VALUES ('Juan', 'Pérez', '12345678', 'OFFLINE', true);
-INSERT INTO employee (name, last_name, dni, status, active) VALUES ('María', 'González', '23456789', 'OFFLINE', true);
-INSERT INTO employee (name, last_name, dni, status, active) VALUES ('Carlos', 'Rodríguez', '34567890', 'OFFLINE', true);
-INSERT INTO employee (name, last_name, dni, status, active) VALUES ('Ana', 'Martínez', '45678901', 'OFFLINE', true);
-INSERT INTO employee (name, last_name, dni, status, active) VALUES ('Pedro', 'López', '56789012', 'OFFLINE', true);
+-- 6) Providers
+INSERT INTO providers (business_name, tax_id, tax_address, phone, email, contact_name, active) VALUES
+ ('Electro SA',        '30-12345678-9', 'Av. Corrientes 1000, CABA', '+54 11 4000-1000', 'contacto@electrosa.com',        'Sergio López',   true),
+ ('Textil Moda SRL',   '30-23456789-0', 'Calle San Martín 500, CBA', '+54 351 400-2000', 'ventas@textilmoda.com',         'Laura Pérez',    true),
+ ('Alimentos Frescos','30-34567890-1', 'Av. Colon 1500, CBA',       '+54 351 400-3000', 'info@alimentosfrescos.com',     'Marcos Díaz',    true),
+ ('Hogar y Deco SA',  '30-45678901-2', 'Bv. Oroño 800, Rosario',    '+54 341 400-4000', 'hola@hogarydeco.com',           'Sofía Romero',   true),
+ ('Juguetes Divertidos SA','30-56789012-3','Av. Santa Fe 2000, CABA','+54 11 4000-5000','ventas@juguetesdivertidos.com', 'Pablo Fernández',true);
 
--- Inserción de datos en la tabla credentials
--- Contraseña: password123 (debe estar encriptada en producción)
-INSERT INTO credentials (username, email, password, user_id) VALUES ('admin', 'admin@stockify.com', '$2a$10$rPiEAgQNIT1TCoKi.Iy9wuaZMhDU9Ocs9XTTaP.IS6xCxfGtJ9ZYy', '12345678');
-INSERT INTO credentials (username, email, password, user_id) VALUES ('manager', 'manager@stockify.com', '$2a$10$rPiEAgQNIT1TCoKi.Iy9wuaZMhDU9Ocs9XTTaP.IS6xCxfGtJ9ZYy', '23456789');
-INSERT INTO credentials (username, email, password, user_id) VALUES ('employee1', 'employee1@stockify.com', '$2a$10$rPiEAgQNIT1TCoKi.Iy9wuaZMhDU9Ocs9XTTaP.IS6xCxfGtJ9ZYy', '34567890');
-INSERT INTO credentials (username, email, password, user_id) VALUES ('employee2', 'employee2@stockify.com', '$2a$10$rPiEAgQNIT1TCoKi.Iy9wuaZMhDU9Ocs9XTTaP.IS6xCxfGtJ9ZYy', '45678901');
-INSERT INTO credentials (username, email, password, user_id) VALUES ('employee3', 'employee3@stockify.com', '$2a$10$rPiEAgQNIT1TCoKi.Iy9wuaZMhDU9Ocs9XTTaP.IS6xCxfGtJ9ZYy', '56789012');
+-- 7) Categories (with working images)
+INSERT INTO categories (name, img_url) VALUES
+ ('Electrónicos', 'https://placehold.co/600x400?text=Electr%C3%B3nicos'),
+ ('Ropa',         'https://placehold.co/600x400?text=Ropa'),
+ ('Alimentos',    'https://placehold.co/600x400?text=Alimentos'),
+ ('Hogar',        'https://placehold.co/600x400?text=Hogar'),
+ ('Juguetes',     'https://placehold.co/600x400?text=Juguetes');
 
--- Inserción de datos en la tabla credentials_roles
-INSERT INTO credentials_roles (credential_id, role_id) VALUES (1, 1); -- admin -> ADMIN
-INSERT INTO credentials_roles (credential_id, role_id) VALUES (2, 2); -- manager -> MANAGER
-INSERT INTO credentials_roles (credential_id, role_id) VALUES (3, 3); -- employee1 -> EMPLOYEE
-INSERT INTO credentials_roles (credential_id, role_id) VALUES (4, 3); -- employee2 -> EMPLOYEE
-INSERT INTO credentials_roles (credential_id, role_id) VALUES (5, 3); -- employee3 -> EMPLOYEE
+-- 8) Products (with working images)
+-- Note: img_URL column name (exact case/underscore)
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity) VALUES
+ ('Smartphone X', 'Pantalla 6.1", 128GB, cámara dual',          1200.00, 1200.00, 'SMX-128-BLK', '7790000000011', 'TechBrand', 'https://placehold.co/600x400?text=Smartphone+X', 15.00),
+ ('Laptop Pro',   '14" i7, 16GB RAM, 512GB SSD',                2200.00, 2200.00, 'LTP-14-I7',   '7790000000028', 'TechBrand', 'https://placehold.co/600x400?text=Laptop+Pro',   8.00),
+ ('Camiseta',     'Camiseta de algodón 100%',                     25.00,   25.00,  'TSH-ALG-BLA', '7790000000035', 'TextilCo',  'https://placehold.co/600x400?text=Camiseta',     120.00),
+ ('Jeans',        'Jeans corte recto, denim azul',                55.00,   55.00,  'JEAN-STD-BLU','7790000000042', 'TextilCo',  'https://placehold.co/600x400?text=Jeans',        60.00),
+ ('Arroz 1kg',    'Arroz premium largo fino 1kg',                 5.50,    5.50,   'ARZ-1KG',     '7790000000059', 'FoodCorp',  'https://placehold.co/600x400?text=Arroz+1kg',    300.00),
+ ('Aceite 900ml', 'Aceite de oliva extra virgen 900ml',          12.00,   12.00,  'ACE-900-OLV', '7790000000066', 'FoodCorp',  'https://placehold.co/600x400?text=Aceite',       180.00),
+ ('Sillón',       'Sillón reclinable tapizado',                  350.00,  350.00,  'SIL-REC',     '7790000000073', 'HomePlus',  'https://placehold.co/600x400?text=Sill%C3%B3n',  10.00),
+ ('Mesa Centro',  'Mesa de centro madera y vidrio',              180.00,  180.00,  'MSC-CTR',     '7790000000080', 'HomePlus',  'https://placehold.co/600x400?text=Mesa+Centro',  20.00),
+ ('Muñeca',       'Muñeca interactiva con accesorios',            35.00,   35.00,  'MUN-INT',     '7790000000097', 'ToyFun',    'https://placehold.co/600x400?text=Mu%C3%B1eca',  85.00),
+ ('Bloques',      'Set de bloques de construcción 100 piezas',    20.00,   20.00,  'BLQ-100',     '7790000000103', 'ToyFun',    'https://placehold.co/600x400?text=Bloques',      90.00),
+ ('Auriculares',  'Auriculares inalámbricos con estuche',         80.00,   80.00,  'EAR-BT',      '7790000000110', 'TechBrand', 'https://placehold.co/600x400?text=Auriculares',  40.00),
+ ('Monitor 24"',  'Monitor 24" FHD IPS',                        170.00,  170.00,  'MON-24FHD',   '7790000000127', 'TechBrand', 'https://placehold.co/600x400?text=Monitor+24',   25.00);
 
--- Inserción de datos en la tabla providers
-INSERT INTO providers (business_name, tax_id, tax_address, phone, email, contact_name, active)
-VALUES ('Electro SA', 'A12345678', 'Calle Electrónica 123', '1122334455', 'contacto@electrosa.com', 'Roberto Gómez', true);
-INSERT INTO providers (business_name, tax_id, tax_address, phone, email, contact_name, active)
-VALUES ('Textil Moda', 'B23456789', 'Av. Moda 456', '2233445566', 'ventas@textilmoda.com', 'Laura Sánchez', true);
-INSERT INTO providers (business_name, tax_id, tax_address, phone, email, contact_name, active)
-VALUES ('Alimentos Frescos', 'C34567890', 'Ruta 7 Km 5', '3344556677', 'pedidos@alimentosfrescos.com', 'Miguel Fernández', true);
-INSERT INTO providers (business_name, tax_id, tax_address, phone, email, contact_name, active)
-VALUES ('Hogar y Deco', 'D45678901', 'Calle Decoración 789', '4455667788', 'info@hogarydeco.com', 'Silvia Ramírez', true);
-INSERT INTO providers (business_name, tax_id, tax_address, phone, email, contact_name, active)
-VALUES ('Juguetes Divertidos', 'E56789012', 'Av. Juegos 101', '5566778899', 'ventas@juguetesdivertidos.com', 'Fernando Torres', true);
+-- 9) Product -> Category mapping
+-- Use names to resolve IDs to keep this robust
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c WHERE p.name='Smartphone X' AND c.name='Electrónicos';
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c WHERE p.name='Laptop Pro'   AND c.name='Electrónicos';
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c WHERE p.name='Auriculares'  AND c.name='Electrónicos';
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c WHERE p.name='Monitor 24"' AND c.name='Electrónicos';
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c WHERE p.name='Camiseta'     AND c.name='Ropa';
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c WHERE p.name='Jeans'        AND c.name='Ropa';
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c WHERE p.name='Arroz 1kg'    AND c.name='Alimentos';
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c WHERE p.name='Aceite 900ml' AND c.name='Alimentos';
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c WHERE p.name='Sillón'       AND c.name='Hogar';
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c WHERE p.name='Mesa Centro'  AND c.name='Hogar';
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c WHERE p.name='Muñeca'       AND c.name='Juguetes';
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c WHERE p.name='Bloques'      AND c.name='Juguetes';
 
--- Inserción de datos en la tabla clients
-INSERT INTO clients (client_first_name, client_last_name, client_dni, client_email, client_phone, client_date_of_registration)
-VALUES ('Pablo', 'García', '11223344', 'pablo@email.com', '1122334455', CURRENT_DATE);
-INSERT INTO clients (client_first_name, client_last_name, client_dni, client_email, client_phone, client_date_of_registration)
-VALUES ('Lucía', 'Fernández', '22334455', 'lucia@email.com', '2233445566', CURRENT_DATE);
-INSERT INTO clients (client_first_name, client_last_name, client_dni, client_email, client_phone, client_date_of_registration)
-VALUES ('Martín', 'López', '33445566', 'martin@email.com', '3344556677', CURRENT_DATE);
-INSERT INTO clients (client_first_name, client_last_name, client_dni, client_email, client_phone, client_date_of_registration)
-VALUES ('Valentina', 'Rodríguez', '44556677', 'valentina@email.com', '4455667788', CURRENT_DATE);
-INSERT INTO clients (client_first_name, client_last_name, client_dni, client_email, client_phone, client_date_of_registration)
-VALUES ('Santiago', 'Martínez', '55667788', 'santiago@email.com', '5566778899', CURRENT_DATE);
+-- 10) Product -> Provider mapping
+INSERT INTO products_providers (product_id, provider_id)
+SELECT p.id, v.id FROM products p, providers v WHERE p.name IN ('Smartphone X','Laptop Pro','Auriculares','Monitor 24"') AND v.business_name='Electro SA';
+INSERT INTO products_providers (product_id, provider_id)
+SELECT p.id, v.id FROM products p, providers v WHERE p.name IN ('Camiseta','Jeans') AND v.business_name='Textil Moda SRL';
+INSERT INTO products_providers (product_id, provider_id)
+SELECT p.id, v.id FROM products p, providers v WHERE p.name IN ('Arroz 1kg','Aceite 900ml') AND v.business_name='Alimentos Frescos';
+INSERT INTO products_providers (product_id, provider_id)
+SELECT p.id, v.id FROM products p, providers v WHERE p.name IN ('Sillón','Mesa Centro') AND v.business_name='Hogar y Deco SA';
+INSERT INTO products_providers (product_id, provider_id)
+SELECT p.id, v.id FROM products p, providers v WHERE p.name IN ('Muñeca','Bloques') AND v.business_name='Juguetes Divertidos SA';
 
--- Inserción de datos en la tabla products
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand)
-VALUES ('Smartphone X', 'Smartphone de última generación', 1200.00, 1000.00, 'SP001', 'SP001BAR', 'TechBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand)
-VALUES ('Laptop Pro', 'Laptop para profesionales', 2500.00, 2200.00, 'LP002', 'LP002BAR', 'TechBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand)
-VALUES ('Camiseta Casual', 'Camiseta de algodón', 25.00, 15.00, 'CC003', 'CC003BAR', 'FashionBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand)
-VALUES ('Pantalón Jeans', 'Pantalón de mezclilla', 45.00, 30.00, 'PJ004', 'PJ004BAR', 'FashionBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand)
-VALUES ('Arroz Premium', 'Arroz de grano largo', 5.00, 3.50, 'AP005', 'AP005BAR', 'FoodBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand)
-VALUES ('Aceite de Oliva', 'Aceite de oliva extra virgen', 8.00, 6.00, 'AO006', 'AO006BAR', 'FoodBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand)
-VALUES ('Sillón Reclinable', 'Sillón reclinable de cuero', 350.00, 280.00, 'SR007', 'SR007BAR', 'HomeBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand)
-VALUES ('Mesa de Centro', 'Mesa de centro de madera', 120.00, 90.00, 'MC008', 'MC008BAR', 'HomeBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand)
-VALUES ('Muñeca Interactiva', 'Muñeca con funciones interactivas', 35.00, 25.00, 'MI009', 'MI009BAR', 'ToyBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand)
-VALUES ('Set de Bloques', 'Set de bloques de construcción', 20.00, 15.00, 'SB010', 'SB010BAR', 'ToyBrand');
+-- 11) Credentials (users able to log in)
+-- Password hash for 'password123' (bcrypt)
+INSERT INTO credentials (username, email, password, user_id) VALUES
+ ('admin',   'admin@stockify.com',   '$2a$10$rPiEAgQNIT1TCoKi.Iy9wuaZMhDU9Ocs9XTTaP.IS6xCxfGtJ9ZYy', (SELECT c.client_id FROM clients c WHERE c.client_dni='12345678')),
+ ('manager', 'manager@stockify.com', '$2a$10$rPiEAgQNIT1TCoKi.Iy9wuaZMhDU9Ocs9XTTaP.IS6xCxfGtJ9ZYy', (SELECT c.client_id FROM clients c WHERE c.client_dni='23456789')),
+ ('employee','employee@stockify.com','$2a$10$rPiEAgQNIT1TCoKi.Iy9wuaZMhDU9Ocs9XTTaP.IS6xCxfGtJ9ZYy', (SELECT c.client_id FROM clients c WHERE c.client_dni='34567890'));
 
--- Inserción de datos en la tabla products_categories
-INSERT INTO products_categories (product_id, category_id) VALUES (1, 1); -- Smartphone X -> Electrónicos
-INSERT INTO products_categories (product_id, category_id) VALUES (2, 1); -- Laptop Pro -> Electrónicos
-INSERT INTO products_categories (product_id, category_id) VALUES (3, 2); -- Camiseta Casual -> Ropa
-INSERT INTO products_categories (product_id, category_id) VALUES (4, 2); -- Pantalón Jeans -> Ropa
-INSERT INTO products_categories (product_id, category_id) VALUES (5, 3); -- Arroz Premium -> Alimentos
-INSERT INTO products_categories (product_id, category_id) VALUES (6, 3); -- Aceite de Oliva -> Alimentos
-INSERT INTO products_categories (product_id, category_id) VALUES (7, 4); -- Sillón Reclinable -> Hogar
-INSERT INTO products_categories (product_id, category_id) VALUES (8, 4); -- Mesa de Centro -> Hogar
-INSERT INTO products_categories (product_id, category_id) VALUES (9, 5); -- Muñeca Interactiva -> Juguetes
-INSERT INTO products_categories (product_id, category_id) VALUES (10, 5); -- Set de Bloques -> Juguetes
+-- 12) Credentials -> Roles
+INSERT INTO credentials_roles (credential_id, role_id)
+SELECT cr.id, r.id FROM credentials cr, roles r WHERE cr.email='admin@stockify.com' AND r.name='ADMIN';
+INSERT INTO credentials_roles (credential_id, role_id)
+SELECT cr.id, r.id FROM credentials cr, roles r WHERE cr.email='manager@stockify.com' AND r.name='MANAGER';
+INSERT INTO credentials_roles (credential_id, role_id)
+SELECT cr.id, r.id FROM credentials cr, roles r WHERE cr.email='employee@stockify.com' AND r.name='EMPLOYEE';
 
--- Inserción de datos en la tabla products_providers
-INSERT INTO products_providers (product_id, provider_id) VALUES (1, 1); -- Smartphone X -> Electro SA
-INSERT INTO products_providers (product_id, provider_id) VALUES (2, 1); -- Laptop Pro -> Electro SA
-INSERT INTO products_providers (product_id, provider_id) VALUES (3, 2); -- Camiseta Casual -> Textil Moda
-INSERT INTO products_providers (product_id, provider_id) VALUES (4, 2); -- Pantalón Jeans -> Textil Moda
-INSERT INTO products_providers (product_id, provider_id) VALUES (5, 3); -- Arroz Premium -> Alimentos Frescos
-INSERT INTO products_providers (product_id, provider_id) VALUES (6, 3); -- Aceite de Oliva -> Alimentos Frescos
-INSERT INTO products_providers (product_id, provider_id) VALUES (7, 4); -- Sillón Reclinable -> Hogar y Deco
-INSERT INTO products_providers (product_id, provider_id) VALUES (8, 4); -- Mesa de Centro -> Hogar y Deco
-INSERT INTO products_providers (product_id, provider_id) VALUES (9, 5); -- Muñeca Interactiva -> Juguetes Divertidos
-INSERT INTO products_providers (product_id, provider_id) VALUES (10, 5); -- Set de Bloques -> Juguetes Divertidos
-
--- Inserción de datos en la tabla stock
-INSERT INTO stock (store_id, product_id, quantity, low_stock_alert_sent) VALUES (1, 1, 50.0, false);
-INSERT INTO stock (store_id, product_id, quantity, low_stock_alert_sent) VALUES (1, 2, 30.0, false);
-INSERT INTO stock (store_id, product_id, quantity, low_stock_alert_sent) VALUES (1, 3, 100.0, false);
-INSERT INTO stock (store_id, product_id, quantity, low_stock_alert_sent) VALUES (1, 4, 80.0, false);
-INSERT INTO stock (store_id, product_id, quantity, low_stock_alert_sent) VALUES (1, 5, 200.0, false);
-INSERT INTO stock (store_id, product_id, quantity, low_stock_alert_sent) VALUES (2, 6, 150.0, false);
-INSERT INTO stock (store_id, product_id, quantity, low_stock_alert_sent) VALUES (2, 7, 20.0, false);
-INSERT INTO stock (store_id, product_id, quantity, low_stock_alert_sent) VALUES (2, 8, 25.0, false);
-INSERT INTO stock (store_id, product_id, quantity, low_stock_alert_sent) VALUES (3, 9, 40.0, false);
-INSERT INTO stock (store_id, product_id, quantity, low_stock_alert_sent) VALUES (3, 10, 60.0, false);
-
--- Inserción de datos en la tabla pos
-INSERT INTO pos (current_amount, status, employee_id, store_id) VALUES (1000.00, 'OFFLINE', '1', 1);
-INSERT INTO pos (current_amount, status, employee_id, store_id) VALUES (1500.00, 'OFFLINE', '2', 2);
-INSERT INTO pos (current_amount, status, employee_id, store_id) VALUES (2000.00, 'OFFLINE', '3', 3);
-
--- Inserción de datos en la tabla shifts
-INSERT INTO shifts (shift_day, entry_time, exit_time) VALUES (CURRENT_DATE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO shifts (shift_day, entry_time, exit_time) VALUES (CURRENT_DATE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO shifts (shift_day, entry_time, exit_time) VALUES (CURRENT_DATE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
--- Inserción de datos en la tabla shift_employee
-INSERT INTO shift_employee (shift_id, employee_id) VALUES (1, 1);
-INSERT INTO shift_employee (shift_id, employee_id) VALUES (2, 2);
-INSERT INTO shift_employee (shift_id, employee_id) VALUES (3, 3);
-
--- Inserción de datos en la tabla time_log
--- Commented out due to schema issues, uncomment and adjust as needed
--- INSERT INTO time_log (date, clock_in_time, clock_out_time, employee_id, store_id)
--- VALUES (CURRENT_DATE, '08:00:00', '16:00:00', '12345678', 1);
--- INSERT INTO time_log (date, clock_in_time, clock_out_time, employee_id, store_id)
--- VALUES (CURRENT_DATE, '09:00:00', '17:00:00', '23456789', 2);
--- INSERT INTO time_log (date, clock_in_time, clock_out_time, employee_id, store_id)
--- VALUES (CURRENT_DATE, '10:00:00', '18:00:00', '34567890', 3);
-
--- Inserción de datos en la tabla session_pos
-INSERT INTO session_pos (opening_time, close_time, opening_amount, close_amount, cash_difference, expected_amount, employee_id, pos_id)
-VALUES (CURRENT_TIMESTAMP, NULL, 1000.00, NULL, NULL, NULL, 1, 1);
-INSERT INTO session_pos (opening_time, close_time, opening_amount, close_amount, cash_difference, expected_amount, employee_id, pos_id)
-VALUES (CURRENT_TIMESTAMP, NULL, 1500.00, NULL, NULL, NULL, 2, 2);
-INSERT INTO session_pos (opening_time, close_time, opening_amount, close_amount, cash_difference, expected_amount, employee_id, pos_id)
-VALUES (CURRENT_TIMESTAMP, NULL, 2000.00, NULL, NULL, NULL, 3, 3);
-
--- Inserción de datos en la tabla transactions (ejemplos de ventas)
-INSERT INTO transactions (total, date_time, payment_method, description, type, session_pos_id, store_id)
-VALUES (1225.00, CURRENT_TIMESTAMP, 'CASH', 'Venta de smartphone', 'SALE', 1, 1);
-INSERT INTO transactions (total, date_time, payment_method, description, type, session_pos_id, store_id)
-VALUES (70.00, CURRENT_TIMESTAMP, 'CREDIT', 'Venta de ropa', 'SALE', 2, 2);
-INSERT INTO transactions (total, date_time, payment_method, description, type, session_pos_id, store_id)
-VALUES (55.00, CURRENT_TIMESTAMP, 'DEBIT', 'Venta de juguetes', 'SALE', 3, 3);
-
--- Inserción de datos en la tabla sales
-INSERT INTO sales (transaction_id, client_id) VALUES (1, 1);
-INSERT INTO sales (transaction_id, client_id) VALUES (2, 2);
-INSERT INTO sales (transaction_id, client_id) VALUES (3, 3);
-
--- Inserción de datos en la tabla details_transactions
-INSERT INTO details_transactions (product_id, quantity, subtotal, transaction_id) VALUES (1, 1.0, 1200.00, 1);
-INSERT INTO details_transactions (product_id, quantity, subtotal, transaction_id) VALUES (5, 5.0, 25.00, 1);
-INSERT INTO details_transactions (product_id, quantity, subtotal, transaction_id) VALUES (3, 2.0, 50.00, 2);
-INSERT INTO details_transactions (product_id, quantity, subtotal, transaction_id) VALUES (4, 0.5, 20.00, 2);
-INSERT INTO details_transactions (product_id, quantity, subtotal, transaction_id) VALUES (9, 1.0, 35.00, 3);
-INSERT INTO details_transactions (product_id, quantity, subtotal, transaction_id) VALUES (10, 1.0, 20.00, 3);
-
--- Inserción de datos en la tabla transactions (ejemplos de compras)
-INSERT INTO transactions (total, date_time, payment_method, description, type, session_pos_id, store_id)
-VALUES (10000.00, CURRENT_TIMESTAMP, 'BANK_TRANSFER', 'Compra de electrónicos', 'PURCHASE', 1, 1);
-INSERT INTO transactions (total, date_time, payment_method, description, type, session_pos_id, store_id)
-VALUES (5000.00, CURRENT_TIMESTAMP, 'BANK_TRANSFER', 'Compra de ropa', 'PURCHASE', 2, 2);
-INSERT INTO transactions (total, date_time, payment_method, description, type, session_pos_id, store_id)
-VALUES (3000.00, CURRENT_TIMESTAMP, 'BANK_TRANSFER', 'Compra de juguetes', 'PURCHASE', 3, 3);
-
--- Inserción de datos en la tabla purchases
-INSERT INTO purchases (transaction_id, provider_id) VALUES (4, 1);
-INSERT INTO purchases (transaction_id, provider_id) VALUES (5, 2);
-INSERT INTO purchases (transaction_id, provider_id) VALUES (6, 5);
-
--- Inserción de datos en la tabla details_transactions para las compras
-INSERT INTO details_transactions (product_id, quantity, subtotal, transaction_id) VALUES (1, 10.0, 10000.00, 4);
-INSERT INTO details_transactions (product_id, quantity, subtotal, transaction_id) VALUES (3, 200.0, 3000.00, 5);
-INSERT INTO details_transactions (product_id, quantity, subtotal, transaction_id) VALUES (4, 100.0, 2000.00, 5);
-INSERT INTO details_transactions (product_id, quantity, subtotal, transaction_id) VALUES (9, 50.0, 1250.00, 6);
-INSERT INTO details_transactions (product_id, quantity, subtotal, transaction_id) VALUES (10, 100.0, 1750.00, 6);
+-- Optional example transactions (uncomment if you want demo data)
+-- INSERT INTO transactions (total, date_time, payment_method, description, type, store_id)
+-- VALUES (1225.00, NOW(), 'CASH', 'Venta inicial', 'SALE', (SELECT id FROM stores WHERE store_name='Tienda Central'));
+-- INSERT INTO sales (transaction_id, client_id)
+-- VALUES ((SELECT id FROM transactions ORDER BY id DESC LIMIT 1), (SELECT client_id FROM clients WHERE client_dni='12345678'));

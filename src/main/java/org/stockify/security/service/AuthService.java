@@ -220,10 +220,9 @@ public class AuthService {
                             input.password()
                     )
             );
-            CredentialsEntity credentials = credentialsRepository.findByEmail(input.email())
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + input.email()));
 
-            return credentials;
+            return credentialsRepository.findByEmail(input.email())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + input.email()));
         } catch (BadCredentialsException e) {
             throw new AuthenticationException("Invalid email or password", e);
         } catch (Exception e) {

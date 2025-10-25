@@ -101,12 +101,21 @@ public class AuthController {
         // Sanitize potentially sensitive fields for login payload
         profile.setDni(null);
         profile.setPhone(null);
-        java.util.Set<String> roles = cred.getRoles().stream().map(r -> r.getName()).collect(java.util.stream.Collectors.toSet());
+        java.util.Set<String> permits = cred.getRoles().stream()
+                .filter(java.util.Objects::nonNull)
+                .map(org.stockify.security.model.entity.RoleEntity::getPermits)
+                .filter(java.util.Objects::nonNull)
+                .flatMap(java.util.Set::stream)
+                .filter(java.util.Objects::nonNull)
+                .map(p -> p.getPermit())
+                .filter(java.util.Objects::nonNull)
+                .map(Enum::name)
+                .collect(java.util.stream.Collectors.toCollection(java.util.TreeSet::new));
         return ResponseEntity.ok(
                 LoginResponse.builder()
                         .token(token)
                         .user(profile)
-                        .roles(roles)
+                        .permits(permits)
                         .build()
         );
     }
@@ -117,15 +126,25 @@ public class AuthController {
         description = "Registers a new user profile and credentials in one step and assigns default CLIENT role"
     )
     public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
+        System.out.println(request);
         org.stockify.security.model.entity.CredentialsEntity saved = authService.register(request);
         String token = jwtService.generateToken(saved);
         UserResponse profile = userMapper.toDto(saved.getUser());
-        java.util.Set<String> roles = saved.getRoles().stream().map(r -> r.getName()).collect(java.util.stream.Collectors.toSet());
+        java.util.Set<String> permits = saved.getRoles().stream()
+                .filter(java.util.Objects::nonNull)
+                .map(org.stockify.security.model.entity.RoleEntity::getPermits)
+                .filter(java.util.Objects::nonNull)
+                .flatMap(java.util.Set::stream)
+                .filter(java.util.Objects::nonNull)
+                .map(p -> p.getPermit())
+                .filter(java.util.Objects::nonNull)
+                .map(Enum::name)
+                .collect(java.util.stream.Collectors.toCollection(java.util.TreeSet::new));
         return ResponseEntity.status(201).body(
                 RegisterResponse.builder()
                         .token(token)
                         .user(profile)
-                        .roles(roles)
+                        .permits(permits)
                         .build()
         );
     }

@@ -65,7 +65,34 @@ public class JwtService {
      */
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", userDetails.getAuthorities());
+
+        // Build permits claim: uppercase enum names, ordered, no duplicates
+        java.util.Set<String> permits = new java.util.TreeSet<>();
+
+        if (userDetails instanceof org.stockify.security.model.entity.CredentialsEntity cred) {
+            permits.addAll(
+                    cred.getRoles().stream()
+                            .filter(java.util.Objects::nonNull)
+                            .map(org.stockify.security.model.entity.RoleEntity::getPermits)
+                            .filter(java.util.Objects::nonNull)
+                            .flatMap(java.util.Set::stream)
+                            .filter(java.util.Objects::nonNull)
+                            .map(org.stockify.security.model.entity.PermitEntity::getPermit)
+                            .filter(java.util.Objects::nonNull)
+                            .map(Enum::name)
+                            .collect(java.util.stream.Collectors.toSet())
+            );
+        } else {
+            // Fallback: derive from GrantedAuthorities excluding ROLE_*
+            for (org.springframework.security.core.GrantedAuthority a : userDetails.getAuthorities()) {
+                String auth = a.getAuthority();
+                if (auth != null && !auth.startsWith("ROLE_")) {
+                    permits.add(auth);
+                }
+            }
+        }
+
+        claims.put("permits", permits);
         return buildToken(claims, userDetails, jwtExpiration);
     }
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {

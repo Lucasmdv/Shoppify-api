@@ -8,6 +8,7 @@ import org.stockify.dto.request.user.UserRequest;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 @Builder
 @Schema(name = "RegisterRequest", description = "Composite request to register user profile and credentials together")
 public class RegisterRequest {

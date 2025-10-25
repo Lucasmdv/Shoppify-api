@@ -11,7 +11,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Schema(name = "RegisterResponse", description = "Response with JWT token, user profile and roles")
+@Schema(name = "RegisterResponse", description = "Response with JWT token, user profile and permits")
 public class RegisterResponse {
     @Schema(description = "JWT token for authenticated requests")
     private String token;
@@ -19,7 +19,7 @@ public class RegisterResponse {
     @Schema(description = "Created user profile")
     private UserResponse user;
 
-    @Schema(description = "Assigned role names")
-    private Set<String> roles;
+    @Schema(description = "Assigned permits (uppercase enum names, ordered, without duplicates)")
+    private Set<String> permits;
 }
 
