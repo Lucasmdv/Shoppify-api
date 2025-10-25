@@ -34,7 +34,6 @@ public interface ProductMapper {
      */
     default void updateEntityFromRequest(ProductRequest dto, @MappingTarget ProductEntity entity) {
         updateFromRequest(dto, entity);
-        entity.setCategories(namesToEntities(dto.categories()));
         if (dto.stock() != null) {
             entity.setStock(normalizeStock(dto.stock()));
         }
@@ -60,7 +59,6 @@ public interface ProductMapper {
     @Mapping(source = "categories", target = "categories", qualifiedByName = "namesToEntities")
     void patchEntityFromRequest(ProductRequest dto, @MappingTarget ProductEntity entity);
 
-    // ✅ Todos estos devuelven colecciones MUTABLES (ya no Set.of())
     @Named("entitiesToNames")
     default Set<String> entitiesToNames(Set<CategoryEntity> categories) {
         if (categories == null || categories.isEmpty()) return new LinkedHashSet<>();

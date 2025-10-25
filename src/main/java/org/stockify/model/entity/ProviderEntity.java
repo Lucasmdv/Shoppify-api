@@ -56,5 +56,4 @@ public class ProviderEntity {
 
     @OneToMany(mappedBy = "provider", fetch = FetchType.LAZY)
     private Set<PurchaseEntity> purchaseList;
-
 }

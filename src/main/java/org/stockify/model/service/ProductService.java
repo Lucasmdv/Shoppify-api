@@ -76,6 +76,7 @@ public class ProductService {
      */
     public ProductResponse save(ProductRequest request) throws DuplicatedUniqueConstraintException {
         ProductEntity product = productMapper.toEntity(request);
+        product.getCategories().clear();
 
         for (String categoryName : request.categories()) {
             CategoryEntity category = categoryRepository.findByName(categoryName)
@@ -84,10 +85,8 @@ public class ProductService {
                         newCategory.setName(categoryName);
                         return categoryRepository.save(newCategory);
                     });
-
             product.getCategories().add(category);
         }
-
         product = productRepository.save(product);
         return productMapper.toResponse(product);
     }
@@ -185,6 +184,18 @@ public class ProductService {
     public ProductResponse update(Long id, ProductRequest request) {
         ProductEntity product = getProductById(id);
         productMapper.updateEntityFromRequest(request, product);
+
+        product.getCategories().clear();
+        for (String categoryName : request.categories()) {
+            CategoryEntity category = categoryRepository.findByName(categoryName)
+                    .orElseGet(() -> {
+                        CategoryEntity newCategory = new CategoryEntity();
+                        newCategory.setName(categoryName);
+                        return categoryRepository.save(newCategory);
+                    });
+            product.getCategories().add(category);
+        }
+
         return productMapper.toResponse(productRepository.save(product));
     }
 
@@ -199,6 +210,18 @@ public class ProductService {
     public ProductResponse patch(Long id, ProductRequest request) {
         ProductEntity product = getProductById(id);
         productMapper.patchEntityFromRequest(request, product);
+
+        product.getCategories().clear();
+        for (String categoryName : request.categories()) {
+            CategoryEntity category = categoryRepository.findByName(categoryName)
+                    .orElseGet(() -> {
+                        CategoryEntity newCategory = new CategoryEntity();
+                        newCategory.setName(categoryName);
+                        return categoryRepository.save(newCategory);
+                    });
+            product.getCategories().add(category);
+        }
+
         return productMapper.toResponse(productRepository.save(product));
     }
 
