@@ -1,137 +1,160 @@
--- Stockify seed data aligned with current schema
--- DB: PostgreSQL | Entities: roles, permits, credentials, clients, stores, providers,
--- categories, products (+joins), transactions (optional)
+-- Idempotent seed for roles, permits, and mappings
+-- Target DB: PostgreSQL
 
--- 1) Permits (enum: READ, WRITE, DELETE, ADMIN, MANAGE_USERS, MANAGE_ROLES, GENERATE_REPORTS)
--- Ensure both code and permit string are provided (code = lowercase of enum)
-INSERT INTO permits (code, permit) VALUES
- ('read', 'READ'),
- ('write', 'WRITE'),
- ('delete', 'DELETE'),
- ('admin', 'ADMIN'),
- ('manage_users', 'MANAGE_USERS'),
- ('manage_roles', 'MANAGE_ROLES'),
- ('generate_reports', 'GENERATE_REPORTS');
+-- Permits (enum names in uppercase; code is lowercase and unique)
+INSERT INTO permits (code, permit)
+SELECT 'read', 'READ'
+WHERE NOT EXISTS (SELECT 1 FROM permits WHERE code = 'read');
 
--- 2) Roles
-INSERT INTO roles (name, description) VALUES
- ('ADMIN', 'System administrators with full access'),
- ('MANAGER', 'Store managers with reporting access'),
- ('EMPLOYEE', 'Employees with read access');
+INSERT INTO permits (code, permit)
+SELECT 'write', 'WRITE'
+WHERE NOT EXISTS (SELECT 1 FROM permits WHERE code = 'write');
 
--- 3) Role -> Permit mapping
--- ADMIN: all permits
+INSERT INTO permits (code, permit)
+SELECT 'delete', 'DELETE'
+WHERE NOT EXISTS (SELECT 1 FROM permits WHERE code = 'delete');
+
+INSERT INTO permits (code, permit)
+SELECT 'admin', 'ADMIN'
+WHERE NOT EXISTS (SELECT 1 FROM permits WHERE code = 'admin');
+
+INSERT INTO permits (code, permit)
+SELECT 'manage_users', 'MANAGE_USERS'
+WHERE NOT EXISTS (SELECT 1 FROM permits WHERE code = 'manage_users');
+
+INSERT INTO permits (code, permit)
+SELECT 'manage_roles', 'MANAGE_ROLES'
+WHERE NOT EXISTS (SELECT 1 FROM permits WHERE code = 'manage_roles');
+
+INSERT INTO permits (code, permit)
+SELECT 'generate_reports', 'GENERATE_REPORTS'
+WHERE NOT EXISTS (SELECT 1 FROM permits WHERE code = 'generate_reports');
+
+-- Roles (name is unique)
+INSERT INTO roles (name, description)
+SELECT 'ADMIN', 'Administrator role with full permissions'
+WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'ADMIN');
+
+INSERT INTO roles (name, description)
+SELECT 'MANAGER', 'Manager role with write and reporting permissions'
+WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'MANAGER');
+
+INSERT INTO roles (name, description)
+SELECT 'EMPLOYEE', 'Employee role with read permissions'
+WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'EMPLOYEE');
+
+INSERT INTO roles (name, description)
+SELECT 'CLIENT', 'Default client role'
+WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'CLIENT');
+
+-- Role to Permit mappings (avoid duplicates via NOT EXISTS)
+-- ADMIN: READ, WRITE, DELETE, ADMIN, MANAGE_USERS, MANAGE_ROLES, GENERATE_REPORTS
 INSERT INTO role_permits (role_id, permit_id)
-SELECT r.id, p.id FROM roles r, permits p WHERE r.name='ADMIN' AND p.permit IN ('READ','WRITE','DELETE','ADMIN','MANAGE_USERS','MANAGE_ROLES','GENERATE_REPORTS');
+SELECT r.id, p.id
+FROM roles r, permits p
+WHERE r.name = 'ADMIN' AND p.permit IN ('READ','WRITE','DELETE','ADMIN','MANAGE_USERS','MANAGE_ROLES','GENERATE_REPORTS')
+AND NOT EXISTS (
+    SELECT 1 FROM role_permits rp WHERE rp.role_id = r.id AND rp.permit_id = p.id
+);
 
 -- MANAGER: READ, WRITE, GENERATE_REPORTS
 INSERT INTO role_permits (role_id, permit_id)
-SELECT r.id, p.id FROM roles r, permits p WHERE r.name='MANAGER' AND p.permit IN ('READ','WRITE','GENERATE_REPORTS');
+SELECT r.id, p.id
+FROM roles r, permits p
+WHERE r.name = 'MANAGER' AND p.permit IN ('READ','WRITE','GENERATE_REPORTS')
+AND NOT EXISTS (
+    SELECT 1 FROM role_permits rp WHERE rp.role_id = r.id AND rp.permit_id = p.id
+);
 
 -- EMPLOYEE: READ
 INSERT INTO role_permits (role_id, permit_id)
-SELECT r.id, p.id FROM roles r, permits p WHERE r.name='EMPLOYEE' AND p.permit IN ('READ');
+SELECT r.id, p.id
+FROM roles r, permits p
+WHERE r.name = 'EMPLOYEE' AND p.permit IN ('READ')
+AND NOT EXISTS (
+    SELECT 1 FROM role_permits rp WHERE rp.role_id = r.id AND rp.permit_id = p.id
+);
 
--- 4) Stores
-INSERT INTO stores (store_name, address, city) VALUES
- ('Tienda Central', 'Av. Principal 123', 'Buenos Aires'),
- ('Sucursal Norte', 'Calle Norte 456', 'Córdoba');
+-- CLIENT: READ
+INSERT INTO role_permits (role_id, permit_id)
+SELECT r.id, p.id
+FROM roles r, permits p
+WHERE r.name = 'CLIENT' AND p.permit IN ('READ')
+AND NOT EXISTS (
+    SELECT 1 FROM role_permits rp WHERE rp.role_id = r.id AND rp.permit_id = p.id
+);
 
--- 5) Clients (users)
--- Using working avatar URLs
-INSERT INTO clients (client_first_name, client_last_name, client_dni, client_phone, client_img) VALUES
- ('Juan',  'Pérez',   '12345678', '+54 11 3000-0001', 'https://placehold.co/300x300?text=Juan+P%C3%A9rez'),
- ('María', 'González','23456789', '+54 11 3000-0002', 'https://placehold.co/300x300?text=Mar%C3%ADa+Gonz%C3%A1lez'),
- ('Ana',   'Martínez','34567890', '+54 11 3000-0003', 'https://placehold.co/300x300?text=Ana+Mart%C3%ADnez');
+-- Ensure singleton store (ID=1)
+INSERT INTO stores (id, store_name, address, city)
+SELECT 1, '', '', ''
+WHERE NOT EXISTS (SELECT 1 FROM stores WHERE id = 1);
 
--- 6) Providers
-INSERT INTO providers (business_name, tax_id, tax_address, phone, email, contact_name, active) VALUES
- ('Electro SA',        '30-12345678-9', 'Av. Corrientes 1000, CABA', '+54 11 4000-1000', 'contacto@electrosa.com',        'Sergio López',   true),
- ('Textil Moda SRL',   '30-23456789-0', 'Calle San Martín 500, CBA', '+54 351 400-2000', 'ventas@textilmoda.com',         'Laura Pérez',    true),
- ('Alimentos Frescos','30-34567890-1', 'Av. Colon 1500, CBA',       '+54 351 400-3000', 'info@alimentosfrescos.com',     'Marcos Díaz',    true),
- ('Hogar y Deco SA',  '30-45678901-2', 'Bv. Oroño 800, Rosario',    '+54 341 400-4000', 'hola@hogarydeco.com',           'Sofía Romero',   true),
- ('Juguetes Divertidos SA','30-56789012-3','Av. Santa Fe 2000, CABA','+54 11 4000-5000','ventas@juguetesdivertidos.com', 'Pablo Fernández',true);
+-- Seed home carousel for store 1 (idempotent per item)
+INSERT INTO store_home_carousel (store_id, url, title, href)
+SELECT 1, 'https://picsum.photos/id/1011/1200/400', 'Welcome to Shoppify', '/'
+WHERE NOT EXISTS (
+    SELECT 1 FROM store_home_carousel WHERE store_id = 1 AND url = 'https://picsum.photos/id/1011/1200/400'
+);
 
--- 7) Categories (with working images)
-INSERT INTO categories (name, img_url) VALUES
- ('Electrónicos', 'https://placehold.co/600x400?text=Electr%C3%B3nicos'),
- ('Ropa',         'https://placehold.co/600x400?text=Ropa'),
- ('Alimentos',    'https://placehold.co/600x400?text=Alimentos'),
- ('Hogar',        'https://placehold.co/600x400?text=Hogar'),
- ('Juguetes',     'https://placehold.co/600x400?text=Juguetes');
+INSERT INTO store_home_carousel (store_id, url, title, href)
+SELECT 1, 'https://picsum.photos/id/1015/1200/400', 'Big Sale', '/sale'
+WHERE NOT EXISTS (
+    SELECT 1 FROM store_home_carousel WHERE store_id = 1 AND url = 'https://picsum.photos/id/1015/1200/400'
+);
 
--- 8) Products (with working images)
--- Note: img_URL column name (exact case/underscore)
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity) VALUES
- ('Smartphone X', 'Pantalla 6.1", 128GB, cámara dual',          1200.00, 1200.00, 'SMX-128-BLK', '7790000000011', 'TechBrand', 'https://placehold.co/600x400?text=Smartphone+X', 15.00),
- ('Laptop Pro',   '14" i7, 16GB RAM, 512GB SSD',                2200.00, 2200.00, 'LTP-14-I7',   '7790000000028', 'TechBrand', 'https://placehold.co/600x400?text=Laptop+Pro',   8.00),
- ('Camiseta',     'Camiseta de algodón 100%',                     25.00,   25.00,  'TSH-ALG-BLA', '7790000000035', 'TextilCo',  'https://placehold.co/600x400?text=Camiseta',     120.00),
- ('Jeans',        'Jeans corte recto, denim azul',                55.00,   55.00,  'JEAN-STD-BLU','7790000000042', 'TextilCo',  'https://placehold.co/600x400?text=Jeans',        60.00),
- ('Arroz 1kg',    'Arroz premium largo fino 1kg',                 5.50,    5.50,   'ARZ-1KG',     '7790000000059', 'FoodCorp',  'https://placehold.co/600x400?text=Arroz+1kg',    300.00),
- ('Aceite 900ml', 'Aceite de oliva extra virgen 900ml',          12.00,   12.00,  'ACE-900-OLV', '7790000000066', 'FoodCorp',  'https://placehold.co/600x400?text=Aceite',       180.00),
- ('Sillón',       'Sillón reclinable tapizado',                  350.00,  350.00,  'SIL-REC',     '7790000000073', 'HomePlus',  'https://placehold.co/600x400?text=Sill%C3%B3n',  10.00),
- ('Mesa Centro',  'Mesa de centro madera y vidrio',              180.00,  180.00,  'MSC-CTR',     '7790000000080', 'HomePlus',  'https://placehold.co/600x400?text=Mesa+Centro',  20.00),
- ('Muñeca',       'Muñeca interactiva con accesorios',            35.00,   35.00,  'MUN-INT',     '7790000000097', 'ToyFun',    'https://placehold.co/600x400?text=Mu%C3%B1eca',  85.00),
- ('Bloques',      'Set de bloques de construcción 100 piezas',    20.00,   20.00,  'BLQ-100',     '7790000000103', 'ToyFun',    'https://placehold.co/600x400?text=Bloques',      90.00),
- ('Auriculares',  'Auriculares inalámbricos con estuche',         80.00,   80.00,  'EAR-BT',      '7790000000110', 'TechBrand', 'https://placehold.co/600x400?text=Auriculares',  40.00),
- ('Monitor 24"',  'Monitor 24" FHD IPS',                        170.00,  170.00,  'MON-24FHD',   '7790000000127', 'TechBrand', 'https://placehold.co/600x400?text=Monitor+24',   25.00);
+INSERT INTO store_home_carousel (store_id, url, title, href)
+SELECT 1, 'https://picsum.photos/id/1025/1200/400', 'New Arrivals', '/new'
+WHERE NOT EXISTS (
+    SELECT 1 FROM store_home_carousel WHERE store_id = 1 AND url = 'https://picsum.photos/id/1025/1200/400'
+);
 
--- 9) Product -> Category mapping
--- Use names to resolve IDs to keep this robust
-INSERT INTO products_categories (product_id, category_id)
-SELECT p.id, c.id FROM products p, categories c WHERE p.name='Smartphone X' AND c.name='Electrónicos';
-INSERT INTO products_categories (product_id, category_id)
-SELECT p.id, c.id FROM products p, categories c WHERE p.name='Laptop Pro'   AND c.name='Electrónicos';
-INSERT INTO products_categories (product_id, category_id)
-SELECT p.id, c.id FROM products p, categories c WHERE p.name='Auriculares'  AND c.name='Electrónicos';
-INSERT INTO products_categories (product_id, category_id)
-SELECT p.id, c.id FROM products p, categories c WHERE p.name='Monitor 24"' AND c.name='Electrónicos';
-INSERT INTO products_categories (product_id, category_id)
-SELECT p.id, c.id FROM products p, categories c WHERE p.name='Camiseta'     AND c.name='Ropa';
-INSERT INTO products_categories (product_id, category_id)
-SELECT p.id, c.id FROM products p, categories c WHERE p.name='Jeans'        AND c.name='Ropa';
-INSERT INTO products_categories (product_id, category_id)
-SELECT p.id, c.id FROM products p, categories c WHERE p.name='Arroz 1kg'    AND c.name='Alimentos';
-INSERT INTO products_categories (product_id, category_id)
-SELECT p.id, c.id FROM products p, categories c WHERE p.name='Aceite 900ml' AND c.name='Alimentos';
-INSERT INTO products_categories (product_id, category_id)
-SELECT p.id, c.id FROM products p, categories c WHERE p.name='Sillón'       AND c.name='Hogar';
-INSERT INTO products_categories (product_id, category_id)
-SELECT p.id, c.id FROM products p, categories c WHERE p.name='Mesa Centro'  AND c.name='Hogar';
-INSERT INTO products_categories (product_id, category_id)
-SELECT p.id, c.id FROM products p, categories c WHERE p.name='Muñeca'       AND c.name='Juguetes';
-INSERT INTO products_categories (product_id, category_id)
-SELECT p.id, c.id FROM products p, categories c WHERE p.name='Bloques'      AND c.name='Juguetes';
+-- Seed categories
+INSERT INTO categories (name, img_url)
+SELECT 'Electronics', 'https://picsum.photos/id/180/400/300'
+WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Electronics');
 
--- 10) Product -> Provider mapping
-INSERT INTO products_providers (product_id, provider_id)
-SELECT p.id, v.id FROM products p, providers v WHERE p.name IN ('Smartphone X','Laptop Pro','Auriculares','Monitor 24"') AND v.business_name='Electro SA';
-INSERT INTO products_providers (product_id, provider_id)
-SELECT p.id, v.id FROM products p, providers v WHERE p.name IN ('Camiseta','Jeans') AND v.business_name='Textil Moda SRL';
-INSERT INTO products_providers (product_id, provider_id)
-SELECT p.id, v.id FROM products p, providers v WHERE p.name IN ('Arroz 1kg','Aceite 900ml') AND v.business_name='Alimentos Frescos';
-INSERT INTO products_providers (product_id, provider_id)
-SELECT p.id, v.id FROM products p, providers v WHERE p.name IN ('Sillón','Mesa Centro') AND v.business_name='Hogar y Deco SA';
-INSERT INTO products_providers (product_id, provider_id)
-SELECT p.id, v.id FROM products p, providers v WHERE p.name IN ('Muñeca','Bloques') AND v.business_name='Juguetes Divertidos SA';
+INSERT INTO categories (name, img_url)
+SELECT 'Clothing', 'https://picsum.photos/id/250/400/300'
+WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Clothing');
 
--- 11) Credentials (users able to log in)
--- Password hash for 'password123' (bcrypt)
-INSERT INTO credentials (username, email, password, user_id) VALUES
- ('admin',   'admin@stockify.com',   '$2a$10$rPiEAgQNIT1TCoKi.Iy9wuaZMhDU9Ocs9XTTaP.IS6xCxfGtJ9ZYy', (SELECT c.client_id FROM clients c WHERE c.client_dni='12345678')),
- ('manager', 'manager@stockify.com', '$2a$10$rPiEAgQNIT1TCoKi.Iy9wuaZMhDU9Ocs9XTTaP.IS6xCxfGtJ9ZYy', (SELECT c.client_id FROM clients c WHERE c.client_dni='23456789')),
- ('employee','employee@stockify.com','$2a$10$rPiEAgQNIT1TCoKi.Iy9wuaZMhDU9Ocs9XTTaP.IS6xCxfGtJ9ZYy', (SELECT c.client_id FROM clients c WHERE c.client_dni='34567890'));
+INSERT INTO categories (name, img_url)
+SELECT 'Home', 'https://picsum.photos/id/1080/400/300'
+WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Home');
 
--- 12) Credentials -> Roles
-INSERT INTO credentials_roles (credential_id, role_id)
-SELECT cr.id, r.id FROM credentials cr, roles r WHERE cr.email='admin@stockify.com' AND r.name='ADMIN';
-INSERT INTO credentials_roles (credential_id, role_id)
-SELECT cr.id, r.id FROM credentials cr, roles r WHERE cr.email='manager@stockify.com' AND r.name='MANAGER';
-INSERT INTO credentials_roles (credential_id, role_id)
-SELECT cr.id, r.id FROM credentials cr, roles r WHERE cr.email='employee@stockify.com' AND r.name='EMPLOYEE';
+-- Seed products
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity)
+SELECT 'Smartphone X', 'Latest generation smartphone', 1200.00, 1000.00, 'SP001', 'SP001BAR', 'TechBrand', 'https://picsum.photos/id/1/600/400', 10
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Smartphone X');
 
--- Optional example transactions (uncomment if you want demo data)
--- INSERT INTO transactions (total, date_time, payment_method, description, type, store_id)
--- VALUES (1225.00, NOW(), 'CASH', 'Venta inicial', 'SALE', (SELECT id FROM stores WHERE store_name='Tienda Central'));
--- INSERT INTO sales (transaction_id, client_id)
--- VALUES ((SELECT id FROM transactions ORDER BY id DESC LIMIT 1), (SELECT client_id FROM clients WHERE client_dni='12345678'));
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity)
+SELECT 'Laptop Pro', 'Professional laptop', 2500.00, 2200.00, 'LP002', 'LP002BAR', 'TechBrand', 'https://picsum.photos/id/2/600/400', 7
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Laptop Pro');
+
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity)
+SELECT 'Cotton T-Shirt', 'Soft cotton t-shirt', 25.00, 15.00, 'TS003', 'TS003BAR', 'FashionBrand', 'https://picsum.photos/id/3/600/400', 50
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Cotton T-Shirt');
+
+-- Link products to categories
+-- Smartphone X -> Electronics
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.name = 'Smartphone X' AND c.name = 'Electronics'
+AND NOT EXISTS (
+    SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id
+);
+
+-- Laptop Pro -> Electronics
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.name = 'Laptop Pro' AND c.name = 'Electronics'
+AND NOT EXISTS (
+    SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id
+);
+
+-- Cotton T-Shirt -> Clothing
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.name = 'Cotton T-Shirt' AND c.name = 'Clothing'
+AND NOT EXISTS (
+    SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id
+);

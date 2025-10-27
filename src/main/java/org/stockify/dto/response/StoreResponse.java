@@ -1,6 +1,8 @@
 package org.stockify.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+import org.stockify.dto.shared.HomeCarouselItem;
 
 @Schema(description = "Store information")
 public record StoreResponse(
@@ -14,5 +16,8 @@ public record StoreResponse(
         String address,
 
         @Schema(description = "City where the store is located", example = "New York")
-        String city
+        String city,
+
+        @Schema(description = "Home page carousel items")
+        List<HomeCarouselItem> homeCarousel
 ) {}

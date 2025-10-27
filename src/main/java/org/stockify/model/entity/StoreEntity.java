@@ -6,7 +6,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
@@ -34,9 +36,12 @@ public class StoreEntity {
     @Column(name = "city", nullable = false, length = 100)
     private String city;
 
-
     @OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
     private Set<TransactionEntity> transactions;
+
+    @ElementCollection
+    @CollectionTable(name = "store_home_carousel", joinColumns = @JoinColumn(name = "store_id"))
+    private List<CarouselItem> homeCarousel = new ArrayList<>();
 
 
 

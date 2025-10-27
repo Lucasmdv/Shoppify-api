@@ -3,6 +3,8 @@ package org.stockify.dto.request.store;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+import org.stockify.dto.shared.HomeCarouselItem;
 
 public record StoreRequest(
         @Schema(description = "Name of the store", example = "Main Street Store")
@@ -18,5 +20,8 @@ public record StoreRequest(
         @Schema(description = "City where the store is located", example = "New York")
         @NotBlank(message = "City is required")
         @Size(max = 100, message = "City must be less than 100 characters")
-        String city
+        String city,
+
+        @Schema(description = "Optional home carousel items (url, title)")
+        List<HomeCarouselItem> homeCarousel
 ) {}

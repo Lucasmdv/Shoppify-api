@@ -22,4 +22,8 @@ public interface StoreMapper {
     @Mapping(target = "id", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void patchEntityFromRequest(StoreRequest request, @MappingTarget StoreEntity entity);
+
+    // Mapping helpers for carousel items
+    org.stockify.model.entity.CarouselItem toEmbeddable(org.stockify.dto.shared.HomeCarouselItem dto);
+    org.stockify.dto.shared.HomeCarouselItem toDto(org.stockify.model.entity.CarouselItem emb);
 }
