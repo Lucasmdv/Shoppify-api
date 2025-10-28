@@ -13,6 +13,8 @@ public interface UserMapper {
     @Mapping(target = "dateOfRegistration", ignore = true)
     UserEntity toEntity(UserRequest clientRequest);
     @Mapping(target = "links", ignore = true)
+    @Mapping(target = "dateOfRegistration", source = "dateOfRegistration", dateFormat = "yyyy-MM-dd")
+    @Mapping(target = "email", source = "credentials.email")
     UserResponse toDto(UserEntity clientEntity);
 
     @Mapping(target = "sales", ignore = true)

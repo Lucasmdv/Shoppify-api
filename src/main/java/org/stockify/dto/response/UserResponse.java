@@ -30,4 +30,8 @@ public class UserResponse extends RepresentationModel<UserResponse> {
 
     @Schema(description = "Client's image", example = "http//:image.com", maxLength = 20)
     private String img;
+
+    private String dateOfRegistration;
+
+    private String email;
 }

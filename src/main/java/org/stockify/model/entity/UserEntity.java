@@ -3,6 +3,8 @@ package org.stockify.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.stockify.security.model.entity.CredentialsEntity;
+
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -41,6 +43,9 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
     private Set<SaleEntity> sales;
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private CredentialsEntity credentials;
 
 
     @Column(name = "client_img")
