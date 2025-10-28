@@ -22,6 +22,11 @@ public record StoreRequest(
         @Size(max = 100, message = "City must be less than 100 characters")
         String city,
 
+
+        @Schema(description = "Phone of the store", example = "223-4817825")
+        @NotBlank(message = "Phone is required.")
+        String phone,
+
         @Schema(description = "Optional home carousel items (url, title)")
         List<HomeCarouselItem> homeCarousel
 ) {}

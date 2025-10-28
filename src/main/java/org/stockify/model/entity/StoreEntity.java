@@ -36,6 +36,11 @@ public class StoreEntity {
     @Column(name = "city", nullable = false, length = 100)
     private String city;
 
+    @Size(max = 100)
+    @NotNull
+    @Column(name = "phone", nullable = false, length = 100)
+    private String phone;
+
     @OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
     private Set<TransactionEntity> transactions;
 
