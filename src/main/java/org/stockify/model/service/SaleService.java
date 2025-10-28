@@ -26,7 +26,6 @@ import org.stockify.model.repository.SaleRepository;
 import org.stockify.model.repository.UserRepository;
 import org.stockify.model.specification.SaleSpecification;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,16 +52,18 @@ public class SaleService {
             ProductEntity product = productRepository.findById(detail.getProductID())
                     .orElseThrow(() -> new NotFoundException("Product not found with ID " + detail.getProductID()));
 
-            BigDecimal quantity = BigDecimal.valueOf(detail.getQuantity());
-            BigDecimal currentStock = product.getStock() == null ? BigDecimal.ZERO : product.getStock();
+            long quantity = detail.getQuantity();
+            long currentStock = product.getStock() == null ? 0L : product.getStock();
+            long currentSold = product.getSoldQuantity() == null ? 0L : product.getSoldQuantity();
 
-            if (currentStock.compareTo(quantity) < 0) {
+            if (currentStock < quantity) {
                 throw new InsufficientStockException(
                         "Insufficient stock for product ID " + detail.getProductID()
                 );
             }
 
-            product.setStock(currentStock.subtract(quantity));
+            product.setStock(currentStock - quantity);
+            product.setSoldQuantity(currentSold + quantity);
             productsToUpdate.add(product);
         }
 

@@ -23,5 +23,5 @@ public class DetailTransactionRequest {
     @Schema(description = "Quantity of the product in the transaction (must be 0 or positive)", example = "10")
     @NotNull(message = "Quantity is required")
     @PositiveOrZero(message = "Quantity must be 0 or positive")
-    Double quantity;
+    Long quantity;
 }

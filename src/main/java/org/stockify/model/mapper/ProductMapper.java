@@ -8,7 +8,6 @@ import org.stockify.model.entity.CategoryEntity;
 import org.stockify.model.entity.ProductEntity;
 import org.stockify.model.entity.ProviderEntity;
 
-import java.math.BigDecimal;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,7 +18,8 @@ public interface ProductMapper {
 
     @Mapping(source = "categories", target = "categories", qualifiedByName = "entitiesToNames")
     @Mapping(source = "providers", target = "providers", qualifiedByName = "providerEntitiesToIds")
-    @Mapping(target = "stock", expression = "java(mapStock(entity.getStock()))")
+    @Mapping(target = "stock", expression = "java(entity.getStock() == null ? 0L : entity.getStock())")
+    @Mapping(target = "soldQuantity", expression = "java(entity.getSoldQuantity() == null ? 0L : entity.getSoldQuantity())")
     ProductResponse toResponse(ProductEntity entity);
 
     @Mapping(target = "detailTransactions", ignore = true)
@@ -27,6 +27,7 @@ public interface ProductMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "categories", ignore = true)
     @Mapping(target = "stock", expression = "java(normalizeStock(request.stock()))")
+    @Mapping(target = "soldQuantity", expression = "java(initialSoldQuantity())")
     ProductEntity toEntity(ProductRequest request);
 
     /**
@@ -47,6 +48,7 @@ public interface ProductMapper {
     @Mapping(target = "providers", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "categories", ignore = true)
+    @Mapping(target = "soldQuantity", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateFromRequest(ProductRequest dto, @MappingTarget ProductEntity entity);
 
@@ -58,9 +60,9 @@ public interface ProductMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(source = "categories", target = "categories", qualifiedByName = "namesToEntities")
+    @Mapping(target = "soldQuantity", ignore = true)
     void patchEntityFromRequest(ProductRequest dto, @MappingTarget ProductEntity entity);
 
-    // ✅ Todos estos devuelven colecciones MUTABLES (ya no Set.of())
     @Named("entitiesToNames")
     default Set<String> entitiesToNames(Set<CategoryEntity> categories) {
         if (categories == null || categories.isEmpty()) return new LinkedHashSet<>();
@@ -94,6 +96,7 @@ public interface ProductMapper {
     @Mapping(target = "categories", ignore = true)
     @Mapping(target = "detailTransactions", ignore = true)
     @Mapping(target = "stock", expression = "java(normalizeStock(dto.getStock()))")
+    @Mapping(target = "soldQuantity", expression = "java(initialSoldQuantity())")
     ProductEntity toEntity(ProductCSVRequest dto);
 
     @Mapping(target = "categories", source = "categories", qualifiedByName = "stringToCategorySet")
@@ -108,11 +111,11 @@ public interface ProductMapper {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    default double mapStock(BigDecimal stock) {
-        return stock == null ? 0d : stock.doubleValue();
+    default Long normalizeStock(Long stock) {
+        return stock == null ? 0L : stock;
     }
 
-    default BigDecimal normalizeStock(BigDecimal stock) {
-        return stock == null ? BigDecimal.ZERO : stock;
+    default Long initialSoldQuantity() {
+        return 0L;
     }
 }

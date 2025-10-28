@@ -27,7 +27,7 @@ public record ProductRequest(
         BigDecimal unitPrice,
 
         @Schema(description = "Available stock quantity", example = "100")
-        BigDecimal stock,
+        Long stock,
 
         @Schema(description = "SKU code (Stock Keeping Unit)", example = "PHONE-001")
         String sku,

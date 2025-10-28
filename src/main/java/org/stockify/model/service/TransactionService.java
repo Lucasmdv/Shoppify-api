@@ -53,11 +53,12 @@ public class TransactionService {
                     DetailTransactionEntity entity = new DetailTransactionEntity();
                     entity.setProduct(product);
 
-                    BigDecimal quantity = BigDecimal.valueOf(detailRequest.getQuantity());
+                    long quantity = detailRequest.getQuantity();
                     entity.setQuantity(quantity);
 
                     BigDecimal unitPrice = resolveUnitPrice(product, type);
-                    entity.setSubtotal(unitPrice.multiply(quantity));
+                    BigDecimal quantityAsBigDecimal = BigDecimal.valueOf(quantity);
+                    entity.setSubtotal(unitPrice.multiply(quantityAsBigDecimal));
 
                     return entity;
                 })

@@ -1,9 +1,10 @@
 package org.stockify.model.specification;
 
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 import org.stockify.model.entity.ProductEntity;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public class ProductSpecifications {
@@ -89,23 +90,41 @@ public class ProductSpecifications {
                 description == null ? null : cb.like(cb.lower(root.get("description")), "%" + description.toLowerCase() + "%");
     }
 
-    public static Specification<ProductEntity> byStock(Double stock) {
-        return (root, query, cb) -> cb.equal(root.get("stock"), toBigDecimal(stock));
+    public static Specification<ProductEntity> byStock(Long stock) {
+        return (root, query, cb) -> stock == null ? null : cb.equal(root.get("stock"), stock);
     }
 
-    public static Specification<ProductEntity> byStockLessThan(Double stockLessThan) {
-        return (root, query, cb) -> cb.lessThan(root.get("stock"), toBigDecimal(stockLessThan));
+    public static Specification<ProductEntity> byStockLessThan(Long stockLessThan) {
+        return (root, query, cb) -> stockLessThan == null ? null : cb.lt(root.get("stock"), stockLessThan);
     }
 
-    public static Specification<ProductEntity> byStockGreaterThan(Double stockGreaterThan) {
-        return (root, query, cb) -> cb.greaterThan(root.get("stock"), toBigDecimal(stockGreaterThan));
+    public static Specification<ProductEntity> byStockGreaterThan(Long stockGreaterThan) {
+        return (root, query, cb) -> stockGreaterThan == null ? null : cb.gt(root.get("stock"), stockGreaterThan);
     }
 
-    public static Specification<ProductEntity> byStockBetween(Double min, Double max) {
-        return (root, query, cb) -> cb.between(root.get("stock"), toBigDecimal(min), toBigDecimal(max));
+    public static Specification<ProductEntity> byStockBetween(Long min, Long max) {
+        return (root, query, cb) -> {
+            if (min == null || max == null) {
+                return null;
+            }
+            return cb.between(root.get("stock"), min, max);
+        };
     }
 
-    private static BigDecimal toBigDecimal(Double value) {
-        return value == null ? null : BigDecimal.valueOf(value);
+    public static Specification<ProductEntity> byProductOrCategories(String value) {
+        return (root, query, cb) -> {
+            if (value == null || value.isBlank()) {
+                return null;
+            }
+
+            query.distinct(true);
+            String pattern = "%" + value.toLowerCase() + "%";
+            Join<ProductEntity, ?> categoriesJoin = root.join("categories", JoinType.LEFT);
+
+            return cb.or(
+                    cb.like(cb.lower(root.get("name")), pattern),
+                    cb.like(cb.lower(categoriesJoin.get("name")), pattern)
+            );
+        };
     }
 }

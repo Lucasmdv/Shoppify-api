@@ -15,8 +15,8 @@ public class DetailTransactionResponse {
     @Schema(description = "Unique identifier of the detail transaction", example = "1")
     Long id;
 
-    @Schema(description = "Quantity of the product in this transaction detail", example = "3.5")
-    BigDecimal quantity;
+    @Schema(description = "Quantity of the product in this transaction detail", example = "3")
+    Long quantity;
 
     @Schema(description = "Subtotal amount for this detail line", example = "150.75")
     BigDecimal subtotal;

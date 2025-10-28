@@ -6,7 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -412,6 +414,9 @@ public class ProductService {
                         filterRequest.getPriceBetween().get(0),
                         filterRequest.getPriceBetween().get(1))
                         : null)
+                .add(filterRequest.getProductOrCategory() != null && !filterRequest.getProductOrCategory().isEmpty()
+                        ? ProductSpecifications.byProductOrCategories(filterRequest.getProductOrCategory())
+                        : null)
                 .add(filterRequest.getStock() != null ? ProductSpecifications.byStock(filterRequest.getStock()) : null)
                 .add(filterRequest.getStockLessThan() != null ? ProductSpecifications.byStockLessThan(filterRequest.getStockLessThan()) : null)
                 .add(filterRequest.getStockGreaterThan() != null ? ProductSpecifications.byStockGreaterThan(filterRequest.getStockGreaterThan()) : null)
@@ -422,13 +427,30 @@ public class ProductService {
                         : null)
                 .build();
 
-        Page<ProductEntity> page = productRepository.findAll(spec, pageable);
+        Pageable pageableWithSort = applySoldQuantitySort(pageable, filterRequest);
+
+        Page<ProductEntity> page = productRepository.findAll(spec, pageableWithSort);
 
         if (page.isEmpty()) {
             logger.warn("Products list is empty for pageable: {}", pageable);
         }
 
         return page.map(productMapper::toResponse);
+    }
+
+    private Pageable applySoldQuantitySort(Pageable pageable, ProductFilterRequest filterRequest) {
+        if (filterRequest == null || filterRequest.getSortBySoldQuantity() == null || filterRequest.getSortBySoldQuantity().isBlank()) {
+            return pageable;
+        }
+
+        Sort.Direction direction = "asc".equalsIgnoreCase(filterRequest.getSortBySoldQuantity())
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Sort soldSort = Sort.by(direction, "soldQuantity");
+        Sort combinedSort = pageable.getSort().isSorted() ? soldSort.and(pageable.getSort()) : soldSort;
+
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), combinedSort);
     }
 
 

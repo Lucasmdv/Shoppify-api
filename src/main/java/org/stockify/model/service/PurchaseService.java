@@ -24,7 +24,6 @@ import org.stockify.model.repository.ProviderRepository;
 import org.stockify.model.repository.PurchaseRepository;
 import org.stockify.model.specification.PurchaseSpecification;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,9 +53,9 @@ public class PurchaseService {
             ProductEntity product = productRepository.findById(detail.getProductID())
                     .orElseThrow(() -> new NotFoundException("Product not found with ID " + detail.getProductID()));
 
-            BigDecimal quantity = BigDecimal.valueOf(detail.getQuantity());
-            BigDecimal currentStock = product.getStock() == null ? BigDecimal.ZERO : product.getStock();
-            product.setStock(currentStock.add(quantity));
+            long quantity = detail.getQuantity();
+            long currentStock = product.getStock() == null ? 0L : product.getStock();
+            product.setStock(currentStock + quantity);
             productsToUpdate.add(product);
         }
 

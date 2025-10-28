@@ -50,8 +50,13 @@ public class ProductEntity {
     private String imgURL;
 
     @ColumnDefault("0")
-    @Column(name = "stock_quantity", precision = 15, scale = 2)
-    private BigDecimal stock = BigDecimal.ZERO;
+    @Column(name = "stock_quantity")
+    private Long stock = 0L;
+
+    @ColumnDefault("0")
+    @Column(name = "sold_quantity")
+    private Long soldQuantity = 0L;
+
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "products_categories",
@@ -70,8 +75,6 @@ public class ProductEntity {
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private Set<DetailTransactionEntity> detailTransactions = new HashSet<>();
 
-    public ProductEntity() {
-        this.stock = BigDecimal.ZERO;
-    }
+
 
 }

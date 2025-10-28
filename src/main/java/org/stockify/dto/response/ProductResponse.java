@@ -18,7 +18,10 @@ public record ProductResponse(
         double unitPrice,
 
         @Schema(description = "Available stock quantity", example = "100.0")
-        double stock,
+        long stock,
+
+        @Schema(description = "Total quantity sold for this product", example = "250.0")
+        long soldQuantity,
 
         @Schema(description = "SKU (Stock Keeping Unit) code", example = "WM-12345")
         String sku,

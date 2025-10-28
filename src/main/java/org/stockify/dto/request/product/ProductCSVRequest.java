@@ -27,7 +27,7 @@ public class ProductCSVRequest {
 
     @Schema(description = "Stock quantity available", example = "50")
     @CsvBindByName(column = "stock")
-    private BigDecimal stock;
+    private Long stock;
 
     @Schema(description = "SKU (Stock Keeping Unit) code", example = "PHONE-001")
     @CsvBindByName(column = "sku")
