@@ -13,7 +13,9 @@ public class RegisterUserCredentialsRequest {
 
     // Credentials
     @Schema(description = "Unique username of the user", example = "john_doe")
+
     private String username;
+
 
     @Schema(description = "User email address", example = "john@example.com")
     private String email;

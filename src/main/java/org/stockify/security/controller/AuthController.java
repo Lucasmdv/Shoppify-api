@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -125,7 +126,7 @@ public class AuthController {
         summary = "Register user profile and credentials",
         description = "Registers a new user profile and credentials in one step and assigns default CLIENT role"
     )
-    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
         System.out.println(request);
         org.stockify.security.model.entity.CredentialsEntity saved = authService.register(request);
         String token = jwtService.generateToken(saved);

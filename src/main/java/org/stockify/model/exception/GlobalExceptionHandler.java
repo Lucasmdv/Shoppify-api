@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.stockify.dto.response.ErrorResponse;
 import org.zalando.problem.spring.web.advice.ProblemHandling;
+import org.stockify.security.exception.AuthenticationException;
 
 import java.time.LocalDateTime;
 
@@ -109,6 +110,13 @@ public class GlobalExceptionHandler implements ProblemHandling {
             InsufficientAuthenticationException ex,
             HttpServletRequest request) {
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex, request);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleCustomAuthenticationException(
+            AuthenticationException ex,
+            HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.CONFLICT, ex, request);
     }
 
     /**

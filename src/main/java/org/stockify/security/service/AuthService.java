@@ -100,12 +100,12 @@ public class AuthService {
      */
     public CredentialsEntity register(RegisterRequest request) {
         if (request == null || request.getCredentials() == null || request.getUser() == null) {
-            throw new AuthenticationException("Invalid register payload", null);
+            throw new AuthenticationException("Los datos de registro están incompletos. Verificá la información enviada.", null);
         }
 
         String email = request.getCredentials().getEmail();
         if (credentialsRepository.existsByEmail(email)) {
-            throw new AuthenticationException("User already exists with email: " + email, null);
+            throw new AuthenticationException("Ya existe un usuario registrado con el correo: " + email, null);
         }
 
         // Create user profile
@@ -128,7 +128,7 @@ public class AuthService {
 
         // Assign default CLIENT role (must exist)
         RoleEntity clientRole = rolRepository.findByName("CLIENT")
-                .orElseThrow(() -> new AuthenticationException("Default role CLIENT not found. Please create it first.", null));
+                .orElseThrow(() -> new AuthenticationException("No se encontró el rol predeterminado CLIENT. Creá el rol antes de continuar.", null));
         Set<RoleEntity> roles = new HashSet<>();
         roles.add(clientRole);
         credentials.setRoles(roles);
@@ -141,7 +141,7 @@ public class AuthService {
      */
     public CredentialsEntity registerCredentials(RegisterCredentialsRequest request) {
         if (credentialsRepository.existsByEmail(request.getEmail())) {
-            throw new AuthenticationException("User already exists with email: " + request.getEmail(), null);
+            throw new AuthenticationException("Ya existe un usuario registrado con el correo: " + request.getEmail(), null);
         }
 
         CredentialsEntity credentials = CredentialsEntity.builder()
@@ -152,7 +152,7 @@ public class AuthService {
 
         // Assign default CLIENT role (must exist)
         RoleEntity clientRole = rolRepository.findByName("CLIENT")
-                .orElseThrow(() -> new AuthenticationException("Default role CLIENT not found. Please create it first.", null));
+                .orElseThrow(() -> new AuthenticationException("No se encontró el rol predeterminado CLIENT. Creá el rol antes de continuar.", null));
         Set<RoleEntity> roles = new HashSet<>();
         roles.add(clientRole);
         credentials.setRoles(roles);
@@ -172,7 +172,7 @@ public class AuthService {
      */
     public CredentialsEntity registerUserWithCredentials(org.stockify.security.model.dto.request.RegisterUserCredentialsRequest request) {
         if (credentialsRepository.existsByEmail(request.getEmail())) {
-            throw new AuthenticationException("User already exists with email: " + request.getEmail(), null);
+            throw new AuthenticationException("Ya existe un usuario registrado con el correo: " + request.getEmail(), null);
         }
 
         // Create user profile first
@@ -196,7 +196,7 @@ public class AuthService {
 
         // Assign default CLIENT role (must exist)
         RoleEntity clientRole = rolRepository.findByName("CLIENT")
-                .orElseThrow(() -> new AuthenticationException("Default role CLIENT not found. Please create it first.", null));
+                .orElseThrow(() -> new AuthenticationException("No se encontró el rol predeterminado CLIENT. Creá el rol antes de continuar.", null));
         Set<RoleEntity> roles = new HashSet<>();
         roles.add(clientRole);
         credentials.setRoles(roles);
@@ -224,9 +224,9 @@ public class AuthService {
             return credentialsRepository.findByEmail(input.email())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + input.email()));
         } catch (BadCredentialsException e) {
-            throw new AuthenticationException("Invalid email or password", e);
+            throw new AuthenticationException("El correo o la contraseña son incorrectos.", e);
         } catch (Exception e) {
-            throw new AuthenticationException("Authentication failed: " + e.getMessage(), e);
+            throw new AuthenticationException("Ocurrió un error inesperado al intentar autenticar al usuario.", e);
         }
     }
 
