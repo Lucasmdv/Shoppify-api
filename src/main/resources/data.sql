@@ -5,7 +5,7 @@
    PERMITS
    (enum names in uppercase; code is lowercase and unique)
    ================================ */
-INSERT INTO permits (code, permit)
+/*INSERT INTO permits (code, permit)
 SELECT 'read', 'READ'
 WHERE NOT EXISTS (SELECT 1 FROM permits WHERE code = 'read');
 
@@ -16,10 +16,6 @@ WHERE NOT EXISTS (SELECT 1 FROM permits WHERE code = 'write');
 INSERT INTO permits (code, permit)
 SELECT 'delete', 'DELETE'
 WHERE NOT EXISTS (SELECT 1 FROM permits WHERE code = 'delete');
-
-INSERT INTO permits (code, permit)
-SELECT 'admin', 'ADMIN'
-WHERE NOT EXISTS (SELECT 1 FROM permits WHERE code = 'admin');
 
 INSERT INTO permits (code, permit)
 SELECT 'manage_users', 'MANAGE_USERS'
@@ -33,20 +29,36 @@ INSERT INTO permits (code, permit)
 SELECT 'generate_reports', 'GENERATE_REPORTS'
 WHERE NOT EXISTS (SELECT 1 FROM permits WHERE code = 'generate_reports');
 
+*/
+--Simplificado para presentacion de frontend
+INSERT INTO permits (code, permit)
+SELECT 'admin', 'ADMIN'
+WHERE NOT EXISTS (SELECT 1 FROM permits WHERE code = 'admin');
+
+INSERT INTO permits (code, permit)
+SELECT 'user', 'USER'
+WHERE NOT EXISTS (SELECT 1 FROM permits WHERE code = 'user');
+
+
+
+
 /* ================================
    ROLES (name is unique)
-   ================================ */
-INSERT INTO roles (name, description)
-SELECT 'ADMIN', 'Administrator role with full permissions'
-WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'ADMIN');
+   ================================
 
-INSERT INTO roles (name, description)
+ INSERT INTO roles (name, description)
 SELECT 'MANAGER', 'Manager role with write and reporting permissions'
 WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'MANAGER');
 
 INSERT INTO roles (name, description)
 SELECT 'EMPLOYEE', 'Employee role with read permissions'
 WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'EMPLOYEE');
+   */
+
+INSERT INTO roles (name, description)
+SELECT 'ADMIN', 'Administrator role with full permissions'
+WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'ADMIN');
+
 
 INSERT INTO roles (name, description)
 SELECT 'CLIENT', 'Default client role'
@@ -60,37 +72,18 @@ INSERT INTO role_permits (role_id, permit_id)
 SELECT r.id, p.id
 FROM roles r, permits p
 WHERE r.name = 'ADMIN'
-  AND p.permit IN ('READ','WRITE','DELETE','ADMIN','MANAGE_USERS','MANAGE_ROLES','GENERATE_REPORTS')
+  AND p.permit IN ('ADMIN')
   AND NOT EXISTS (
     SELECT 1 FROM role_permits rp WHERE rp.role_id = r.id AND rp.permit_id = p.id
 );
 
--- MANAGER: READ, WRITE, GENERATE_REPORTS
-INSERT INTO role_permits (role_id, permit_id)
-SELECT r.id, p.id
-FROM roles r, permits p
-WHERE r.name = 'MANAGER'
-  AND p.permit IN ('READ','WRITE','GENERATE_REPORTS')
-  AND NOT EXISTS (
-    SELECT 1 FROM role_permits rp WHERE rp.role_id = r.id AND rp.permit_id = p.id
-);
+-- CLIENT:
 
--- EMPLOYEE: READ
-INSERT INTO role_permits (role_id, permit_id)
-SELECT r.id, p.id
-FROM roles r, permits p
-WHERE r.name = 'EMPLOYEE'
-  AND p.permit IN ('READ')
-  AND NOT EXISTS (
-    SELECT 1 FROM role_permits rp WHERE rp.role_id = r.id AND rp.permit_id = p.id
-);
-
--- CLIENT: READ
 INSERT INTO role_permits (role_id, permit_id)
 SELECT r.id, p.id
 FROM roles r, permits p
 WHERE r.name = 'CLIENT'
-  AND p.permit IN ('READ')
+  AND p.permit IN ('USER')
   AND NOT EXISTS (
     SELECT 1 FROM role_permits rp WHERE rp.role_id = r.id AND rp.permit_id = p.id
 );
@@ -98,29 +91,29 @@ WHERE r.name = 'CLIENT'
 /* ================================
    STORE (singleton ID=1)
    ================================ */
-INSERT INTO stores (id, store_name, address, city)
-SELECT 1, '', '', ''
+INSERT INTO stores (id, store_name, address, city,phone)
+SELECT 1, 'Shoppify', 'Calle Falsa 123', 'Mar del Plata', '999999999'
 WHERE NOT EXISTS (SELECT 1 FROM stores WHERE id = 1);
 
 /* ================================
    HOME CAROUSEL (store_id=1)
    ================================ */
 INSERT INTO store_home_carousel (store_id, url, title, href)
-SELECT 1, 'https://picsum.photos/id/1011/1200/400', 'Welcome to Shoppify', '/'
+SELECT 1, 'https://http2.mlstatic.com/D_NQ_788667-MLA96325313369_102025-OO.webp', 'Welcome to Shoppify', '/'
 WHERE NOT EXISTS (
-    SELECT 1 FROM store_home_carousel WHERE store_id = 1 AND url = 'https://picsum.photos/id/1011/1200/400'
+    SELECT 1 FROM store_home_carousel WHERE store_id = 1 AND url = 'https://http2.mlstatic.com/D_NQ_788667-MLA96325313369_102025-OO.webp'
 );
 
 INSERT INTO store_home_carousel (store_id, url, title, href)
-SELECT 1, 'https://picsum.photos/id/1015/1200/400', 'Big Sale', '/sale'
+SELECT 1, 'https://http2.mlstatic.com/D_NQ_853625-MLA95865472368_102025-OO.webp', 'Big Sale', '/sale'
 WHERE NOT EXISTS (
-    SELECT 1 FROM store_home_carousel WHERE store_id = 1 AND url = 'https://picsum.photos/id/1015/1200/400'
+    SELECT 1 FROM store_home_carousel WHERE store_id = 1 AND url = 'https://http2.mlstatic.com/D_NQ_853625-MLA95865472368_102025-OO.webp'
 );
 
 INSERT INTO store_home_carousel (store_id, url, title, href)
-SELECT 1, 'https://picsum.photos/id/1025/1200/400', 'New Arrivals', '/new'
+SELECT 1, 'https://http2.mlstatic.com/D_NQ_639856-MLA95484130475_102025-OO.webp', 'New Arrivals', '/new'
 WHERE NOT EXISTS (
-    SELECT 1 FROM store_home_carousel WHERE store_id = 1 AND url = 'https://picsum.photos/id/1025/1200/400'
+    SELECT 1 FROM store_home_carousel WHERE store_id = 1 AND url = 'https://http2.mlstatic.com/D_NQ_639856-MLA95484130475_102025-OO.webp'
 );
 
 /* ================================

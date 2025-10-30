@@ -21,13 +21,15 @@
 -- Nota: Algunos inserts pueden requerir ajustes dependiendo del sistema de base de datos utilizado.
 
 -- Inserción de datos en la tabla permits
-INSERT INTO permits (permit) VALUES ('READ');
-INSERT INTO permits (permit) VALUES ('WRITE');
-INSERT INTO permits (permit) VALUES ('DELETE');
-INSERT INTO permits (permit) VALUES ('ADMIN');
-INSERT INTO permits (permit) VALUES ('MANAGE_USERS');
-INSERT INTO permits (permit) VALUES ('MANAGE_ROLES');
-INSERT INTO permits (permit) VALUES ('GENERATE_REPORTS');
+INSERT INTO permits (code, permit) VALUES 
+('read', 'READ'),
+('write', 'WRITE'),
+('delete', 'DELETE'),
+('admin', 'ADMIN'),
+('user', 'USER'),
+('manage_users', 'MANAGE_USERS'),
+('manage_roles', 'MANAGE_ROLES'),
+('generate_reports', 'GENERATE_REPORTS');
 
 -- Inserción de datos en la tabla roles
 INSERT INTO roles (role) VALUES ('ADMIN');
