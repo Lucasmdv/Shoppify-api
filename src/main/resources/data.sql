@@ -89,6 +89,48 @@ WHERE r.name = 'CLIENT'
 );
 
 /* ================================
+   DEMO USERS (CLIENT & ADMIN)
+   ================================ */
+INSERT INTO clients (client_first_name, client_last_name, client_dni, client_phone, client_img)
+SELECT 'Test', 'Cliente', '90000001', '1100000001', 'https://picsum.photos/id/1011/400/300'
+WHERE NOT EXISTS (SELECT 1 FROM clients WHERE client_dni = '90000001');
+
+INSERT INTO clients (client_first_name, client_last_name, client_dni, client_phone, client_img)
+SELECT 'Test', 'Admin', '90000002', '1100000002', 'https://picsum.photos/id/1012/400/300'
+WHERE NOT EXISTS (SELECT 1 FROM clients WHERE client_dni = '90000002');
+
+
+INSERT INTO credentials (username, email, password, user_id)
+SELECT 'test.client', 'client@client', '$2a$10$ETW1zaXw0ZHn2rAMvfuwE.4dF6bl/g5Gr42GNXV5uZz./moucSZ3i', c.client_id
+FROM clients c
+WHERE c.client_dni = '90000001'
+  AND NOT EXISTS (SELECT 1 FROM credentials WHERE email = 'client@client');
+
+INSERT INTO credentials (username, email, password, user_id)
+SELECT 'test.admin', 'admin@admin', '$2a$10$ETW1zaXw0ZHn2rAMvfuwE.4dF6bl/g5Gr42GNXV5uZz./moucSZ3i', c.client_id
+FROM clients c
+WHERE c.client_dni = '90000002'
+  AND NOT EXISTS (SELECT 1 FROM credentials WHERE email = 'admin@admin');
+
+INSERT INTO credentials_roles (credential_id, role_id)
+SELECT cred.id, r.id
+FROM credentials cred, roles r
+WHERE cred.email = 'client@client'
+  AND r.name = 'CLIENT'
+  AND NOT EXISTS (
+    SELECT 1 FROM credentials_roles cr WHERE cr.credential_id = cred.id AND cr.role_id = r.id
+);
+
+INSERT INTO credentials_roles (credential_id, role_id)
+SELECT cred.id, r.id
+FROM credentials cred, roles r
+WHERE cred.email = 'admin@admin'
+  AND r.name = 'ADMIN'
+  AND NOT EXISTS (
+    SELECT 1 FROM credentials_roles cr WHERE cr.credential_id = cred.id AND cr.role_id = r.id
+);
+
+/* ================================
    STORE (singleton ID=1)
    ================================ */
 INSERT INTO stores (id, store_name, address, city,phone)
