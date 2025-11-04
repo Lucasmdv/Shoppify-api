@@ -11,6 +11,9 @@ public class ProductFilterRequest {
     @Schema(description = "Exact price to filter", example = "99.99", nullable = true)
     private Double price;
 
+    @Schema(description = "Exact discount percentage to filter", example = "15.0", nullable = true)
+    private Double discountPercentage;
+
     @Schema(description = "Exact stock quantity to filter", example = "100", nullable = true)
     private Long stock;
 
@@ -61,9 +64,22 @@ public class ProductFilterRequest {
     @Schema(description = "Filter for price less than this value", example = "500.00", nullable = true)
     private Double priceLess;
 
+    @Schema(description = "Filter for discount greater than this value", example = "5.0", nullable = true)
+    private Double discountGreater;
+
+    @Schema(description = "Filter for discount less than this value", example = "30.0", nullable = true)
+    private Double discountLess;
+
+    @Schema(description = "Filter for discount between two values (min and max)", example = "[5.0, 20.0]", nullable = true)
+    @Size(min = 2, max = 2, message = "discountBetween needs exactly 2 parameters")
+    private List<Double> discountBetween;
+
     @Schema(description = "Filter matching either product name or category name", example = "electronics", nullable = true)
     private String productOrCategory;
 
     @Schema(description = "Sort direction for sold quantity (asc or desc)", example = "desc", nullable = true)
     private String sortBySoldQuantity;
+
+    @Schema(description = "Sort direction for discount percentage (asc or desc)", example = "asc", nullable = true)
+    private String sortByDiscountPercentage;
 }

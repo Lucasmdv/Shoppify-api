@@ -178,6 +178,9 @@ public class ProductService {
     public ProductResponse update(Long id, ProductRequest request) {
         ProductEntity product = getProductById(id);
         productMapper.updateEntityFromRequest(request, product);
+        if (request.discountPercentage() != null) {
+            product.setDiscountPercentage(productMapper.normalizeDiscount(request.discountPercentage()));
+        }
         product.setCategories(resolveCategories(request.categories()));
         return productMapper.toResponse(productRepository.save(product));
     }
@@ -193,6 +196,9 @@ public class ProductService {
     public ProductResponse patch(Long id, ProductRequest request) {
         ProductEntity product = getProductById(id);
         productMapper.patchEntityFromRequest(request, product);
+        if (request.discountPercentage() != null) {
+            product.setDiscountPercentage(productMapper.normalizeDiscount(request.discountPercentage()));
+        }
         product.setCategories(resolveCategories(request.categories()));
         return productMapper.toResponse(productRepository.save(product));
     }
@@ -422,6 +428,14 @@ public class ProductService {
                         filterRequest.getPriceBetween().get(0),
                         filterRequest.getPriceBetween().get(1))
                         : null)
+                .add(filterRequest.getDiscountPercentage() != null ? ProductSpecifications.byDiscount(filterRequest.getDiscountPercentage()) : null)
+                .add(filterRequest.getDiscountGreater() != null ? ProductSpecifications.byDiscountGreaterThan(filterRequest.getDiscountGreater()) : null)
+                .add(filterRequest.getDiscountLess() != null ? ProductSpecifications.byDiscountLessThan(filterRequest.getDiscountLess()) : null)
+                .add(filterRequest.getDiscountBetween() != null && filterRequest.getDiscountBetween().size() == 2
+                        ? ProductSpecifications.byDiscountBetween(
+                        filterRequest.getDiscountBetween().get(0),
+                        filterRequest.getDiscountBetween().get(1))
+                        : null)
                 .add(filterRequest.getProductOrCategory() != null && !filterRequest.getProductOrCategory().isEmpty()
                         ? ProductSpecifications.byProductOrCategories(filterRequest.getProductOrCategory())
                         : null)
@@ -435,7 +449,7 @@ public class ProductService {
                         : null)
                 .build();
 
-        Pageable pageableWithSort = applySoldQuantitySort(pageable, filterRequest);
+        Pageable pageableWithSort = applyCustomSorts(pageable, filterRequest);
 
         Page<ProductEntity> page = productRepository.findAll(spec, pageableWithSort);
 
@@ -446,17 +460,32 @@ public class ProductService {
         return page.map(productMapper::toResponse);
     }
 
-    private Pageable applySoldQuantitySort(Pageable pageable, ProductFilterRequest filterRequest) {
-        if (filterRequest == null || filterRequest.getSortBySoldQuantity() == null || filterRequest.getSortBySoldQuantity().isBlank()) {
+    private Pageable applyCustomSorts(Pageable pageable, ProductFilterRequest filterRequest) {
+        if (filterRequest == null) {
             return pageable;
         }
 
-        Sort.Direction direction = "asc".equalsIgnoreCase(filterRequest.getSortBySoldQuantity())
-                ? Sort.Direction.ASC
-                : Sort.Direction.DESC;
+        Sort combinedSort = pageable.getSort();
 
-        Sort soldSort = Sort.by(direction, "soldQuantity");
-        Sort combinedSort = pageable.getSort().isSorted() ? soldSort.and(pageable.getSort()) : soldSort;
+        if (filterRequest.getSortByDiscountPercentage() != null && !filterRequest.getSortByDiscountPercentage().isBlank()) {
+            Sort.Direction discountDirection = "asc".equalsIgnoreCase(filterRequest.getSortByDiscountPercentage())
+                    ? Sort.Direction.ASC
+                    : Sort.Direction.DESC;
+            Sort discountSort = Sort.by(discountDirection, "discountPercentage");
+            combinedSort = combinedSort.isSorted() ? combinedSort.and(discountSort) : discountSort;
+        }
+
+        if (filterRequest.getSortBySoldQuantity() != null && !filterRequest.getSortBySoldQuantity().isBlank()) {
+            Sort.Direction soldDirection = "asc".equalsIgnoreCase(filterRequest.getSortBySoldQuantity())
+                    ? Sort.Direction.ASC
+                    : Sort.Direction.DESC;
+            Sort soldSort = Sort.by(soldDirection, "soldQuantity");
+            combinedSort = combinedSort.isSorted() ? combinedSort.and(soldSort) : soldSort;
+        }
+
+        if (!combinedSort.isSorted()) {
+            return pageable;
+        }
 
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), combinedSort);
     }

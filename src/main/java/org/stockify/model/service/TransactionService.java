@@ -19,6 +19,7 @@ import org.stockify.model.repository.StoreRepository;
 import org.stockify.model.repository.TransactionRepository;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -93,10 +94,22 @@ public class TransactionService {
         if (type == TransactionType.PURCHASE && product.getUnitPrice() != null) {
             return product.getUnitPrice();
         }
-        if (product.getPrice() != null) {
-            return product.getPrice();
+        BigDecimal basePrice = product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO;
+
+        if (type == TransactionType.SALE) {
+            BigDecimal discount = product.getDiscountPercentage() != null ? product.getDiscountPercentage() : BigDecimal.ZERO;
+            if (discount.compareTo(BigDecimal.ZERO) < 0) {
+                discount = BigDecimal.ZERO;
+            }
+            if (discount.compareTo(BigDecimal.valueOf(100)) > 0) {
+                discount = BigDecimal.valueOf(100);
+            }
+            BigDecimal factor = BigDecimal.ONE.subtract(
+                    discount.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP)
+            );
+            return basePrice.multiply(factor).setScale(2, RoundingMode.HALF_UP);
         }
-        return BigDecimal.ZERO;
+        return basePrice;
     }
 
 

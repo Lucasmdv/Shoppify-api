@@ -8,6 +8,8 @@ import org.stockify.model.entity.CategoryEntity;
 import org.stockify.model.entity.ProductEntity;
 import org.stockify.model.entity.ProviderEntity;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -20,6 +22,8 @@ public interface ProductMapper {
     @Mapping(source = "providers", target = "providers", qualifiedByName = "providerEntitiesToIds")
     @Mapping(target = "stock", expression = "java(entity.getStock() == null ? 0L : entity.getStock())")
     @Mapping(target = "soldQuantity", expression = "java(entity.getSoldQuantity() == null ? 0L : entity.getSoldQuantity())")
+    @Mapping(target = "discountPercentage", expression = "java(toDouble(entity.getDiscountPercentage()))")
+    @Mapping(target = "priceWithDiscount", expression = "java(calculatePriceWithDiscount(entity.getPrice(), entity.getDiscountPercentage()))")
     ProductResponse toResponse(ProductEntity entity);
 
     @Mapping(target = "detailTransactions", ignore = true)
@@ -28,6 +32,7 @@ public interface ProductMapper {
     @Mapping(target = "categories", ignore = true)
     @Mapping(target = "stock", expression = "java(normalizeStock(request.stock()))")
     @Mapping(target = "soldQuantity", expression = "java(initialSoldQuantity())")
+    @Mapping(target = "discountPercentage", expression = "java(normalizeDiscount(request.discountPercentage()))")
     ProductEntity toEntity(ProductRequest request);
 
     /**
@@ -37,6 +42,9 @@ public interface ProductMapper {
         updateFromRequest(dto, entity);
         if (dto.stock() != null) {
             entity.setStock(normalizeStock(dto.stock()));
+        }
+        if (dto.discountPercentage() != null) {
+            entity.setDiscountPercentage(normalizeDiscount(dto.discountPercentage()));
         }
     }
 
@@ -84,9 +92,11 @@ public interface ProductMapper {
     @Mapping(target = "detailTransactions", ignore = true)
     @Mapping(target = "stock", expression = "java(normalizeStock(dto.getStock()))")
     @Mapping(target = "soldQuantity", expression = "java(initialSoldQuantity())")
+    @Mapping(target = "discountPercentage", expression = "java(normalizeDiscount(null))")
     ProductEntity toEntity(ProductCSVRequest dto);
 
     @Mapping(target = "categories", source = "categories", qualifiedByName = "stringToCategorySet")
+    @Mapping(target = "discountPercentage", expression = "java(java.math.BigDecimal.ZERO)")
     ProductRequest toRequest(ProductCSVRequest dto);
 
     @Named("stringToCategorySet")
@@ -104,5 +114,37 @@ public interface ProductMapper {
 
     default Long initialSoldQuantity() {
         return 0L;
+    }
+
+    default BigDecimal normalizeDiscount(BigDecimal discount) {
+        if (discount == null) {
+            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        }
+        BigDecimal min = BigDecimal.ZERO;
+        BigDecimal max = BigDecimal.valueOf(100);
+        if (discount.compareTo(min) < 0) {
+            return min.setScale(2, RoundingMode.HALF_UP);
+        }
+        if (discount.compareTo(max) > 0) {
+            return max.setScale(2, RoundingMode.HALF_UP);
+        }
+        return discount.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    default double toDouble(BigDecimal value) {
+        return value == null ? 0.0 : value.doubleValue();
+    }
+
+    default double calculatePriceWithDiscount(BigDecimal price, BigDecimal discount) {
+        BigDecimal basePrice = price == null ? BigDecimal.ZERO : price;
+        BigDecimal normalizedDiscount = normalizeDiscount(discount);
+        if (basePrice.compareTo(BigDecimal.ZERO) <= 0) {
+            return 0.0;
+        }
+        BigDecimal discountFactor = BigDecimal.ONE.subtract(
+                normalizedDiscount.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP)
+        );
+        BigDecimal finalPrice = basePrice.multiply(discountFactor);
+        return finalPrice.setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 }

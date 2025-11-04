@@ -17,6 +17,12 @@ public record ProductResponse(
         @Schema(description = "Unit price of the product", example = "5.20")
         double unitPrice,
 
+        @Schema(description = "Discount percentage applied to the price", example = "10.0")
+        double discountPercentage,
+
+        @Schema(description = "Final price after applying discount", example = "23.39")
+        double priceWithDiscount,
+
         @Schema(description = "Available stock quantity", example = "100.0")
         long stock,
 

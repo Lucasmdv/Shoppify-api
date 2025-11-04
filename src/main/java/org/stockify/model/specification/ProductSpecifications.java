@@ -5,6 +5,7 @@ import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 import org.stockify.model.entity.ProductEntity;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class ProductSpecifications {
@@ -83,6 +84,27 @@ public class ProductSpecifications {
 
     public static Specification<ProductEntity> byPriceBetween(Double min, Double max) {
         return (root, query, cb) -> cb.between(root.get("price"), min, max);
+    }
+
+    public static Specification<ProductEntity> byDiscount(Double discount) {
+        return (root, query, cb) -> discount == null ? null : cb.equal(root.get("discountPercentage"), BigDecimal.valueOf(discount));
+    }
+
+    public static Specification<ProductEntity> byDiscountGreaterThan(Double discount) {
+        return (root, query, cb) -> discount == null ? null : cb.greaterThan(root.get("discountPercentage"), BigDecimal.valueOf(discount));
+    }
+
+    public static Specification<ProductEntity> byDiscountLessThan(Double discount) {
+        return (root, query, cb) -> discount == null ? null : cb.lessThan(root.get("discountPercentage"), BigDecimal.valueOf(discount));
+    }
+
+    public static Specification<ProductEntity> byDiscountBetween(Double min, Double max) {
+        return (root, query, cb) -> {
+            if (min == null || max == null) {
+                return null;
+            }
+            return cb.between(root.get("discountPercentage"), BigDecimal.valueOf(min), BigDecimal.valueOf(max));
+        };
     }
 
     public static Specification<ProductEntity> byDescription(String description) {

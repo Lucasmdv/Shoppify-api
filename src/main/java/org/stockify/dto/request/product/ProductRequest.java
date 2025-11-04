@@ -1,6 +1,8 @@
 package org.stockify.dto.request.product;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
@@ -26,6 +28,11 @@ public record ProductRequest(
         @Schema(description = "Unit price of the product", example = "899.99")
         BigDecimal unitPrice,
 
+        @Schema(description = "Discount percentage applied to the price", example = "15.0")
+        @DecimalMin(value = "0.0", message = "Discount cannot be negative")
+        @DecimalMax(value = "100.0", message = "Discount cannot exceed 100%")
+        BigDecimal discountPercentage,
+
         @Schema(description = "Available stock quantity", example = "100")
         Long stock,
 
@@ -42,6 +49,7 @@ public record ProductRequest(
         Set<String> categories
 ) {
     public ProductRequest {
+        if (discountPercentage == null) discountPercentage = BigDecimal.ZERO;
         if (categories == null) categories = Set.of();
     }
 }

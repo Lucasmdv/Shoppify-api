@@ -35,6 +35,10 @@ public class ProductEntity {
     @Column(name = "unit_price", precision = 10, scale = 2)
     private BigDecimal unitPrice;
 
+    @ColumnDefault("0")
+    @Column(name = "discount_percentage", precision = 5, scale = 2)
+    private BigDecimal discountPercentage = BigDecimal.ZERO;
+
     @ColumnDefault("-1")
     @Column(name = "sku", unique = false)
     private String sku;

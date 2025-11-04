@@ -182,57 +182,57 @@ WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Accessories');
    PRODUCTS (3 base + 10 adicionales)
    ================================ */
 -- Base (por si aún no estaban)
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity)
-SELECT 'Smartphone X', 'Latest generation smartphone', 1200.00, 1000.00, 'SP001', 'SP001BAR', 'TechBrand', 'https://picsum.photos/id/1/600/400', 10
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
+SELECT 'Smartphone X', 'Latest generation smartphone', 1200.00, 1000.00, 'SP001', 'SP001BAR', 'TechBrand', 'https://picsum.photos/id/1/600/400', 10, 0
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Smartphone X');
 
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity)
-SELECT 'Laptop Pro', 'Professional laptop', 2500.00, 2200.00, 'LP002', 'LP002BAR', 'TechBrand', 'https://picsum.photos/id/2/600/400', 7
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
+SELECT 'Laptop Pro', 'Professional laptop', 2500.00, 2200.00, 'LP002', 'LP002BAR', 'TechBrand', 'https://picsum.photos/id/2/600/400', 7, 0
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Laptop Pro');
 
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity)
-SELECT 'Cotton T-Shirt', 'Soft cotton t-shirt', 25.00, 15.00, 'TS003', 'TS003BAR', 'FashionBrand', 'https://picsum.photos/id/3/600/400', 50
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
+SELECT 'Cotton T-Shirt', 'Soft cotton t-shirt', 25.00, 15.00, 'TS003', 'TS003BAR', 'FashionBrand', 'https://picsum.photos/id/3/600/400', 50, 0
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Cotton T-Shirt');
 
 -- Adicionales (10)
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity)
-SELECT 'Wireless Headphones', 'Noise-cancelling wireless headphones', 150.00, 100.00, 'WH004', 'WH004BAR', 'SoundBrand', 'https://picsum.photos/id/4/600/400', 25
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
+SELECT 'Wireless Headphones', 'Noise-cancelling wireless headphones', 150.00, 100.00, 'WH004', 'WH004BAR', 'SoundBrand', 'https://picsum.photos/id/4/600/400', 25, 0
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Wireless Headphones');
 
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity)
-SELECT 'Gaming Mouse', 'Ergonomic gaming mouse with RGB lighting', 60.00, 40.00, 'GM005', 'GM005BAR', 'GameTech', 'https://picsum.photos/id/5/600/400', 30
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
+SELECT 'Gaming Mouse', 'Ergonomic gaming mouse with RGB lighting', 60.00, 40.00, 'GM005', 'GM005BAR', 'GameTech', 'https://picsum.photos/id/5/600/400', 30, 15
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Gaming Mouse');
 
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity)
-SELECT 'Sports Sneakers', 'Lightweight and durable sports sneakers', 90.00, 65.00, 'SN006', 'SN006BAR', 'FootBrand', 'https://picsum.photos/id/6/600/400', 20
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
+SELECT 'Sports Sneakers', 'Lightweight and durable sports sneakers', 90.00, 65.00, 'SN006', 'SN006BAR', 'FootBrand', 'https://picsum.photos/id/6/600/400', 20, 0
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Sports Sneakers');
 
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity)
-SELECT 'LED TV 50"', '4K Ultra HD Smart TV', 700.00, 500.00, 'TV007', 'TV007BAR', 'VisionPlus', 'https://picsum.photos/id/7/600/400', 12
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
+SELECT 'LED TV 50"', '4K Ultra HD Smart TV', 700.00, 500.00, 'TV007', 'TV007BAR', 'VisionPlus', 'https://picsum.photos/id/7/600/400', 12, 0
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'LED TV 50"');
 
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity)
-SELECT 'Bluetooth Speaker', 'Portable high-quality speaker', 45.00, 30.00, 'BS008', 'BS008BAR', 'SoundBrand', 'https://picsum.photos/id/8/600/400', 40
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
+SELECT 'Bluetooth Speaker', 'Portable high-quality speaker', 45.00, 30.00, 'BS008', 'BS008BAR', 'SoundBrand', 'https://picsum.photos/id/8/600/400', 40, 0
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Bluetooth Speaker');
 
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity)
-SELECT 'Coffee Maker', 'Automatic coffee maker', 120.00, 90.00, 'CM009', 'CM009BAR', 'HomeAppliance', 'https://picsum.photos/id/9/600/400', 15
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
+SELECT 'Coffee Maker', 'Automatic coffee maker', 120.00, 90.00, 'CM009', 'CM009BAR', 'HomeAppliance', 'https://picsum.photos/id/9/600/400', 15, 0
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Coffee Maker');
 
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity)
-SELECT 'Gaming Keyboard', 'Mechanical keyboard with RGB lighting', 110.00, 75.00, 'GK010', 'GK010BAR', 'GameTech', 'https://picsum.photos/id/10/600/400', 25
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
+SELECT 'Gaming Keyboard', 'Mechanical keyboard with RGB lighting', 110.00, 75.00, 'GK010', 'GK010BAR', 'GameTech', 'https://picsum.photos/id/10/600/400', 25, 0
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Gaming Keyboard');
 
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity)
-SELECT 'Men Jacket', 'Winter waterproof jacket', 80.00, 55.00, 'JK011', 'JK011BAR', 'FashionBrand', 'https://picsum.photos/id/11/600/400', 18
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
+SELECT 'Men Jacket', 'Winter waterproof jacket', 80.00, 55.00, 'JK011', 'JK011BAR', 'FashionBrand', 'https://picsum.photos/id/11/600/400', 18, 0
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Men Jacket');
 
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity)
-SELECT 'Women Sunglasses', 'UV400 protective sunglasses', 35.00, 20.00, 'SG012', 'SG012BAR', 'StyleBrand', 'https://picsum.photos/id/12/600/400', 50
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
+SELECT 'Women Sunglasses', 'UV400 protective sunglasses', 35.00, 20.00, 'SG012', 'SG012BAR', 'StyleBrand', 'https://picsum.photos/id/12/600/400', 50, 0
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Women Sunglasses');
 
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity)
-SELECT 'Smartwatch Pro', 'Smartwatch with health monitoring features', 200.00, 150.00, 'SW013', 'SW013BAR', 'TechBrand', 'https://picsum.photos/id/13/600/400', 22
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
+SELECT 'Smartwatch Pro', 'Smartwatch with health monitoring features', 200.00, 150.00, 'SW013', 'SW013BAR', 'TechBrand', 'https://picsum.photos/id/13/600/400', 22, 0
 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Smartwatch Pro');
 
 /* ================================

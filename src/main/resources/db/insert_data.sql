@@ -113,26 +113,26 @@ INSERT INTO clients (client_first_name, client_last_name, client_dni, client_ema
 VALUES ('Santiago', 'Martínez', '55667788', 'santiago@email.com', '5566778899', CURRENT_DATE);
 
 -- Inserción de datos en la tabla products
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand) 
-VALUES ('Smartphone X', 'Smartphone de última generación', 1200.00, 1000.00, 'SP001', 'SP001BAR', 'TechBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand) 
-VALUES ('Laptop Pro', 'Laptop para profesionales', 2500.00, 2200.00, 'LP002', 'LP002BAR', 'TechBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand) 
-VALUES ('Camiseta Casual', 'Camiseta de algodón', 25.00, 15.00, 'CC003', 'CC003BAR', 'FashionBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand) 
-VALUES ('Pantalón Jeans', 'Pantalón de mezclilla', 45.00, 30.00, 'PJ004', 'PJ004BAR', 'FashionBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand) 
-VALUES ('Arroz Premium', 'Arroz de grano largo', 5.00, 3.50, 'AP005', 'AP005BAR', 'FoodBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand) 
-VALUES ('Aceite de Oliva', 'Aceite de oliva extra virgen', 8.00, 6.00, 'AO006', 'AO006BAR', 'FoodBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand) 
-VALUES ('Sillón Reclinable', 'Sillón reclinable de cuero', 350.00, 280.00, 'SR007', 'SR007BAR', 'HomeBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand) 
-VALUES ('Mesa de Centro', 'Mesa de centro de madera', 120.00, 90.00, 'MC008', 'MC008BAR', 'HomeBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand) 
-VALUES ('Muñeca Interactiva', 'Muñeca con funciones interactivas', 35.00, 25.00, 'MI009', 'MI009BAR', 'ToyBrand');
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand) 
-VALUES ('Set de Bloques', 'Set de bloques de construcción', 20.00, 15.00, 'SB010', 'SB010BAR', 'ToyBrand');
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, discount_percentage) 
+VALUES ('Smartphone X', 'Smartphone de última generación', 1200.00, 1000.00, 'SP001', 'SP001BAR', 'TechBrand', 0);
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, discount_percentage) 
+VALUES ('Laptop Pro', 'Laptop para profesionales', 2500.00, 2200.00, 'LP002', 'LP002BAR', 'TechBrand', 0);
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, discount_percentage) 
+VALUES ('Camiseta Casual', 'Camiseta de algodón', 25.00, 15.00, 'CC003', 'CC003BAR', 'FashionBrand', 0);
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, discount_percentage) 
+VALUES ('Pantalón Jeans', 'Pantalón de mezclilla', 45.00, 30.00, 'PJ004', 'PJ004BAR', 'FashionBrand', 0);
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, discount_percentage) 
+VALUES ('Arroz Premium', 'Arroz de grano largo', 5.00, 3.50, 'AP005', 'AP005BAR', 'FoodBrand', 0);
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, discount_percentage) 
+VALUES ('Aceite de Oliva', 'Aceite de oliva extra virgen', 8.00, 6.00, 'AO006', 'AO006BAR', 'FoodBrand', 0);
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, discount_percentage) 
+VALUES ('Sillón Reclinable', 'Sillón reclinable de cuero', 350.00, 280.00, 'SR007', 'SR007BAR', 'HomeBrand', 15);
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, discount_percentage) 
+VALUES ('Mesa de Centro', 'Mesa de centro de madera', 120.00, 90.00, 'MC008', 'MC008BAR', 'HomeBrand', 0);
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, discount_percentage) 
+VALUES ('Muñeca Interactiva', 'Muñeca con funciones interactivas', 35.00, 25.00, 'MI009', 'MI009BAR', 'ToyBrand', 0);
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, discount_percentage) 
+VALUES ('Set de Bloques', 'Set de bloques de construcción', 20.00, 15.00, 'SB010', 'SB010BAR', 'ToyBrand', 0);
 
 -- Inserción de datos en la tabla products_categories
 INSERT INTO products_categories (product_id, category_id) VALUES (1, 1); -- Smartphone X -> Electrónicos
