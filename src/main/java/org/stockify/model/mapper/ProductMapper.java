@@ -35,7 +35,6 @@ public interface ProductMapper {
      */
     default void updateEntityFromRequest(ProductRequest dto, @MappingTarget ProductEntity entity) {
         updateFromRequest(dto, entity);
-        entity.setCategories(namesToEntities(dto.categories()));
         if (dto.stock() != null) {
             entity.setStock(normalizeStock(dto.stock()));
         }
@@ -59,7 +58,7 @@ public interface ProductMapper {
     @Mapping(target = "providers", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
-    @Mapping(source = "categories", target = "categories", qualifiedByName = "namesToEntities")
+    @Mapping(target = "categories", ignore = true)
     @Mapping(target = "soldQuantity", ignore = true)
     void patchEntityFromRequest(ProductRequest dto, @MappingTarget ProductEntity entity);
 
@@ -68,18 +67,6 @@ public interface ProductMapper {
         if (categories == null || categories.isEmpty()) return new LinkedHashSet<>();
         return categories.stream()
                 .map(CategoryEntity::getName)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
-    @Named("namesToEntities")
-    default Set<CategoryEntity> namesToEntities(Set<String> names) {
-        if (names == null || names.isEmpty()) return new LinkedHashSet<>();
-        return names.stream()
-                .map(name -> {
-                    CategoryEntity e = new CategoryEntity();
-                    e.setName(name);
-                    return e;
-                })
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 

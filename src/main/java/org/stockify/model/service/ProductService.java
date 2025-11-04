@@ -36,7 +36,9 @@ import org.stockify.model.specification.SpecificationBuilder;
 
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -78,18 +80,7 @@ public class ProductService {
      */
     public ProductResponse save(ProductRequest request) throws DuplicatedUniqueConstraintException {
         ProductEntity product = productMapper.toEntity(request);
-
-        for (String categoryName : request.categories()) {
-            CategoryEntity category = categoryRepository.findByName(categoryName)
-                    .orElseGet(() -> {
-                        CategoryEntity newCategory = new CategoryEntity();
-                        newCategory.setName(categoryName);
-                        return categoryRepository.save(newCategory);
-                    });
-
-            product.getCategories().add(category);
-        }
-
+        product.setCategories(resolveCategories(request.categories()));
         product = productRepository.save(product);
         return productMapper.toResponse(product);
     }
@@ -187,6 +178,7 @@ public class ProductService {
     public ProductResponse update(Long id, ProductRequest request) {
         ProductEntity product = getProductById(id);
         productMapper.updateEntityFromRequest(request, product);
+        product.setCategories(resolveCategories(request.categories()));
         return productMapper.toResponse(productRepository.save(product));
     }
 
@@ -201,6 +193,7 @@ public class ProductService {
     public ProductResponse patch(Long id, ProductRequest request) {
         ProductEntity product = getProductById(id);
         productMapper.patchEntityFromRequest(request, product);
+        product.setCategories(resolveCategories(request.categories()));
         return productMapper.toResponse(productRepository.save(product));
     }
 
@@ -347,6 +340,21 @@ public class ProductService {
      * @return the found product entity
      * @throws NotFoundException if no product is found with the given ID
      */
+    private Set<CategoryEntity> resolveCategories(Set<String> categoryNames) {
+        if (categoryNames == null || categoryNames.isEmpty()) {
+            return new LinkedHashSet<>();
+        }
+
+        return categoryNames.stream()
+                .map(name -> categoryRepository.findByName(name)
+                        .orElseGet(() -> {
+                            CategoryEntity category = new CategoryEntity();
+                            category.setName(name);
+                            return categoryRepository.save(category);
+                        }))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
     private ProductEntity getProductById(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Product with ID " + id + " not found"));
