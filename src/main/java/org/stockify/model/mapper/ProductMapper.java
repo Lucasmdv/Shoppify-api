@@ -32,7 +32,6 @@ public interface ProductMapper {
     @Mapping(target = "categories", ignore = true)
     @Mapping(target = "stock", expression = "java(normalizeStock(request.stock()))")
     @Mapping(target = "soldQuantity", expression = "java(initialSoldQuantity())")
-    @Mapping(target = "discountPercentage", expression = "java(normalizeDiscount(request.discountPercentage()))")
     ProductEntity toEntity(ProductRequest request);
 
     /**
@@ -42,9 +41,6 @@ public interface ProductMapper {
         updateFromRequest(dto, entity);
         if (dto.stock() != null) {
             entity.setStock(normalizeStock(dto.stock()));
-        }
-        if (dto.discountPercentage() != null) {
-            entity.setDiscountPercentage(normalizeDiscount(dto.discountPercentage()));
         }
     }
 
@@ -92,11 +88,9 @@ public interface ProductMapper {
     @Mapping(target = "detailTransactions", ignore = true)
     @Mapping(target = "stock", expression = "java(normalizeStock(dto.getStock()))")
     @Mapping(target = "soldQuantity", expression = "java(initialSoldQuantity())")
-    @Mapping(target = "discountPercentage", expression = "java(normalizeDiscount(null))")
     ProductEntity toEntity(ProductCSVRequest dto);
 
     @Mapping(target = "categories", source = "categories", qualifiedByName = "stringToCategorySet")
-    @Mapping(target = "discountPercentage", expression = "java(java.math.BigDecimal.ZERO)")
     ProductRequest toRequest(ProductCSVRequest dto);
 
     @Named("stringToCategorySet")
@@ -116,19 +110,43 @@ public interface ProductMapper {
         return 0L;
     }
 
-    default BigDecimal normalizeDiscount(BigDecimal discount) {
+    @AfterMapping
+    default void normalizeMappedValues(ProductRequest source, @MappingTarget ProductEntity target) {
+        if (source == null || target == null) {
+            return;
+        }
+
+        if (source.price() != null) {
+            target.setPrice(applyMoneyScale(source.price()));
+        }
+
+        if (source.unitPrice() != null) {
+            target.setUnitPrice(applyMoneyScale(source.unitPrice()));
+        }
+
+        if (source.discountPercentage() != null) {
+            target.setDiscountPercentage(normalizeDiscountPercentage(source.discountPercentage()));
+        } else if (target.getDiscountPercentage() == null) {
+            target.setDiscountPercentage(normalizeDiscountPercentage(null));
+        }
+    }
+
+    @AfterMapping
+    default void normalizeMappedValues(ProductCSVRequest source, @MappingTarget ProductEntity target) {
+        if (source == null || target == null) {
+            return;
+        }
+
+        target.setPrice(applyMoneyScale(source.getPrice()));
+        target.setUnitPrice(applyMoneyScale(source.getUnitPrice()));
+        target.setDiscountPercentage(normalizeDiscountPercentage(null));
+    }
+
+    default BigDecimal normalizeDiscountPercentage(BigDecimal discount) {
         if (discount == null) {
-            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+            return clampDiscount(BigDecimal.ZERO);
         }
-        BigDecimal min = BigDecimal.ZERO;
-        BigDecimal max = BigDecimal.valueOf(100);
-        if (discount.compareTo(min) < 0) {
-            return min.setScale(2, RoundingMode.HALF_UP);
-        }
-        if (discount.compareTo(max) > 0) {
-            return max.setScale(2, RoundingMode.HALF_UP);
-        }
-        return discount.setScale(2, RoundingMode.HALF_UP);
+        return clampDiscount(discount);
     }
 
     default double toDouble(BigDecimal value) {
@@ -137,7 +155,7 @@ public interface ProductMapper {
 
     default double calculatePriceWithDiscount(BigDecimal price, BigDecimal discount) {
         BigDecimal basePrice = price == null ? BigDecimal.ZERO : price;
-        BigDecimal normalizedDiscount = normalizeDiscount(discount);
+        BigDecimal normalizedDiscount = normalizeDiscountPercentage(discount);
         if (basePrice.compareTo(BigDecimal.ZERO) <= 0) {
             return 0.0;
         }
@@ -146,5 +164,27 @@ public interface ProductMapper {
         );
         BigDecimal finalPrice = basePrice.multiply(discountFactor);
         return finalPrice.setScale(2, RoundingMode.HALF_UP).doubleValue();
+    }
+
+    private static BigDecimal applyMoneyScale(BigDecimal value) {
+        if (value == null) {
+            return null;
+        }
+        return value.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private static BigDecimal clampDiscount(BigDecimal discount) {
+        if (discount == null) {
+            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        }
+
+        BigDecimal scaled = discount.setScale(2, RoundingMode.HALF_UP);
+        if (scaled.compareTo(BigDecimal.ZERO) < 0) {
+            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        }
+        if (scaled.compareTo(BigDecimal.valueOf(100)) > 0) {
+            return BigDecimal.valueOf(100).setScale(2, RoundingMode.HALF_UP);
+        }
+        return scaled;
     }
 }

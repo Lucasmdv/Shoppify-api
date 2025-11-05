@@ -178,9 +178,6 @@ public class ProductService {
     public ProductResponse update(Long id, ProductRequest request) {
         ProductEntity product = getProductById(id);
         productMapper.updateEntityFromRequest(request, product);
-        if (request.discountPercentage() != null) {
-            product.setDiscountPercentage(productMapper.normalizeDiscount(request.discountPercentage()));
-        }
         product.setCategories(resolveCategories(request.categories()));
         return productMapper.toResponse(productRepository.save(product));
     }
@@ -196,9 +193,6 @@ public class ProductService {
     public ProductResponse patch(Long id, ProductRequest request) {
         ProductEntity product = getProductById(id);
         productMapper.patchEntityFromRequest(request, product);
-        if (request.discountPercentage() != null) {
-            product.setDiscountPercentage(productMapper.normalizeDiscount(request.discountPercentage()));
-        }
         product.setCategories(resolveCategories(request.categories()));
         return productMapper.toResponse(productRepository.save(product));
     }
