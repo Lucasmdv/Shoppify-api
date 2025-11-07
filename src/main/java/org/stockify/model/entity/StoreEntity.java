@@ -7,8 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
-import java.util.Set;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -41,11 +41,22 @@ public class StoreEntity {
     @Column(name = "phone", nullable = false, length = 100)
     private String phone;
 
+    @Size(max = 255)
+    @Column(name = "facebook", length = 255)
+    private String facebook;
+
+    @Size(max = 255)
+    @Column(name = "instagram", length = 255)
+    private String instagram;
+
+    @Size(max = 255)
+    @Column(name = "twitter", length = 255)
+    private String twitter;
+
     @OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
     private Set<TransactionEntity> transactions;
 
-    @ElementCollection
-    @CollectionTable(name = "store_home_carousel", joinColumns = @JoinColumn(name = "store_id"))
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CarouselItem> homeCarousel = new ArrayList<>();
 
 

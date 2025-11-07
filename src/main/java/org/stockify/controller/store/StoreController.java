@@ -20,6 +20,7 @@ import org.stockify.dto.request.store.StoreRequest;
 import org.stockify.dto.response.StoreResponse;
 import org.stockify.dto.shared.HomeCarouselItem;
 import org.stockify.model.assembler.StoreModelAssembler;
+import org.stockify.model.service.HomeCarouselService;
 import org.stockify.model.service.StoreService;
 
 import java.net.URI;
@@ -35,6 +36,7 @@ public class StoreController {
 
     private final StoreService storeService;
     private final StoreModelAssembler storeModelAssembler;
+    private final HomeCarouselService homeCarouselService;
 
 
     @Operation(summary = "Get singleton store")
@@ -80,7 +82,7 @@ public class StoreController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "List of carousel items to set (url, title)")
             @RequestBody java.util.List<HomeCarouselItem> items) {
-        StoreResponse store = storeService.updateCarousel(STORE_ID, items);
+        StoreResponse store = homeCarouselService.replaceCarousel(STORE_ID, items);
         return ResponseEntity.ok(storeModelAssembler.toModel(store));
     }
 
@@ -95,6 +97,57 @@ public class StoreController {
     })
     @GetMapping("/carousel")
     public ResponseEntity<java.util.List<HomeCarouselItem>> getCarousel() {
-        return ResponseEntity.ok(storeService.getCarousel(STORE_ID));
+        return ResponseEntity.ok(homeCarouselService.listCarousel(STORE_ID));
+    }
+
+    @Operation(summary = "Get carousel item by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Carousel item found"),
+            @ApiResponse(responseCode = "404", description = "Carousel item not found")
+    })
+    @GetMapping("/carousel/{itemId}")
+    public ResponseEntity<HomeCarouselItem> getCarouselItem(
+            @Parameter(description = "Carousel identifier") @PathVariable Long itemId) {
+        return ResponseEntity.ok(homeCarouselService.findCarouselItem(STORE_ID, itemId));
+    }
+
+    @Operation(summary = "Create carousel item")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Carousel item created"),
+            @ApiResponse(responseCode = "400", description = "Validation error")
+    })
+    @PostMapping("/carousel")
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE')")
+    public ResponseEntity<HomeCarouselItem> createCarouselItem(
+            @RequestBody HomeCarouselItem item) {
+        HomeCarouselItem created = homeCarouselService.createCarouselItem(STORE_ID, item);
+        URI location = URI.create("/stores/carousel/" + created.id());
+        return ResponseEntity.created(location).body(created);
+    }
+
+    @Operation(summary = "Update carousel item")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Carousel item updated"),
+            @ApiResponse(responseCode = "404", description = "Carousel item not found")
+    })
+    @PutMapping("/carousel/{itemId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE')")
+    public ResponseEntity<HomeCarouselItem> updateCarouselItem(
+            @Parameter(description = "Carousel identifier") @PathVariable Long itemId,
+            @RequestBody HomeCarouselItem item) {
+        return ResponseEntity.ok(homeCarouselService.updateCarouselItem(STORE_ID, itemId, item));
+    }
+
+    @Operation(summary = "Delete carousel item")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Carousel item deleted"),
+            @ApiResponse(responseCode = "404", description = "Carousel item not found")
+    })
+    @DeleteMapping("/carousel/{itemId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE')")
+    public ResponseEntity<Void> deleteCarouselItem(
+            @Parameter(description = "Carousel identifier") @PathVariable Long itemId) {
+        homeCarouselService.deleteCarouselItem(STORE_ID, itemId);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -23,6 +23,14 @@ public record StoreResponse(
         @Schema(description = "Phone of the store", example = "223-4817825")
         String phone,
 
+        @Schema(description = "Facebook page URL", example = "https://facebook.com/shoppify")
+        String facebook,
+
+        @Schema(description = "Instagram profile URL", example = "https://instagram.com/shoppify")
+        String instagram,
+
+        @Schema(description = "X (Twitter) profile URL", example = "https://x.com/shoppify")
+        String twitter,
 
         @Schema(description = "Home page carousel items")
         List<HomeCarouselItem> homeCarousel

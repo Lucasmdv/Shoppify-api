@@ -133,8 +133,9 @@ WHERE cred.email = 'admin@admin'
 /* ================================
    STORE (singleton ID=1)
    ================================ */
-INSERT INTO stores (id, store_name, address, city,phone)
-SELECT 1, 'Shoppify', 'Calle Falsa 123', 'Mar del Plata', '999999999'
+INSERT INTO stores (id, store_name, address, city,phone, facebook, instagram, twitter)
+SELECT 1, 'Shoppify', 'Calle Falsa 123', 'Mar del Plata', '999999999',
+       'https://facebook.com/shoppify', 'https://instagram.com/shoppify', 'https://x.com/shoppify'
 WHERE NOT EXISTS (SELECT 1 FROM stores WHERE id = 1);
 
 /* ================================

@@ -27,6 +27,18 @@ public record StoreRequest(
         @NotBlank(message = "Phone is required.")
         String phone,
 
+        @Schema(description = "Facebook page URL", example = "https://facebook.com/shoppify")
+        @Size(max = 255, message = "Facebook URL must be less than 255 characters")
+        String facebook,
+
+        @Schema(description = "Instagram profile URL", example = "https://instagram.com/shoppify")
+        @Size(max = 255, message = "Instagram URL must be less than 255 characters")
+        String instagram,
+
+        @Schema(description = "X (Twitter) profile URL", example = "https://x.com/shoppify")
+        @Size(max = 255, message = "X/Twitter URL must be less than 255 characters")
+        String twitter,
+
         @Schema(description = "Optional home carousel items (url, title)")
         List<HomeCarouselItem> homeCarousel
 ) {}

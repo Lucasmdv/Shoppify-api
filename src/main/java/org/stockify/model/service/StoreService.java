@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.stockify.dto.request.store.StoreRequest;
 import org.stockify.dto.response.StoreResponse;
-import org.stockify.dto.shared.HomeCarouselItem;
 import org.stockify.model.entity.StoreEntity;
 import org.stockify.model.exception.DuplicatedUniqueConstraintException;
 import org.stockify.model.exception.NotFoundException;
@@ -134,36 +133,4 @@ public class StoreService {
         }
     }
 
-    /**
-     * Replaces the home carousel items for the singleton store.
-     *
-     * @param id    store id
-     * @param items list with url and title
-     * @return updated StoreResponse
-     */
-    public StoreResponse updateCarousel(Long id, java.util.List<HomeCarouselItem> items) {
-        StoreEntity store = getStoreById(id);
-        java.util.List<org.stockify.model.entity.CarouselItem> mapped =
-                items == null ? java.util.List.of() :
-                        items.stream()
-                                .map(storeMapper::toEmbeddable)
-                                .toList();
-        store.setHomeCarousel(new java.util.ArrayList<>(mapped));
-        store = storeRepository.save(store);
-        return storeMapper.toResponse(store);
-    }
-
-    /**
-     * Retrieves only the home carousel items for a store.
-     *
-     * @param id store id
-     * @return list of carousel items (url, title, href)
-     */
-    public java.util.List<HomeCarouselItem> getCarousel(Long id) {
-        StoreEntity store = getStoreById(id);
-        return store.getHomeCarousel() == null ? java.util.List.of() :
-                store.getHomeCarousel().stream()
-                        .map(storeMapper::toDto)
-                        .toList();
-    }
 }
