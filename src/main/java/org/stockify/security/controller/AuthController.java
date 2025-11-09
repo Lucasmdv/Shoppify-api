@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.stockify.security.model.dto.request.AuthRequest;
+import org.stockify.security.model.dto.request.UpdateCredentialsRequest;
 import org.stockify.security.model.dto.response.AuthResponse;
 import org.stockify.security.model.dto.response.LoginResponse;
 import org.stockify.security.model.dto.request.RegisterRequest;
@@ -19,6 +20,7 @@ import org.stockify.security.model.dto.response.RegisterResponse;
 import org.stockify.dto.response.UserResponse;
 import org.stockify.model.mapper.UserMapper;
 
+import org.stockify.security.model.entity.CredentialsEntity;
 import org.stockify.security.service.AuthService;
 import org.stockify.security.service.JwtService;
 
@@ -149,4 +151,29 @@ public class AuthController {
                         .build()
         );
     }
+
+    @PatchMapping("/update")
+    @Operation(
+            summary = "Actualizar correo electrónico y/o contraseña",
+            description = "Permite al usuario autenticado modificar su correo o contraseña.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Datos actualizados correctamente"),
+            @ApiResponse(responseCode = "400", description = "Solicitud inválida"),
+            @ApiResponse(responseCode = "401", description = "Usuario no autenticado")
+    })
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> updateCredentials(@Valid @RequestBody UpdateCredentialsRequest request) {
+        CredentialsEntity currentUser = authService.getAuthenticatedUser();
+        CredentialsEntity updated = authService.updateCredentials(currentUser.getEmail(), request);
+        String newToken = jwtService.generateToken(updated);
+        return ResponseEntity.ok(
+                AuthResponse.builder()
+                        .token(newToken)
+                        .message("Credenciales actualizadas correctamente")
+                        .build()
+        );
+    }
+
 }

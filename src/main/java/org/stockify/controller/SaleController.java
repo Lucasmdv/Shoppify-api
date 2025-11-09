@@ -31,7 +31,7 @@ import org.stockify.model.service.SaleService;
 @RestController
 @RequestMapping("/sales")
 @Validated
-@Tag(name = "Sale", description = "Endpoints for managing sales")
+@Tag(name = "Sales", description = "Endpoints for managing sales")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 public class SaleController {

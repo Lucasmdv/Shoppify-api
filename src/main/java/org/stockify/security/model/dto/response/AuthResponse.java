@@ -6,11 +6,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Response object returned after successful authentication.
  * Contains the JWT token that should be used for subsequent authenticated requests.
  */
-@Schema(name = "AuthResponse", description = "DTO returned after successful authentication, containing the JWT token.")
+@Schema(name = "AuthResponse", description = "DTO returned after successful authentication, containing the JWT token and optional message.")
 public record AuthResponse(
 
         @Schema(description = "JWT token issued for the authenticated session.", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
-        String token
+        String token,
+
+        @Schema(description = "Optional message about the authentication or update result.", example = "Credenciales actualizadas correctamente")
+        String message
 
 ) {
     /**
@@ -27,6 +30,7 @@ public record AuthResponse(
      */
     public static class AuthResponseBuilder {
         private String token;
+        private String message;
 
         /**
          * Sets the token value for the AuthResponse
@@ -40,12 +44,22 @@ public record AuthResponse(
         }
 
         /**
+         * Sets an optional message for response
+         * @param message Optional message to include in the response
+         * @return Builder with optional message
+         */
+        public AuthResponseBuilder message(String message) {
+            this.message = message;
+            return this;
+        }
+
+        /**
          * Builds the AuthResponse with the configured values
          * 
          * @return A new AuthResponse instance
          */
         public AuthResponse build() {
-            return new AuthResponse(token);
+            return new AuthResponse(token,message);
         }
     }
 }

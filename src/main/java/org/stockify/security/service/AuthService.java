@@ -1,6 +1,7 @@
 package org.stockify.security.service;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,6 +14,7 @@ import org.stockify.model.repository.UserRepository;
 import org.stockify.security.exception.AuthenticationException;
 import org.stockify.security.model.dto.request.RegisterCredentialsRequest;
 import org.stockify.security.model.dto.request.RegisterRequest;
+import org.stockify.security.model.dto.request.UpdateCredentialsRequest;
 import org.stockify.security.model.entity.CredentialsEntity;
 import org.stockify.security.model.entity.RoleEntity;
 import org.stockify.security.repository.CredentialRepository;
@@ -31,38 +33,13 @@ import java.util.Set;
 @Service
 public class AuthService {
 
-    /**
-     * Repository for user credentials
-     */
     private final CredentialRepository credentialsRepository;
-
-    /**
-     * Spring Security authentication manager
-     */
     private final AuthenticationManager authenticationManager;
-
-    /**
-     * Password encoder for secure password storage
-     */
     private final PasswordEncoder passwordEncoder;
-
-
-    /**
-     * Service for JWT token operations
-     */
     private final JwtService jwtService;
-
-    /**
-     * Repository for permission data
-     */
     private final PermitRepository permitRepository;
-
-    /**
-     * Repository for role data
-     */
     private final RolRepository rolRepository;
-
-        private final UserRepository userRepository;
+    private final UserRepository userRepository;
 
     /**
      * Constructor for AuthService
@@ -89,10 +66,6 @@ public class AuthService {
         this.rolRepository = rolRepository;
         this.userRepository = userRepository;
     }
-
-    // Removed legacy role+permit combined update methods from AuthService.
-
-    // Removed permit helper methods; permits are managed via roles.
 
     /**
      * Registers a user profile together with credentials using a composite request.
@@ -250,5 +223,26 @@ public class AuthService {
         String userEmail = jwtService.extractUsername(token);
         return credentialsRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+    }
+
+    @Transactional
+    public CredentialsEntity updateCredentials(String username, UpdateCredentialsRequest request) {
+        CredentialsEntity user = credentialsRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+        if (request.getCurrentPassword() != null &&
+                !passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("La contraseña actual no es correcta");
+        }
+
+        if (request.getNewEmail() != null && !request.getNewEmail().isBlank()) {
+            user.setEmail(request.getNewEmail());
+        }
+
+        if (request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        }
+
+        return credentialsRepository.save(user);
     }
 }
