@@ -97,7 +97,11 @@ public class SaleService {
         Specification<SaleEntity> specification = Specification
                 .where(SaleSpecification.byClientId(filterRequest.getClientId()))
                 .and(SaleSpecification.bySaleId(filterRequest.getSaleId()))
-                .and(SaleSpecification.byTransactionId(filterRequest.getTransactionId()));
+                .and(SaleSpecification.byTransactionId(filterRequest.getTransactionId()))
+                .and(SaleSpecification.byEndDate(filterRequest.getEndDate()))
+                .and(SaleSpecification.byStartDate(filterRequest.getStartDate()))
+                .and(SaleSpecification.byPaymentMethod(filterRequest.getPaymentMethod()))
+                .and(SaleSpecification.byTotalRange(filterRequest.getMinPrice(),  filterRequest.getMaxPrice()));
 
         Page<SaleEntity> saleEntities = saleRepository.findAll(specification, pageable);
         return saleEntities.map(saleMapper::toResponseDTO);
