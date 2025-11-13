@@ -27,7 +27,7 @@ public class SaleSpecification {
         return (root, query, cb) -> {
             if (startDate == null) return null;
             LocalDateTime startOfDay = startDate.atStartOfDay();
-            return cb.greaterThanOrEqualTo(root.get("dateTime"), startOfDay);
+            return cb.greaterThanOrEqualTo(root.get("transaction").get("dateTime"), startOfDay);
         };
     }
 
@@ -35,24 +35,24 @@ public class SaleSpecification {
         return (root, query, cb) -> {
             if (endDate == null) return null;
             LocalDateTime endOfDay = endDate.atTime(23, 59, 59);
-            return cb.lessThanOrEqualTo(root.get("dateTime"), endOfDay);
+            return cb.lessThanOrEqualTo(root.get("transaction").get("dateTime"), endOfDay);
         };
     }
 
     public static Specification<SaleEntity> byPaymentMethod(String method) {
         return (root, query, cb) ->
-                (method == null || method.isEmpty()) ? null : cb.equal(root.get("paymentMethod"), method);
+                (method == null || method.isEmpty()) ? null : cb.equal(root.get("transaction").get("paymentMethod"), method);
     }
 
     public static Specification<SaleEntity> byTotalRange(Double min, Double max) {
         return (root, query, cb) -> {
             if (min == null && max == null) return null;
             if (min != null && max != null) {
-                return cb.between(root.get("total"), min, max);
+                return cb.between(root.get("transaction").get("total"), min, max);
             } else if (min != null) {
-                return cb.greaterThanOrEqualTo(root.get("total"), min);
+                return cb.greaterThanOrEqualTo(root.get("transaction").get("total"), min);
             } else {
-                return cb.lessThanOrEqualTo(root.get("total"), max);
+                return cb.lessThanOrEqualTo(root.get("transaction").get("total"), max);
             }
         };
     }
