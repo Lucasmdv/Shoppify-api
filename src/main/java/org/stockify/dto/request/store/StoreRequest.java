@@ -9,7 +9,7 @@ import org.stockify.dto.shared.HomeCarouselItem;
 public record StoreRequest(
         @Schema(description = "Name of the store", example = "Main Street Store")
         @NotBlank(message = "Store name is required")
-        @Size(max = 100, message = "Store name must be less than 100 characters")
+        @Size(max = 15, message = "Store name must be less than 15 characters")
         String storeName,
 
         @Schema(description = "Store address", example = "123 Main St")

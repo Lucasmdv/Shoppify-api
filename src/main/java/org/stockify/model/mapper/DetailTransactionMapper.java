@@ -36,7 +36,8 @@ public interface DetailTransactionMapper {
                 basePrice,
                 discount,
                 finalPrice,
-                product.getBarcode()
+                product.getBarcode(),
+                product.getImgURL()
         );
     }
 
