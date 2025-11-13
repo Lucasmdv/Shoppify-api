@@ -28,4 +28,6 @@ public class ProductResponseTransaction {
     @Schema(description = "Image URL of the product", example = "https://example.com/image.jpg")
     String imgURL;
 
+
+
 }
