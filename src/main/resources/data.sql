@@ -39,9 +39,6 @@ INSERT INTO permits (code, permit)
 SELECT 'user', 'USER'
 WHERE NOT EXISTS (SELECT 1 FROM permits WHERE code = 'user');
 
-
-
-
 /* ================================
    ROLES (name is unique)
    ================================
@@ -92,24 +89,24 @@ WHERE r.name = 'CLIENT'
    DEMO USERS (CLIENT & ADMIN)
    ================================ */
 INSERT INTO clients (client_first_name, client_last_name, client_dni, client_phone, client_img)
-SELECT 'Test', 'Cliente', '90000001', '1100000001', 'https://picsum.photos/id/1011/400/300'
-WHERE NOT EXISTS (SELECT 1 FROM clients WHERE client_dni = '90000001');
+SELECT 'Test', 'Cliente', '40289718', '2232057591', 'https://img.freepik.com/foto-gratis/joven-hombre-barbudo-camisa-rayas_273609-5677.jpg?semt=ais_hybrid&w=740&q=80'
+WHERE NOT EXISTS (SELECT 1 FROM clients WHERE client_dni = '40289718');
 
 INSERT INTO clients (client_first_name, client_last_name, client_dni, client_phone, client_img)
-SELECT 'Test', 'Admin', '90000002', '1100000002', 'https://picsum.photos/id/1012/400/300'
-WHERE NOT EXISTS (SELECT 1 FROM clients WHERE client_dni = '90000002');
+SELECT 'Test', 'Admin', '41689718', '2232057295', 'https://media.istockphoto.com/id/1090878494/es/foto/retrato-de-joven-sonriente-a-hombre-guapo-en-camiseta-polo-azul-aislado-sobre-fondo-gris-de.jpg?s=612x612&w=0&k=20&c=dHFsDEJSZ1kuSO4wTDAEaGOJEF-HuToZ6Gt-E2odc6U='
+WHERE NOT EXISTS (SELECT 1 FROM clients WHERE client_dni = '41689718');
 
 
 INSERT INTO credentials (username, email, password, user_id)
 SELECT 'test.client', 'client@client', '$2a$10$ETW1zaXw0ZHn2rAMvfuwE.4dF6bl/g5Gr42GNXV5uZz./moucSZ3i', c.client_id
 FROM clients c
-WHERE c.client_dni = '90000001'
+WHERE c.client_dni = '40289718'
   AND NOT EXISTS (SELECT 1 FROM credentials WHERE email = 'client@client');
 
 INSERT INTO credentials (username, email, password, user_id)
 SELECT 'test.admin', 'admin@admin', '$2a$10$ETW1zaXw0ZHn2rAMvfuwE.4dF6bl/g5Gr42GNXV5uZz./moucSZ3i', c.client_id
 FROM clients c
-WHERE c.client_dni = '90000002'
+WHERE c.client_dni = '41689718'
   AND NOT EXISTS (SELECT 1 FROM credentials WHERE email = 'admin@admin');
 
 INSERT INTO credentials_roles (credential_id, role_id)
@@ -134,7 +131,7 @@ WHERE cred.email = 'admin@admin'
    STORE (singleton ID=1)
    ================================ */
 INSERT INTO stores (id, store_name, address, city,phone, facebook, instagram, twitter)
-SELECT 1, 'Shoppify', 'Calle Falsa 123', 'Mar del Plata', '999999999',
+SELECT 1, 'Shoppify', 'Talcahuano 5123', 'Mar del Plata', '2236057991',
        'https://facebook.com/shoppify', 'https://instagram.com/shoppify', 'https://x.com/shoppify'
 WHERE NOT EXISTS (SELECT 1 FROM stores WHERE id = 1);
 
@@ -162,157 +159,158 @@ WHERE NOT EXISTS (
 /* ================================
    CATEGORIES
    ================================ */
-INSERT INTO categories (name, img_url)
-SELECT 'Electronics', 'https://picsum.photos/id/180/400/300'
-WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Electronics');
 
 INSERT INTO categories (name, img_url)
-SELECT 'Clothing', 'https://picsum.photos/id/250/400/300'
-WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Clothing');
+SELECT 'Electronica', 'https://images.unsplash.com/photo-1562408590-e32931084e23?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZWxlY3Ryb25pY3xlbnwwfHwwfHx8MA%3D%3D'
+WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Electronica');
 
 INSERT INTO categories (name, img_url)
-SELECT 'Home', 'https://picsum.photos/id/1080/400/300'
+SELECT 'Ropa', 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8Y2xvdGhlc3xlbnwwfHwwfHx8MA%3D%3D'
+WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Ropa');
+
+INSERT INTO categories (name, img_url)
+SELECT 'Home', 'https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8aG9tZXxlbnwwfHwwfHx8MA%3D%3D'
 WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Home');
 
 -- Extra category used in mappings
 INSERT INTO categories (name, img_url)
-SELECT 'Accessories', 'https://picsum.photos/id/340/400/300'
-WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Accessories');
+SELECT 'Accesorios', 'https://plus.unsplash.com/premium_photo-1681276170683-706111cf496e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8YWNjZXNvcmllc3xlbnwwfHwwfHx8MA%3D%3D'
+WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Accesorios');
 
 /* ================================
    PRODUCTS (3 base + 10 adicionales)
    ================================ */
 -- Base (por si aún no estaban)
 INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
-SELECT 'Smartphone X', 'Latest generation smartphone', 1200.00, 1000.00, 'SP001', 'SP001BAR', 'TechBrand', 'https://picsum.photos/id/1/600/400', 10, 0
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Smartphone X');
+SELECT 'Teléfono Inteligente X', 'Smartphone de última generación con pantalla AMOLED nítida, procesador de alto rendimiento y triple cámara con IA para fotos claras en cualquier situación. Incluye batería de larga duración, carga rápida y conectividad 5G para trabajo y entretenimiento sin interrupciones.', 1200.00, 1000.00, 'SP001', 'SP001BAR', 'TechBrand', 'https://images.unsplash.com/photo-1598327106026-d9521da673d1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzJ8fHNtYXJ0cGhvbmV8ZW58MHx8MHx8fDA%3D', 10, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Teléfono Inteligente X');
 
 INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
-SELECT 'Laptop Pro', 'Professional laptop', 2500.00, 2200.00, 'LP002', 'LP002BAR', 'TechBrand', 'https://picsum.photos/id/2/600/400', 7, 0
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Laptop Pro');
+SELECT 'Portátil Pro', 'Portátil profesional con chasis de aluminio, procesador de 12ª generación y 32 GB de RAM que permiten ejecutar software exigente sin demoras. Integra pantalla 4K calibrada, SSD NVMe de 1 TB y sistema de enfriamiento silencioso ideal para desarrollo, diseño y edición.', 2500.00, 2200.00, 'LP002', 'LP002BAR', 'TechBrand', 'https://plus.unsplash.com/premium_photo-1711051475117-f3a4d3ff6778?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bGFwdG9wfGVufDB8fDB8fHww', 7, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Portátil Pro');
 
 INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
-SELECT 'Cotton T-Shirt', 'Soft cotton t-shirt', 25.00, 15.00, 'TS003', 'TS003BAR', 'FashionBrand', 'https://picsum.photos/id/3/600/400', 50, 0
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Cotton T-Shirt');
+SELECT 'Camiseta de Algodón', 'Camiseta básica confeccionada con algodón peinado hipoalergénico que mantiene la piel fresca durante todo el día. Tiene costuras reforzadas, cuello redondo suave y un ajuste relajado pensado para uso diario o uniformes.', 25.00, 15.00, 'TS003', 'TS003BAR', 'FashionBrand', 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dHNoaXJ0fGVufDB8fDB8fHww', 50, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Camiseta de Algodón');
 
 -- Adicionales (10)
 INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
-SELECT 'Wireless Headphones', 'Noise-cancelling wireless headphones', 150.00, 100.00, 'WH004', 'WH004BAR', 'SoundBrand', 'https://picsum.photos/id/4/600/400', 25, 0
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Wireless Headphones');
+SELECT 'Auriculares Inalámbricos', 'Auriculares con cancelación activa de ruido, drivers de alta fidelidad y diseño circumaural que envuelve cómodamente la oreja. Ofrecen hasta 30 horas de autonomía, conectividad multipunto y controles táctiles para música y llamadas.', 150.00, 100.00, 'WH004', 'WH004BAR', 'SoundBrand', 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8aGVhZHBob25lc3xlbnwwfHwwfHx8MA%3D%3D', 25, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Auriculares Inalámbricos');
 
 INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
-SELECT 'Gaming Mouse', 'Ergonomic gaming mouse with RGB lighting', 60.00, 40.00, 'GM005', 'GM005BAR', 'GameTech', 'https://picsum.photos/id/5/600/400', 30, 15
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Gaming Mouse');
+SELECT 'Mouse Gamer RGB', 'Mouse ergonómico diseñado para sesiones largas de juego con sensor óptico de 16.000 DPI y switches duraderos. El sistema de iluminación RGB personalizable y los perfiles programables permiten adaptar cada macro a tu estilo.', 60.00, 40.00, 'GM005', 'GM005BAR', 'GameTech', 'https://images.unsplash.com/photo-1629121291243-7b5e885cce9b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW91c2UlMjBnYW1pbmd8ZW58MHx8MHx8fDA%3D', 30, 15
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Mouse Gamer RGB');
 
 INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
-SELECT 'Sports Sneakers', 'Lightweight and durable sports sneakers', 90.00, 65.00, 'SN006', 'SN006BAR', 'FootBrand', 'https://picsum.photos/id/6/600/400', 20, 0
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Sports Sneakers');
+SELECT 'Zapatillas Deportivas', 'Zapatillas livianas con malla respirable y refuerzos laterales que brindan estabilidad en entrenamientos de alto impacto. La entresuela con amortiguación reactiva y la suela de goma antideslizante aseguran tracción en interiores y exteriores.', 90.00, 65.00, 'SN006', 'SN006BAR', 'FootBrand', 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8c3BvcnQlMjBzbmVha2Vyc3xlbnwwfHwwfHx8MA%3D%3D', 20, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Zapatillas Deportivas');
 
 INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
-SELECT 'LED TV 50"', '4K Ultra HD Smart TV', 700.00, 500.00, 'TV007', 'TV007BAR', 'VisionPlus', 'https://picsum.photos/id/7/600/400', 12, 0
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'LED TV 50"');
+SELECT 'TV LED 50 Pulgadas', 'Televisor 4K Ultra HD con panel LED de 50 pulgadas, Dolby Vision y tasa de refresco mejorada para imágenes fluidas. Incluye sistema Smart TV en español, asistentes de voz integrados y múltiples puertos HDMI para consolas y streaming.', 700.00, 500.00, 'TV007', 'TV007BAR', 'VisionPlus', 'https://plus.unsplash.com/premium_photo-1681236323432-3df82be0c1b0?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dHZ8ZW58MHx8MHx8fDA%3D', 12, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'TV LED 50 Pulgadas');
 
 INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
-SELECT 'Bluetooth Speaker', 'Portable high-quality speaker', 45.00, 30.00, 'BS008', 'BS008BAR', 'SoundBrand', 'https://picsum.photos/id/8/600/400', 40, 0
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Bluetooth Speaker');
+SELECT 'Parlante Bluetooth', 'Parlante portátil con carcasa resistente a salpicaduras, radiadores pasivos y sonido 360° claro. Ofrece conexión Bluetooth 5.0 de alcance extendido, manos libres integrado y hasta 12 horas de reproducción continua.', 45.00, 30.00, 'BS008', 'BS008BAR', 'SoundBrand', 'https://images.unsplash.com/photo-1531104985437-603d6490e6d4?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c3BlYWtlcnxlbnwwfHwwfHx8MA%3D%3D', 40, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Parlante Bluetooth');
 
 INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
-SELECT 'Coffee Maker', 'Automatic coffee maker', 120.00, 90.00, 'CM009', 'CM009BAR', 'HomeAppliance', 'https://picsum.photos/id/9/600/400', 15, 0
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Coffee Maker');
+SELECT 'Cafetera Automática', 'Cafetera automática con molinillo integrado, programación diaria y boquilla de vapor para bebidas cremosas. El depósito removible de agua y la limpieza guiada simplifican el mantenimiento en oficinas o hogares ocupados.', 120.00, 90.00, 'CM009', 'CM009BAR', 'HomeAppliance', 'https://plus.unsplash.com/premium_photo-1661722983090-11783531c332?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Y29mZmUlMjBtYWtlcnxlbnwwfHwwfHx8MA%3D%3D', 15, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Cafetera Automática');
 
 INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
-SELECT 'Gaming Keyboard', 'Mechanical keyboard with RGB lighting', 110.00, 75.00, 'GK010', 'GK010BAR', 'GameTech', 'https://picsum.photos/id/10/600/400', 25, 0
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Gaming Keyboard');
+SELECT 'Teclado Gamer', 'Teclado mecánico con switches táctiles de respuesta rápida, placa superior de aluminio y reposamuñecas magnético. La retroiluminación RGB por tecla y el software de macros permiten personalizar perfiles para cada juego.', 110.00, 75.00, 'GK010', 'GK010BAR', 'GameTech', 'https://images.unsplash.com/photo-1637243218672-d338945efdf7?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8Z2FtaW5nJTIwa2V5Ym9hcmR8ZW58MHx8MHx8fDA%3D', 25, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Teclado Gamer');
 
 INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
-SELECT 'Men Jacket', 'Winter waterproof jacket', 80.00, 55.00, 'JK011', 'JK011BAR', 'FashionBrand', 'https://picsum.photos/id/11/600/400', 18, 0
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Men Jacket');
+SELECT 'Campera Impermeable Hombre', 'Campera invernal con membrana impermeable y respirable, relleno térmico sintético y costuras termoselladas para bloquear el viento. Posee capucha ajustable, múltiples bolsillos con cierres impermeables y puños interiores elásticos.', 80.00, 55.00, 'JK011', 'JK011BAR', 'FashionBrand', 'https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bWVuJTIwamFja2V0fGVufDB8fDB8fHww', 18, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Campera Impermeable Hombre');
 
 INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
-SELECT 'Women Sunglasses', 'UV400 protective sunglasses', 35.00, 20.00, 'SG012', 'SG012BAR', 'StyleBrand', 'https://picsum.photos/id/12/600/400', 50, 0
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Women Sunglasses');
+SELECT 'Gafas de Sol Mujer', 'Gafas de sol elegantes con montura liviana resistente a impactos y lentes UV400 de alta claridad. Incluyen tratamiento antirreflejo, bisagras metálicas flexibles y estuche rígido para transportar en carteras o mochilas.', 35.00, 20.00, 'SG012', 'SG012BAR', 'StyleBrand', 'https://images.unsplash.com/photo-1624545104844-0d342896e7a6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c3VuZ2xhc2VzfGVufDB8fDB8fHww', 50, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Gafas de Sol Mujer');
 
 INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, discount_percentage)
-SELECT 'Smartwatch Pro', 'Smartwatch with health monitoring features', 200.00, 150.00, 'SW013', 'SW013BAR', 'TechBrand', 'https://picsum.photos/id/13/600/400', 22, 0
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Smartwatch Pro');
+SELECT 'Reloj Inteligente Pro', 'Reloj inteligente premium con monitoreo continuo de salud, GPS integrado y más de 100 modos deportivos. Integra pagos sin contacto, asistencia por voz y resistencia al agua 5 ATM para uso diario o entrenamientos.', 200.00, 150.00, 'SW013', 'SW013BAR', 'TechBrand', 'https://plus.unsplash.com/premium_photo-1713795721832-0f33126b4abd?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8c21hcnR3YXRjaHxlbnwwfHwwfHx8MA%3D%3D', 22, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Reloj Inteligente Pro');
 
 /* ================================
    PRODUCT ↔ CATEGORY mappings
    ================================ */
--- Smartphone X -> Electronics
+-- Teléfono Inteligente X -> Electronica
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.name = 'Smartphone X' AND c.name = 'Electronics'
+WHERE p.sku = 'SP001' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Laptop Pro -> Electronics
+-- Portátil Pro -> Electronica
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.name = 'Laptop Pro' AND c.name = 'Electronics'
+WHERE p.sku = 'LP002' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Cotton T-Shirt -> Clothing
+-- Camiseta de Algodón -> Ropa
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.name = 'Cotton T-Shirt' AND c.name = 'Clothing'
+WHERE p.sku = 'TS003' AND c.name = 'Ropa'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Wireless Headphones -> Electronics
+-- Auriculares Inalámbricos -> Electronica
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.name = 'Wireless Headphones' AND c.name = 'Electronics'
+WHERE p.sku = 'WH004' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Gaming Mouse -> Electronics
+-- Mouse Gamer RGB -> Electronica
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.name = 'Gaming Mouse' AND c.name = 'Electronics'
+WHERE p.sku = 'GM005' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Sports Sneakers -> Clothing
+-- Zapatillas Deportivas -> Ropa
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.name = 'Sports Sneakers' AND c.name = 'Clothing'
+WHERE p.sku = 'SN006' AND c.name = 'Ropa'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- LED TV 50" -> Electronics
+-- TV LED 50 Pulgadas -> Electronica
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.name = 'LED TV 50"' AND c.name = 'Electronics'
+WHERE p.sku = 'TV007' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Bluetooth Speaker -> Electronics
+-- Parlante Bluetooth -> Electronica
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.name = 'Bluetooth Speaker' AND c.name = 'Electronics'
+WHERE p.sku = 'BS008' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Coffee Maker -> Home
+-- Cafetera Automática -> Home
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.name = 'Coffee Maker' AND c.name = 'Home'
+WHERE p.sku = 'CM009' AND c.name = 'Home'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Gaming Keyboard -> Electronics
+-- Teclado Gamer -> Electronica
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.name = 'Gaming Keyboard' AND c.name = 'Electronics'
+WHERE p.sku = 'GK010' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Men Jacket -> Clothing
+-- Campera Impermeable Hombre -> Ropa
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.name = 'Men Jacket' AND c.name = 'Clothing'
+WHERE p.sku = 'JK011' AND c.name = 'Ropa'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Women Sunglasses -> Accessories
+-- Gafas de Sol Mujer -> Accesorios
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.name = 'Women Sunglasses' AND c.name = 'Accessories'
+WHERE p.sku = 'SG012' AND c.name = 'Accesorios'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Smartwatch Pro -> Electronics
+-- Reloj Inteligente Pro -> Electronica
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.name = 'Smartwatch Pro' AND c.name = 'Electronics'
+WHERE p.sku = 'SW013' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
