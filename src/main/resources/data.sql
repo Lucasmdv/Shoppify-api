@@ -165,6 +165,11 @@ SELECT 'Electronica', 'https://images.unsplash.com/photo-1562408590-e32931084e23
 WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Electronica');
 
 INSERT INTO categories (name, img_url)
+SELECT 'Zapatillas', 'https://images.unsplash.com/photo-1588361861040-ac9b1018f6d5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y2FsemFkb3xlbnwwfHwwfHx8MA%3D%3D'
+WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Zapatillas');
+
+
+INSERT INTO categories (name, img_url)
 SELECT 'Ropa', 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8Y2xvdGhlc3xlbnwwfHwwfHx8MA%3D%3D'
 WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Ropa');
 
