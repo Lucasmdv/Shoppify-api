@@ -17,9 +17,11 @@ import org.stockify.model.mapper.TransactionMapper;
 import org.stockify.model.repository.ProductRepository;
 import org.stockify.model.repository.StoreRepository;
 import org.stockify.model.repository.TransactionRepository;
+import org.stockify.util.PriceCalculator;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,6 +35,7 @@ public class TransactionService {
     private final TransactionMapper transactionMapper;
     private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
+    private final PriceCalculator priceCalculator;
 
     public TransactionResponse saveTransaction(TransactionCreatedRequest request, TransactionType type) {
         TransactionEntity transactionEntity = transactionMapper.toEntity(request);
@@ -44,39 +47,32 @@ public class TransactionService {
     }
 
     public TransactionEntity createTransaction(TransactionRequest request, TransactionType type) {
-        Set<DetailTransactionEntity> detailTransactions = request
-                .getDetailTransactions()
-                .stream()
-                .map(detailRequest -> {
-                    ProductEntity product = productRepository.findById(detailRequest.getProductID())
-                            .orElseThrow(() -> new NotFoundException("Product with ID " + detailRequest.getProductID() + " not found."));
-
-                    DetailTransactionEntity entity = new DetailTransactionEntity();
-                    entity.setProduct(product);
-
-                    long quantity = detailRequest.getQuantity();
-                    entity.setQuantity(quantity);
-
-                    BigDecimal unitPrice = resolveUnitPrice(product, type);
-                    BigDecimal quantityAsBigDecimal = BigDecimal.valueOf(quantity);
-                    entity.setSubtotal(unitPrice.multiply(quantityAsBigDecimal));
-
-                    return entity;
-                })
-                .collect(Collectors.toSet());
 
         TransactionEntity transactionEntity = transactionMapper.toEntity(request);
         transactionEntity.setStore(resolveDefaultStore());
+
+        Set<DetailTransactionEntity> detailTransactions = new HashSet<>();
+        BigDecimal total = BigDecimal.ZERO;
+        for (DetailTransactionRequest detailRequest : request.getDetailTransactions()) {
+
+            ProductEntity product = resolveProduct(detailRequest.getProductID());
+
+
+            DetailTransactionEntity entity = new DetailTransactionEntity();
+            entity.setProduct(product);
+            entity.setQuantity(detailRequest.getQuantity());
+            entity.setTransaction(transactionEntity);
+
+            BigDecimal unitPrice = resolveUnitPrice(product, type);
+            BigDecimal subtotal = priceCalculator.calculateSubtotal(unitPrice, detailRequest.getQuantity());
+            entity.setSubtotal(subtotal);
+            detailTransactions.add(entity);
+            total = total.add(subtotal);
+        }
+
+
         transactionEntity.setDetailTransactions(detailTransactions);
-        detailTransactions.forEach(detail -> detail.setTransaction(transactionEntity));
-
-        transactionEntity.setTotal(
-                detailTransactions.stream()
-                        .map(DetailTransactionEntity::getSubtotal)
-                        .reduce(BigDecimal::add)
-                        .orElse(BigDecimal.ZERO)
-        );
-
+        transactionEntity.setTotal(total);
         transactionEntity.setDescription(request.getDescription());
         transactionEntity.setType(type);
 
@@ -91,31 +87,24 @@ public class TransactionService {
     }
 
     private BigDecimal resolveUnitPrice(ProductEntity product, TransactionType type) {
-        if (type == TransactionType.PURCHASE && product.getUnitPrice() != null) {
-            return product.getUnitPrice();
-        }
-        BigDecimal basePrice = product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO;
 
+        if (type == TransactionType.PURCHASE) {
+            return product.getUnitPrice() != null ? product.getUnitPrice() : BigDecimal.ZERO;
+        }
         if (type == TransactionType.SALE) {
-            BigDecimal discount = product.getDiscountPercentage() != null ? product.getDiscountPercentage() : BigDecimal.ZERO;
-            if (discount.compareTo(BigDecimal.ZERO) < 0) {
-                discount = BigDecimal.ZERO;
-            }
-            if (discount.compareTo(BigDecimal.valueOf(100)) > 0) {
-                discount = BigDecimal.valueOf(100);
-            }
-            BigDecimal factor = BigDecimal.ONE.subtract(
-                    discount.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP)
-            );
-            return basePrice.multiply(factor).setScale(2, RoundingMode.HALF_UP);
+            return priceCalculator.calculateDiscountPrice(product);
         }
-        return basePrice;
+        return product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO;
     }
-
 
     private StoreEntity resolveDefaultStore() {
         return storeRepository.findAll().stream().findFirst()
                 .orElseThrow(() -> new NotFoundException("Store configuration not found. Please register a store before creating transactions."));
+    }
+
+    private ProductEntity resolveProduct(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Product with id " + productId + " not found"));
     }
 }
 
