@@ -33,8 +33,5 @@ public class CartItemEntity {
     @Column(name = "quantity", nullable = false)
     private Long quantity;
 
-    @Column(name = "subtotal", precision = 20, scale = 2)
-    private BigDecimal subtotal;
-
 
 }

@@ -24,5 +24,5 @@ public class CartRequest {
     @Schema(description = "Items that should be stored inside the cart")
     @Valid
     @NotEmpty(message = "The cart must contain at least one item")
-    private List<DetailCartRequest> items;
+    private List<CartItemRequest> items;
 }

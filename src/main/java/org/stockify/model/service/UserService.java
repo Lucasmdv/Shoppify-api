@@ -24,6 +24,7 @@ import org.stockify.model.specification.UserSpecification;
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final CartService cartService;
     // Removed security-related dependencies from UserService
 
     /**
@@ -60,12 +61,15 @@ public class UserService {
     /**
      * Saves a new client in the system.
      *
-     * @param clientRequest DTO containing the client data to create
+     * @param userRequest DTO containing the client data to create
      * @return a DTO with the saved client data
      */
-    public UserResponse save(UserRequest clientRequest) {
-        UserEntity clientEntity = userMapper.toEntity(clientRequest);
-        return userMapper.toDto(userRepository.save(clientEntity));
+    public UserResponse save(UserRequest userRequest) {
+
+        UserEntity userEntity = userMapper.toEntity(userRequest);
+        UserEntity createdUser = userRepository.save(userEntity);
+        cartService.createUserCart(createdUser.getId());
+        return userMapper.toDto(createdUser);
     }
 
     /**

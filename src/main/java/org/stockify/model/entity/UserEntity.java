@@ -44,9 +44,11 @@ public class UserEntity {
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
     private Set<SaleEntity> sales;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user")
     private CredentialsEntity credentials;
 
+    @OneToOne(mappedBy = "client")
+    private CartEntity cart;
 
     @Column(name = "client_img")
     private String img;

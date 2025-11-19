@@ -12,13 +12,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DetailCartRequest {
+public class UpdateCartItemRequest {
 
-    @Schema(description = "Identifier of the product that should be part of the cart", example = "35")
-    @NotNull(message = "Product identifier is required")
-    private Long productId;
-
-    @Schema(description = "Quantity of items for this product", example = "2")
+    @Schema(description = "New quantity for the cart item", example = "3")
     @NotNull(message = "Quantity is required")
     @Min(value = 1, message = "Quantity must be at least 1")
     private Long quantity;

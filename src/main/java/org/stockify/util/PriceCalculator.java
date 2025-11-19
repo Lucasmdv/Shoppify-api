@@ -1,6 +1,10 @@
 package org.stockify.util;
 
+import org.mapstruct.Named;
 import org.springframework.stereotype.Component;
+import org.stockify.model.entity.CartEntity;
+import org.stockify.model.entity.CartItemEntity;
+import org.stockify.model.entity.DetailTransactionEntity;
 import org.stockify.model.entity.ProductEntity;
 
 import java.math.BigDecimal;
@@ -9,83 +13,63 @@ import java.math.RoundingMode;
 @Component
 public class PriceCalculator {
 
-    private static final BigDecimal ONE_HUNDRED = BigDecimal.valueOf(100);
-    private static final BigDecimal ZERO_MONEY = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
-
+    /**
+     * Calcula el precio final de un producto después de aplicar su porcentaje de descuento.
+     * Se asume que los valores de price y discountPercentage ya están limpios y validados.
+     */
+    @Named("discountPrice")
     public BigDecimal calculateDiscountPrice(ProductEntity product) {
-        if (product == null) {
-            return ZERO_MONEY;
-        }
-        return calculatePriceWithDiscount(product.getPrice(), product.getDiscountPercentage());
-    }
 
-    public BigDecimal calculatePriceWithDiscount(BigDecimal price, BigDecimal discount) {
-        BigDecimal basePrice = price == null ? BigDecimal.ZERO : price;
-        BigDecimal normalizedDiscount = normalizeDiscountPercentage(discount);
+        BigDecimal price = product.getPrice();
+        BigDecimal discountPercentage = product.getDiscountPercentage();
 
-        if (basePrice.compareTo(BigDecimal.ZERO) <= 0) {
-            return ZERO_MONEY;
+        if (discountPercentage == null || discountPercentage.compareTo(BigDecimal.ZERO) <= 0) {
+            return price;
         }
 
-        BigDecimal discountFactor = BigDecimal.ONE.subtract(
-                normalizedDiscount.divide(ONE_HUNDRED, 4, RoundingMode.HALF_UP)
+        BigDecimal discountFactor = discountPercentage.divide(
+                BigDecimal.valueOf(100),
+                4,
+                RoundingMode.HALF_UP
         );
-        return basePrice.multiply(discountFactor).setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal finalFactor = BigDecimal.ONE.subtract(discountFactor);
+        BigDecimal finalPrice = price.multiply(finalFactor);
+
+        return finalPrice.setScale(2, RoundingMode.HALF_UP);
     }
 
-    public BigDecimal normalizeMoney(BigDecimal value) {
-        if (value == null) {
-            return null;
-        }
-        return value.setScale(2, RoundingMode.HALF_UP);
-    }
-
-    public BigDecimal normalizeMoneyOrZero(BigDecimal value) {
-        BigDecimal normalized = normalizeMoney(value);
-        return normalized == null ? ZERO_MONEY : normalized;
-    }
-
-    public BigDecimal normalizeDiscountPercentage(BigDecimal discount) {
-        if (discount == null) {
-            return ZERO_MONEY;
-        }
-
-        BigDecimal scaled = discount.setScale(2, RoundingMode.HALF_UP);
-        if (scaled.compareTo(BigDecimal.ZERO) < 0) {
-            return ZERO_MONEY;
-        }
-        if (scaled.compareTo(ONE_HUNDRED) > 0) {
-            return ONE_HUNDRED.setScale(2, RoundingMode.HALF_UP);
-        }
-        return scaled;
-    }
-
-    public double toDouble(BigDecimal value) {
-        return value == null ? 0.0 : value.doubleValue();
-    }
-
-    public double discountPercentageAsDouble(BigDecimal discount) {
-        return toDouble(normalizeDiscountPercentage(discount));
-    }
-
-    public double priceWithDiscountAsDouble(ProductEntity product) {
-        return toDouble(calculateDiscountPrice(product));
-    }
-
-    public double priceWithDiscountAsDouble(BigDecimal price, BigDecimal discount) {
-        return toDouble(calculatePriceWithDiscount(price, discount));
-    }
-
-    public Long normalizeStock(Long stock) {
-        return stock == null ? 0L : stock;
-    }
-
-    public Long initialSoldQuantity() {
-        return 0L;
-    }
 
     public BigDecimal calculateSubtotal(BigDecimal discountPrice, Long quantity){
         if (discountPrice == null || quantity == null) return BigDecimal.ZERO;
         return discountPrice.multiply(BigDecimal.valueOf(quantity));
+    }
+
+    @Named("detailSubtotal")
+    public BigDecimal calculateSubtotalDiscount(DetailTransactionEntity detail){
+        if (detail == null) return BigDecimal.ZERO;
+        ProductEntity product = detail.getProduct();
+        Long quantity = detail.getQuantity();
+        if (product == null || quantity == null) return BigDecimal.ZERO;
+        return calculateDiscountPrice(product).multiply(BigDecimal.valueOf(quantity));
+    }
+
+    @Named("cartSubtotal")
+    public BigDecimal calculateCartSubtotal(CartItemEntity item){
+        if (item == null) return BigDecimal.ZERO;
+        ProductEntity product = item.getProduct();
+        Long quantity = item.getQuantity();
+        if (product == null || quantity == null) return BigDecimal.ZERO;
+        return calculateDiscountPrice(product).multiply(BigDecimal.valueOf(quantity));
+    }
+
+    @Named("cartTotal")
+    public BigDecimal calculateCartTotal(CartEntity cart){
+        if (cart.getProducts() == null) return BigDecimal.ZERO;
+        BigDecimal total = BigDecimal.ZERO;
+        for (CartItemEntity item : cart.getProducts()) {
+            total = total.add(calculateCartSubtotal(item));
+        }
+        return total.setScale(2, RoundingMode.HALF_UP);
     }
 }

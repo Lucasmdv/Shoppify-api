@@ -31,7 +31,12 @@ public class UserResponse extends RepresentationModel<UserResponse> {
     @Schema(description = "Client's image", example = "http//:image.com", maxLength = 20)
     private String img;
 
+    @Schema(description = "Date of registration", example = "2021-01-01")
     private String dateOfRegistration;
 
+    @Schema(description = "Client's email", example = "asd@asd")
     private String email;
+
+    @Schema(description = "Client's cart")
+    private CartResponse cart;
 }
