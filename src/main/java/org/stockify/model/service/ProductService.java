@@ -335,8 +335,6 @@ public class ProductService {
 
     /**
      * Auxiliary method to find a product entity by its ID.
-     *
-     * @param id the ID of the product to find
      * @return the found product entity
      * @throws NotFoundException if no product is found with the given ID
      */

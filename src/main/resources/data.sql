@@ -183,179 +183,505 @@ SELECT 'Accesorios', 'https://plus.unsplash.com/premium_photo-1681276170683-7061
 WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Accesorios');
 
 /* ================================
-   PRODUCTS (3 base + 14 adicionales)
+   PRODUCTOS
    ================================ */
--- Base (por si aún no estaban)
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
-SELECT 'Teléfono Inteligente X', 'Smartphone de última generación con pantalla AMOLED nítida, procesador de alto rendimiento y triple cámara con IA para fotos claras en cualquier situación. Incluye batería de larga duración, carga rápida y conectividad 5G para trabajo y entretenimiento sin interrupciones.', 5899.00, 520000.00, 'SP001', 'SP001BAR', 'TechBrand', 'https://images.unsplash.com/photo-1598327106026-d9521da673d1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzJ8fHNtYXJ0cGhvbmV8ZW58MHx8MHx8fDA%3D', 10, 320, 10
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Teléfono Inteligente X');
 
+-- 1
 INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
-SELECT 'Portátil Pro', 'Portátil profesional con chasis de aluminio, procesador de 12ª generación y 32 GB de RAM que permiten ejecutar software exigente sin demoras. Integra pantalla 4K calibrada, SSD NVMe de 1 TB y sistema de enfriamiento silencioso ideal para desarrollo, diseño y edición.', 12500.00, 1120000.00, 'LP002', 'LP002BAR', 'TechBrand', 'https://plus.unsplash.com/premium_photo-1711051475117-f3a4d3ff6778?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bGFwdG9wfGVufDB8fDB8fHww', 7, 74, 5
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Portátil Pro');
+SELECT 'Audífonos Deportivos Mini', 'Audífonos in-ear con ajuste deportivo, resistencia al sudor y micrófono integrado. Batería de 10 horas y control táctil sencillo.', 4599.00, 32000.00, 'AC01801', '100000000001', 'SoundBrand', 'https://images.unsplash.com/photo-1739764574592-1dcd5d978a53?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8QXVkJUMzJUFEZm9ub3MlMjBEZXBvcnRpdm9zJTIwTWluaXxlbnwwfHwwfHx8MA%3D%3D', 60, 45, 5
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'AC01801');
 
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
-SELECT 'Camiseta de Algodón', 'Camiseta básica confeccionada con algodón peinado hipoalergénico que mantiene la piel fresca durante todo el día. Tiene costuras reforzadas, cuello redondo suave y un ajuste relajado pensado para uso diario o uniformes.', 1499.00, 9000.00, 'TS003', 'TS003BAR', 'FashionBrand', 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dHNoaXJ0fGVufDB8fDB8fHww', 50, 610, 15
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Camiseta de Algodón');
-
--- Adicionales (14)
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
-SELECT 'Auriculares Inalámbricos', 'Auriculares con cancelación activa de ruido, drivers de alta fidelidad y diseño circumaural que envuelve cómodamente la oreja. Ofrecen hasta 30 horas de autonomía, conectividad multipunto y controles táctiles para música y llamadas.', 8799.00, 62000.00, 'WH004', 'WH004BAR', 'SoundBrand', 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8aGVhZHBob25lc3xlbnwwfHwwfHx8MA%3D%3D', 25, 280, 0
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Auriculares Inalámbricos');
-
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
-SELECT 'Mouse Gamer RGB', 'Mouse ergonómico diseñado para sesiones largas de juego con sensor óptico de 16.000 DPI y switches duraderos. El sistema de iluminación RGB personalizable y los perfiles programables permiten adaptar cada macro a tu estilo.', 3299.00, 21000.00, 'GM005', 'GM005BAR', 'GameTech', 'https://images.unsplash.com/photo-1629121291243-7b5e885cce9b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW91c2UlMjBnYW1pbmd8ZW58MHx8MHx8fDA%3D', 30, 190, 20
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Mouse Gamer RGB');
-
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
-SELECT 'Zapatillas Deportivas', 'Zapatillas livianas con malla respirable y refuerzos laterales que brindan estabilidad en entrenamientos de alto impacto. La entresuela con amortiguación reactiva y la suela de goma antideslizante aseguran tracción en interiores y exteriores.', 8999.00, 60000.00, 'SN006', 'SN006BAR', 'FootBrand', 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8c3BvcnQlMjBzbmVha2Vyc3xlbnwwfHwwfHx8MA%3D%3D', 20, 420, 10
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Zapatillas Deportivas');
-
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
-SELECT 'TV LED 50 Pulgadas', 'Televisor 4K Ultra HD con panel LED de 50 pulgadas, Dolby Vision y tasa de refresco mejorada para imágenes fluidas. Incluye sistema Smart TV en español, asistentes de voz integrados y múltiples puertos HDMI para consolas y streaming.', 45999.00, 38000.00, 'TV007', 'TV007BAR', 'VisionPlus', 'https://plus.unsplash.com/premium_photo-1681236323432-3df82be0c1b0?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dHZ8ZW58MHx8MHx8fDA%3D', 12, 140, 12
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'TV LED 50 Pulgadas');
-
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
-SELECT 'Parlante Bluetooth', 'Parlante portátil con carcasa resistente a salpicaduras, radiadores pasivos y sonido 360° claro. Ofrece conexión Bluetooth 5.0 de alcance extendido, manos libres integrado y hasta 12 horas de reproducción continua.', 6399.00, 4200.00, 'BS008', 'BS008BAR', 'SoundBrand', 'https://images.unsplash.com/photo-1531104985437-603d6490e6d4?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c3BlYWtlcnxlbnwwfHwwfHx8MA%3D%3D', 40, 350, 0
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Parlante Bluetooth');
-
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
-SELECT 'Cafetera Automática', 'Cafetera automática con molinillo integrado, programación diaria y boquilla de vapor para bebidas cremosas. El depósito removible de agua y la limpieza guiada simplifican el mantenimiento en oficinas o hogares ocupados.', 15999.00, 12500.00, 'CM009', 'CM009BAR', 'HomeAppliance', 'https://plus.unsplash.com/premium_photo-1661722983090-11783531c332?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Y29mZmUlMjBtYWtlcnxlbnwwfHwwfHx8MA%3D%3D', 15, 95, 18
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Cafetera Automática');
-
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
-SELECT 'Teclado Gamer', 'Teclado mecánico con switches táctiles de respuesta rápida, placa superior de aluminio y reposamuñecas magnético. La retroiluminación RGB por tecla y el software de macros permiten personalizar perfiles para cada juego.', 6999.00, 4500.00, 'GK010', 'GK010BAR', 'GameTech', 'https://images.unsplash.com/photo-1637243218672-d338945efdf7?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8Z2FtaW5nJTIwa2V5Ym9hcmR8ZW58MHx8MHx8fDA%3D', 25, 210, 0
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Teclado Gamer');
-
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
-SELECT 'Campera Impermeable Hombre', 'Campera invernal con membrana impermeable y respirable, relleno térmico sintético y costuras termoselladas para bloquear el viento. Posee capucha ajustable, múltiples bolsillos con cierres impermeables y puños interiores elásticos.', 11999.00, 8000.00, 'JK011', 'JK011BAR', 'FashionBrand', 'https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bWVuJTIwamFja2V0fGVufDB8fDB8fHww', 18, 160, 25
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Campera Impermeable Hombre');
-
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
-SELECT 'Gafas de Sol Mujer', 'Gafas de sol elegantes con montura liviana resistente a impactos y lentes UV400 de alta claridad. Incluyen tratamiento antirreflejo, bisagras metálicas flexibles y estuche rígido para transportar en carteras o mochilas.', 3499.00, 1800.00, 'SG012', 'SG012BAR', 'StyleBrand', 'https://images.unsplash.com/photo-1624545104844-0d342896e7a6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c3VuZ2xhc2VzfGVufDB8fDB8fHww', 50, 500, 10
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Gafas de Sol Mujer');
-
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
-SELECT 'Reloj Inteligente Pro', 'Reloj inteligente premium con monitoreo continuo de salud, GPS integrado y más de 100 modos deportivos. Integra pagos sin contacto, asistencia por voz y resistencia al agua 5 ATM para uso diario o entrenamientos.', 21999.00, 16000.00, 'SW013', 'SW013BAR', 'TechBrand', 'https://plus.unsplash.com/premium_photo-1713795721832-0f33126b4abd?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8c21hcnR3YXRjaHxlbnwwfHwwfHx8MA%3D%3D', 22, 260, 15
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Reloj Inteligente Pro');
-
-/* ================================
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
-SELECT 'Tablet Creativa 11', 'Tablet de 11 pulgadas con panel 2K y lápiz óptico incluido. Integra procesador de ocho núcleos, 8 GB de RAM y 256 GB de almacenamiento ampliable para streaming, ilustración y multitarea.', 369999.00, 300000.00, 'TB014', 'TB014BAR', 'InnovaTech', 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8dGFibGV0fGVufDB8fDB8fHww', 15, 55, 7
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Tablet Creativa 11');
-
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
-SELECT 'Pantalón Jogger Urbano', 'Pantalón jogger de algodón con elastano, cintura ajustable y bolsillos laterales con cierre. El interior perchado brinda abrigo y la silueta cónica permite combinarlo con zapatillas o botas.', 45999.00, 25000.00, 'PJ015', 'PJ015BAR', 'UrbanWear', 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8cGFudHN8ZW58MHx8MHx8fDA%3D', 40, 310, 5
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Pantalón Jogger Urbano');
-
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
-SELECT 'Robot Aspirador Smart', 'Robot aspirador con navegación láser, programación semanal y detección automática de alfombras. Incluye base de autovaciado, control desde app y compatibilidad con asistentes de voz.', 289999.00, 210000.00, 'RB016', 'RB016BAR', 'HomeAppliance', 'https://images.unsplash.com/photo-1580894894514-0b8d4a4e87b4?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cm9ib3QlMjB2YWN1dW18ZW58MHx8MHx8fDA%3D', 12, 80, 12
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Robot Aspirador Smart');
-
-INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
-SELECT 'Mochila Urbana Antirrobo', 'Mochila con tela impermeable, cierres ocultos y puerto USB externo para cargar dispositivos. El espaldar acolchado y los compartimentos organizadores protegen notebooks de hasta 16 pulgadas.', 65999.00, 38000.00, 'BG017', 'BG017BAR', 'CityPack', 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmFja3BhY2t8ZW58MHx8MHx8fDA%3D', 30, 275, 5
-WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = 'Mochila Urbana Antirrobo');
-
-   PRODUCT ↔ CATEGORY mappings
-   ================================ */
--- Teléfono Inteligente X -> Electronica
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.sku = 'SP001' AND c.name = 'Electronica'
+WHERE p.sku = 'AC01801' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Portátil Pro -> Electronica
+-- 2
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Cámara Deportiva 4K', 'Cámara de acción 4K con estabilización electrónica, sumergible y accesorios para casco y bici.', 19999.00, 160000.00, 'CAM01901', '100000000002', 'ActionCam', 'https://images.unsplash.com/photo-1583773393757-949c61acb868?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8QyVDMyVBMW1hcmElMjBEZXBvcnRpdmElMjA0S3xlbnwwfHwwfHx8MA%3D%3D', 18, 26, 10
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'CAM01901');
+
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.sku = 'LP002' AND c.name = 'Electronica'
+WHERE p.sku = 'CAM01901' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Camiseta de Algodón -> Ropa
+-- 3
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Auricular Over-Ear Premium', 'Auricular circumaural con drivers de 40mm y cancelación pasiva, ideal para estudio y viajes.', 10999.00, 80000.00, 'AH02001', '100000000003', 'SoundBrand', 'https://media.istockphoto.com/id/1366982098/es/foto/auriculares-inal%C3%A1mbricos-sobre-la-oreja-cuero-gris-aislado-sobre-fondo-blanco-con-maqueta-de.webp?a=1&b=1&s=612x612&w=0&k=20&c=iDaEPCUaKzU6vQxxlkY1qsPlZJHVqEmXurSxIO3FbYc=', 22, 30, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'AH02001');
+
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.sku = 'TS003' AND c.name = 'Ropa'
+WHERE p.sku = 'AH02001' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Auriculares Inalámbricos -> Electronica
+-- 4
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Cargador Rápido USB-C 65W', 'Cargador compacto 65W con USB-C PD, ideal para notebooks ligeros y smartphones.', 2999.00, 22000.00, 'CH02101', '100000000004', 'ChargePro', 'https://images.unsplash.com/photo-1618911138919-dcabd0bd6108?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fENhcmdhZG9yJTIwUiVDMyVBMXBpZG8lMjBVU0ItQyUyMDY1V3xlbnwwfHwwfHx8MA%3D%3D', 120, 600, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'CH02101');
+
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.sku = 'WH004' AND c.name = 'Electronica'
+WHERE p.sku = 'CH02101' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Mouse Gamer RGB -> Electronica
+-- 5
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Soporte Laptop Ajustable', 'Soporte para laptop con ángulo regulable y ventilación para mejorar la disipación de calor.', 2499.00, 18000.00, 'SP02201', '100000000005', 'OfficeGear', 'https://media.istockphoto.com/id/1125614886/es/foto/pie-soporte-de-port%C3%A1til-con-notebook-en-el-escritorio.webp?a=1&b=1&s=612x612&w=0&k=20&c=bjDYGXWi491LJ1dU7IfVn-tZS_a9a-puw9z4DAbDvjQ=', 80, 150, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'SP02201');
+
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.sku = 'GM005' AND c.name = 'Electronica'
+WHERE p.sku = 'SP02201' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Zapatillas Deportivas -> Ropa
+-- 6
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Smart Plug WiFi', 'Enchufe inteligente con temporizador y compatibilidad con asistentes de voz.', 1999.00, 15000.00, 'SP02301', '100000000006', 'HomeIoT', 'https://images.unsplash.com/photo-1758640265844-5da0c0a4b896?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8U21hcnQlMjBQbHVnJTIwV2lGaXxlbnwwfHwwfHx8MA%3D%3D', 200, 220, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'SP02301');
+
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.sku = 'SN006' AND c.name = 'Ropa'
+WHERE p.sku = 'SP02301' AND c.name = 'Home'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- TV LED 50 Pulgadas -> Electronica
+-- 7
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Altavoz Inteligente Mini', 'Altavoz inteligente compacto con asistente por voz y buena reproducción para ambientes pequeños.', 3999.00, 30000.00, 'AS02401', '100000000007', 'SoundBrand', 'https://images.unsplash.com/photo-1610563634205-79b98fc239e6?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8QWx0YXZveiUyMEludGVsaWdlbnRlJTIwTWluaXxlbnwwfHwwfHx8MA%3D%3D', 85, 90, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'AS02401');
+
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.sku = 'TV007' AND c.name = 'Electronica'
+WHERE p.sku = 'AS02401' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Parlante Bluetooth -> Electronica
+-- 8
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Base de Carga Wireless 15W', 'Base inalámbrica de carga rápida 15W compatible con la mayoría de smartphones modernos.', 2199.00, 17000.00, 'BQ02501', '100000000008', 'ChargePro', 'https://images.unsplash.com/photo-1763543037341-acb3594a09d8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8QmFzZSUyMGRlJTIwQ2FyZ2ElMjBXaXJlbGVzcyUyMDE1V3xlbnwwfHwwfHx8MA%3D%3D', 140, 210, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'BQ02501');
+
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.sku = 'BS008' AND c.name = 'Electronica'
+WHERE p.sku = 'BQ02501' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Cafetera Automática -> Home
+-- 9
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Mochila para Laptop 15"', 'Mochila urbana con compartimento acolchado para notebook y múltiples bolsillos organizadores.', 6599.00, 38000.00, 'BG02601', '100000000009', 'CityPack', 'https://images.unsplash.com/photo-1585501954260-372cec60d355?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8TW9jaGlsYSUyMHBhcmElMjBMYXB0b3AlMjAxNSUyMnxlbnwwfHwwfHx8MA%3D%3D', 55, 140, 5
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'BG02601');
+
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.sku = 'CM009' AND c.name = 'Home'
+WHERE p.sku = 'BG02601' AND c.name = 'Accesorios'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Teclado Gamer -> Electronica
+-- 10
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Batería Externa 20.000mAh', 'Powerbank con doble salida USB y protección contra sobrecargas.', 4799.00, 36000.00, 'PB02701', '100000000010', 'PowerMax', 'https://media.istockphoto.com/id/1453393171/es/foto/powerbank-nuevo-potente-color-oscuro-con-dos-entradas-usb-sobre-un-fondo-blanco-ilustraci%C3%B3n.webp?a=1&b=1&s=612x612&w=0&k=20&c=gu3lBUwaytp0K4Q-7qwaFsxQ0wcA8wUM0CDbRNJiK0Q=', 160, 540, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'PB02701');
+
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.sku = 'GK010' AND c.name = 'Electronica'
+WHERE p.sku = 'PB02701' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Campera Impermeable Hombre -> Ropa
+-- 11
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Remera Técnica Running', 'Remera deportiva con tejido transpirable y secado rápido, ideal para running.', 2699.00, 16000.00, 'RT02801', '100000000011', 'SportWear', 'https://images.unsplash.com/photo-1637712181274-e3e268d248f6?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8UmVtZXJhJTIwVCVDMyVBOWNuaWNhJTIwUnVubmluZ3xlbnwwfHwwfHx8MA%3D%3D', 140, 420, 10
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'RT02801');
+
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.sku = 'JK011' AND c.name = 'Ropa'
+WHERE p.sku = 'RT02801' AND c.name = 'Ropa'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Gafas de Sol Mujer -> Accesorios
+-- 12
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Short de Entrenamiento', 'Short ligero con cintura elástica y bolsillos ocultos para llaves.', 1899.00, 11000.00, 'SH02901', '100000000012', 'SportWear', 'https://images.unsplash.com/photo-1762744826900-ff6cdf807d79?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8U2hvcnQlMjBkZSUyMEVudHJlbmFtaWVudG98ZW58MHx8MHx8fDA%3D', 130, 260, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'SH02901');
+
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.sku = 'SG012' AND c.name = 'Accesorios'
+WHERE p.sku = 'SH02901' AND c.name = 'Ropa'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Reloj Inteligente Pro -> Electronica
+-- 13
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Pantalón Deportivo Largo', 'Pantalón con tejido térmico y ajuste ceñido en tobillos, pensado para entrenamiento en clima frío.', 3999.00, 28000.00, 'PD03001', '100000000013', 'SportWear', 'https://images.unsplash.com/photo-1580764194528-6a4158e3dab0?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fFBhbnRhbCVDMyVCM24lMjBEZXBvcnRpdm8lMjBMYXJnb3xlbnwwfHwwfHx8MA%3D%3D', 90, 120, 15
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'PD03001');
+
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.sku = 'SW013' AND c.name = 'Electronica'
+WHERE p.sku = 'PD03001' AND c.name = 'Ropa'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Tablet Creativa 11 -> Electronica
+-- 14
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Zapatillas Urbanas Casual', 'Zapatillas para uso diario con suela acolchada y diseño minimalista.', 7499.00, 50000.00, 'SN03101', '100000000014', 'FootBrand', 'https://media.istockphoto.com/id/2215077612/es/foto/casual-shoes-isolated-on-white-background-sport-running-sneakers.webp?a=1&b=1&s=612x612&w=0&k=20&c=GxPwx1hfnMBRt7loTqxVgVkvrNZEjFzbY0Sk0rseZEQ=', 45, 210, 10
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'SN03101');
+
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.sku = 'TB014' AND c.name = 'Electronica'
+WHERE p.sku = 'SN03101' AND c.name = 'Zapatillas'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Pantalón Jogger Urbano -> Ropa
+-- 15
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Zapatillas Trail Pro', 'Zapatillas de trail con agarre avanzado y refuerzo en puntera para terrenos irregulares.', 9999.00, 72000.00, 'SN03201', '100000000015', 'TrailMaster', 'https://images.unsplash.com/photo-1563635419376-78d400e5588e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8WmFwYXRpbGxhcyUyMFRyYWlsJTIwUHJvfGVufDB8fDB8fHww', 38, 80, 5
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'SN03201');
+
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.sku = 'PJ015' AND c.name = 'Ropa'
+WHERE p.sku = 'SN03201' AND c.name = 'Zapatillas'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Robot Aspirador Smart -> Home
+-- 16
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Camisa Casual Hombre', 'Camisa de algodón con corte moderno y botones resistentes.', 3299.00, 22000.00, 'CM03301', '100000000016', 'FashionBrand', 'https://images.unsplash.com/photo-1618088129969-bcb0c051985e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Q2FtaXNhJTIwQ2FzdWFsJTIwSG9tYnJlfGVufDB8fDB8fHww', 70, 90, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'CM03301');
+
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.sku = 'RB016' AND c.name = 'Home'
+WHERE p.sku = 'CM03301' AND c.name = 'Ropa'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
 
--- Mochila Urbana Antirrobo -> Accesorios
+-- 17
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Buzo con Capucha', 'Buzo de algodón con capucha ajustable y bolsillos frontales tipo canguro.', 5499.00, 42000.00, 'BZ03401', '100000000017', 'FashionBrand', 'https://media.istockphoto.com/id/154960461/es/foto/sudor-camisa-roja-sobre-fondo-blanco.webp?a=1&b=1&s=612x612&w=0&k=20&c=1H2ZjH8Lnt-C20PRkFvNyWfQUkGVLw9zNLgEIza8Efo=', 60, 75, 20
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'BZ03401');
+
 INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
-WHERE p.sku = 'BG017' AND c.name = 'Accesorios'
+WHERE p.sku = 'BZ03401' AND c.name = 'Ropa'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 18
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Campera Softshell Mujer', 'Campera softshell ligera, cortaviento y repelente al agua.', 8999.00, 65000.00, 'JK03501', '100000000018', 'FashionBrand', 'https://media.istockphoto.com/id/1412625760/es/foto/mujer-joven-con-mochila-elegante-el-d%C3%ADa-de-oto%C3%B1o-espacio-para-mensajes-de-texto.webp?a=1&b=1&s=612x612&w=0&k=20&c=TozcpQxov69x-rqV2th3QzcYiiEaTneTVr8vEBf3Ihw=', 35, 40, 15
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'JK03501');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'JK03501' AND c.name = 'Ropa'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 19
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Smartwatch Lite', 'Reloj deportivo con notificaciones y seguimiento de actividades básicas.', 8999.00, 65000.00, 'SW03601', '100000000019', 'TechBrand', 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&auto=format&fit=crop&q=60', 50, 110, 10
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'SW03601');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'SW03601' AND c.name = 'Electronica'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 20
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Correa Deportiva para Smartwatch', 'Correa de silicona hipoalergénica, compatible con modelos comunes.', 499.00, 3500.00, 'CR03701', '100000000020', 'AccessoriesCo', 'https://images.unsplash.com/photo-1719523677277-ffdf2113ef62?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Q29ycmVhJTIwRGVwb3J0aXZhJTIwcGFyYSUyMFNtYXJ0d2F0Y2h8ZW58MHx8MHx8fDA%3D', 300, 95, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'CR03701');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'CR03701' AND c.name = 'Accesorios'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 21
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Alfombra de Yoga Antideslizante', 'Esterilla con textura antideslizante y 6mm de grosor para mayor confort.', 2199.00, 16000.00, 'YG03801', '100000000021', 'FitGear', 'https://media.istockphoto.com/id/600372270/es/foto/estera-de-yoga-verde-y-sobre-fondo-blanco.webp?a=1&b=1&s=612x612&w=0&k=20&c=AflSU7jkXZDTYVXms1840UcJpr3bc9b_I1QQtN1lolY=', 95, 70, 5
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'YG03801');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'YG03801' AND c.name = 'Accesorios'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 22
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Set de Cuchillos de Cocina', 'Set de 6 cuchillos de acero inoxidable con mango ergonómico y soporte magnético.', 7499.00, 52000.00, 'CK03901', '100000000022', 'KitchenPro', 'https://images.unsplash.com/photo-1609467334293-030ac6448fd8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8U2V0JTIwZGUlMjBDdWNoaWxsb3MlMjBkZSUyMENvY2luYXxlbnwwfHwwfHx8MA%3D%3D', 40, 18, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'CK03901');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'CK03901' AND c.name = 'Home'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 23
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Lámpara de Mesa LED', 'Lámpara con brillo regulable y puerto USB integrado para carga.', 3199.00, 25000.00, 'LM04001', '100000000023', 'HomeLight', 'https://images.unsplash.com/photo-1591445245952-4df9a055e19f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8TCVDMyVBMW1wYXJhJTIwZGUlMjBNZXNhJTIwTEVEfGVufDB8fDB8fHww', 70, 33, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'LM04001');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'LM04001' AND c.name = 'Home'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 24
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Hervidor Eléctrico 1.7L', 'Hervidor rápido con apagado automático y filtro desincrustante.', 3999.00, 30000.00, 'HV04101', '100000000024', 'HomeAppliance', 'https://media.istockphoto.com/id/2161643846/es/foto/hervidor-el%C3%A9ctrico-negro-de-agua-caliente-aislada-sobre-fondo-blanco-con-trayectoria-de-recorte.webp?a=1&b=1&s=612x612&w=0&k=20&c=MMTXVwPpTYc-hIp7mLoOMIuindWUgIOTRP1CkZ_HAZw=', 44, 28, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'HV04101');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'HV04101' AND c.name = 'Home'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 25
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Set de Vasos Térmicos (6)', 'Juego de 6 vasos térmicos de acero inoxidable para bebidas calientes y frías.', 2899.00, 21000.00, 'VT04201', '100000000025', 'KitchenPro', 'https://media.istockphoto.com/id/2148321498/es/foto/dos-tazas-de-papel-blanco-para-caf%C3%A9-caliente-para-llevar-taza-de-caf%C3%A9-para-bebidas-calientes.webp?a=1&b=1&s=612x612&w=0&k=20&c=f2dmRQAXrzWteEQ3A01k682F9eCCOuHtDwzr8tUhQu8=', 120, 65, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'VT04201');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'VT04201' AND c.name = 'Home'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 26
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Sábana King 200 hilos', 'Juego de sábanas 100% algodón peinado, tacto suave y alta durabilidad.', 7999.00, 60000.00, 'SB04301', '100000000026', 'HomeTextile', 'https://media.istockphoto.com/id/1854148520/es/foto/cama-blanca-con-almohadas-grandes.webp?a=1&b=1&s=612x612&w=0&k=20&c=EImQ6hsoIbXPbqu_0WedVKyFr9Q8Kq32vwWTFX6xsb0=', 30, 12, 5
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'SB04301');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'SB04301' AND c.name = 'Home'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 27
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Gorro de Lana Unisex', 'Gorro cálido de lana acrílica con forro interior suave.', 999.00, 7000.00, 'GR04401', '100000000027', 'WinterWear', 'https://images.unsplash.com/photo-1645475401635-88f088f224d6?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8R29ycm8lMjBkZSUyMExhbmElMjBVbmlzZXh8ZW58MHx8MHx8fDA%3D', 220, 320, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'GR04401');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'GR04401' AND c.name = 'Accesorios'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 28
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Cinturón de Cuero', 'Cinturón clásico de cuero genuino con hebilla metálica resistente.', 2499.00, 18000.00, 'CT04501', '100000000028', 'StyleBrand', 'https://images.unsplash.com/photo-1664286074176-5206ee5dc878?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Q2ludHVyJUMzJUIzbiUyMGRlJTIwQ3Vlcm98ZW58MHx8MHx8fDA%3D', 150, 270, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'CT04501');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'CT04501' AND c.name = 'Accesorios'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 29
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Bolso Bandolera Mujer', 'Bolso compacto con cierre y compartimentos internos para organización.', 5599.00, 42000.00, 'BB04601', '100000000029', 'StyleBrand', 'https://media.istockphoto.com/id/2171309410/es/foto/mujer-con-camisa-azul-y-bolso-de-hombro-blanco-de-pie-casualmente.webp?a=1&b=1&s=612x612&w=0&k=20&c=p7s58kN8AfNd73rTjRyPcGZxg_YjOQH6vgkThiMq4dw=', 48, 70, 10
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'BB04601');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'BB04601' AND c.name = 'Accesorios'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 30
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Parasol para Auto', 'Parasol plegable con protección UV para ventanas laterales y parabrisas.', 1299.00, 9000.00, 'PS04701', '100000000030', 'AutoCare', 'https://media.istockphoto.com/id/1627256738/es/foto/una-sombrilla-unida-al-parabrisas-de-un-autom%C3%B3vil.webp?a=1&b=1&s=612x612&w=0&k=20&c=Lf10NmH7xSHdh_PSciqB5cYipC4GFL4UlPUGI0hoMKM=', 210, 75, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'PS04701');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'PS04701' AND c.name = 'Accesorios'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 31
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Monitor 24" Full HD', 'Monitor LED 24 pulgadas con resolución Full HD y entrada HDMI.', 28999.00, 230000.00, 'MN04801', '100000000031', 'VisionPlus', 'https://media.istockphoto.com/id/2200802257/es/foto/smart-monitor-with-blank-screen-isolated-on-white-background.webp?a=1&b=1&s=612x612&w=0&k=20&c=gGuyMwWs_9yb6SEx_WdPPTboSsQBChAch89PA9CwBg0=', 24, 10, 8
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'MN04801');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'MN04801' AND c.name = 'Electronica'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 32
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Impresora Multifunción', 'Impresora multifunción con conectividad WiFi y copiadora, ideal para oficina en casa.', 45999.00, 360000.00, 'IP04901', '100000000032', 'OfficeGear', 'https://images.unsplash.com/photo-1650094980833-7373de26feb6?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8SW1wcmVzb3JhJTIwTXVsdGlmdW5jaSVDMyVCM258ZW58MHx8MHx8fDA%3D', 12, 6, 12
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'IP04901');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'IP04901' AND c.name = 'Electronica'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 33
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Soporte TV de Pared', 'Soporte para TV ajustable, apto para pantallas hasta 55".', 8999.00, 70000.00, 'ST05001', '100000000033', 'VisionPlus', 'https://media.istockphoto.com/id/1802444442/es/foto/pantalla-led-giratoria-de-soporte-de-tv-perfil-cierres-rojos-en-forma-de-x-color-negro.webp?a=1&b=1&s=612x612&w=0&k=20&c=mb9BzZwGsIJqTYrKL8KJIeBIoTJlWTaN7ICxkNtWH1k=', 40, 22, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'ST05001');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'ST05001' AND c.name = 'Home'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 34
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Filtro de Agua para Grifo', 'Filtro compacto de carbón activo para reducir sabor y olor del agua de consumo.', 3499.00, 26000.00, 'FT05101', '100000000034', 'HomeHealth', 'https://images.unsplash.com/photo-1616761872827-cf5d7aa1d5b4?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8RmlsdHJvJTIwZGUlMjBBZ3VhJTIwcGFyYSUyMEdyaWZvfGVufDB8fDB8fHww', 90, 40, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'FT05101');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'FT05101' AND c.name = 'Home'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 35
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Cuchara Medidora Set', 'Set de cucharas medidoras inox con gancho para colgar.', 699.00, 5000.00, 'CM05201', '100000000035', 'KitchenPro', 'https://images.unsplash.com/photo-1630623108935-73ef0cc4f7eb?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Q3VjaGFyYSUyME1lZGlkb3JhJTIwU2V0fGVufDB8fDB8fHww', 300, 95, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'CM05201');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'CM05201' AND c.name = 'Home'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 36
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Lentes Gamer Antirreflejo', 'Gafas con filtro de luz azul para proteger durante largas sesiones frente al monitor.', 2999.00, 22000.00, 'GL05301', '100000000036', 'StyleBrand', 'https://plus.unsplash.com/premium_photo-1733892954454-82800cb76845?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8TGVudGVzJTIwR2FtZXIlMjBBbnRpcnJlZmxlam98ZW58MHx8MHx8fDA%3D', 120, 210, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'GL05301');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'GL05301' AND c.name = 'Accesorios'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 37
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Cámara Web Full HD', 'Cámara web 1080p con micrófono integrado y autoenfoque.', 3699.00, 28000.00, 'CW05401', '100000000037', 'CamNet', 'https://images.unsplash.com/photo-1691215415846-676d3dc8d6d6?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fEMlQzMlQTFtYXJhJTIwV2ViJTIwRnVsbCUyMEhEfGVufDB8fDB8fHww', 95, 50, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'CW05401');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'CW05401' AND c.name = 'Electronica'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 38
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Router WiFi AC Dual Band', 'Router doméstico AC dual band con buen alcance y múltiples antenas.', 6999.00, 54000.00, 'RT05501', '100000000038', 'NetGear', 'https://images.unsplash.com/photo-1516044734145-07ca8eef8731?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8Um91dGVyJTIwV2lGaSUyMEFDJTIwRHVhbCUyMEJhbmR8ZW58MHx8MHx8fDA%3D', 48, 22, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'RT05501');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'RT05501' AND c.name = 'Electronica'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 39
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Micrófono USB Condensador', 'Micrófono USB ideal para streaming, podcast y home studio.', 7499.00, 56000.00, 'MC05601', '100000000039', 'StudioPro', 'https://images.unsplash.com/photo-1718664485620-0e0a2f781120?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8TWljciVDMyVCM2Zvbm8lMjBVU0IlMjBDb25kZW5zYWRvcnxlbnwwfHwwfHx8MA%3D%3D', 32, 14, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'MC05601');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'MC05601' AND c.name = 'Electronica'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 40
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Cafetera de Émbolo 8 tazas', 'Cafetera prensa francesa con jarra de vidrio templado y filtro inox.', 2499.00, 19000.00, 'CF05701', '100000000040', 'HomeAppliance', 'https://images.unsplash.com/photo-1587364139411-bc94b65ee7bc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fENhZmV0ZXJhJTIwZGUlMjAlQzMlODltYm9sbyUyMDglMjB0YXphc3xlbnwwfHwwfHx8MA%3D%3D', 70, 160, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'CF05701');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'CF05701' AND c.name = 'Home'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 41
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Plancha Vertical de Vapor', 'Plancha vertical portátil para ropa con tanque removible y potencia de vapor constante.', 7999.00, 63000.00, 'PV05801', '100000000041', 'HomeAppliance', 'https://media.istockphoto.com/id/1149083317/es/foto/vista-recortada-de-mujer-joven-sosteniendo-hierro-humeante-en-la-mano.webp?a=1&b=1&s=612x612&w=0&k=20&c=IlnPucSAqupmJk08YAGlXR9KLC-cAHDsyDtPVcS-4Bo=', 28, 9, 12
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'PV05801');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'PV05801' AND c.name = 'Home'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 42
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Kit Herramientas Básico', 'Juego de herramientas esencial con destornilladores, alicates y llaves.', 3599.00, 27000.00, 'HK05901', '100000000042', 'ToolBox', 'https://images.unsplash.com/photo-1620825141088-a824daf6a46b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8S2l0JTIwSGVycmFtaWVudGFzJTIwQiVDMyVBMXNpY298ZW58MHx8MHx8fDA%3D', 150, 40, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'HK05901');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'HK05901' AND c.name = 'Home'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 43
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Cámara Instantánea Compacta', 'Cámara instantánea para fotos formato bolsillo con film incluido.', 8999.00, 72000.00, 'CI06001', '100000000043', 'PhotoFun', 'https://images.unsplash.com/photo-1586437855769-01f981e0576b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8QyVDMyVBMW1hcmElMjBJbnN0YW50JUMzJUExbmVhJTIwQ29tcGFjdGF8ZW58MHx8MHx8fDA%3D', 26, 12, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'CI06001');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'CI06001' AND c.name = 'Electronica'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 44
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Set de Toallas (2)', 'Toallas de algodón absorbente, pack de 2 en tamaño estándar', 2599.00, 20000.00, 'TW06101', '100000000044', 'HomeTextile', 'https://images.unsplash.com/photo-1639298107786-fc9e5880016f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8U2V0JTIwZGUlMjBUb2FsbGFzfGVufDB8fDB8fHww', 95, 32, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'TW06101');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'TW06101' AND c.name = 'Home'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 45
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Pulsera Fitness', 'Pulsera con monitor de ritmo cardíaco y contador de pasos.', 4699.00, 35000.00, 'PF06201', '100000000045', 'FitBand', 'https://images.unsplash.com/photo-1510017803434-a899398421b3?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fFB1bHNlcmElMjBGaXRuZXNzfGVufDB8fDB8fHww', 78, 150, 10
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'PF06201');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'PF06201' AND c.name = 'Electronica'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 46
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Billetera Minimalista', 'Billetera compacta con protector RFID y varios compartimentos para tarjetas.', 1999.00, 15000.00, 'BW06301', '100000000046', 'StyleBrand', 'https://images.unsplash.com/photo-1620109433606-a7dfa6107d28?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8QmlsbGV0ZXJhJTIwTWluaW1hbGlzdGF8ZW58MHx8MHx8fDA%3D', 220, 180, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'BW06301');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'BW06301' AND c.name = 'Accesorios'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 47
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Candado de Combinación', 'Candado de combinación para mochilas y equipaje, resistente y ligero.', 699.00, 5000.00, 'CD06401', '100000000047', 'SafeLock', 'https://media.istockphoto.com/id/185234890/es/foto/cerradura-de-combinaci%C3%B3n.webp?a=1&b=1&s=612x612&w=0&k=20&c=37o2L9cFJzZBvd3I4xwyk8u6KMvaab_3Ly2d67PcLlg=', 400, 90, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'CD06401');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'CD06401' AND c.name = 'Accesorios'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 48
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Manta Polar 150x200', 'Manta polar suave, ideal para el frío en el hogar.', 3199.00, 24000.00, 'MT06501', '100000000048', 'HomeTextile', 'https://media.istockphoto.com/id/651177498/es/foto/manta-con-cinta-y-gracias-etiqueta-regalo.webp?a=1&b=1&s=612x612&w=0&k=20&c=mI64Nfcx2leE7VmnQc93YlwWjvXn0xb00p3mDVg9S0k=', 60, 20, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'MT06501');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'MT06501' AND c.name = 'Home'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 49
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Gorra Visera Plana', 'Gorra casual con visera plana y ajuste trasero.', 899.00, 6500.00, 'GP06601', '100000000049', 'StreetWear', 'https://media.istockphoto.com/id/1439882514/es/foto/joven-euroasi%C3%A1tica-poni%C3%A9ndose-una-gorra-de-pelota-vista-a%C3%A9rea.webp?a=1&b=1&s=612x612&w=0&k=20&c=TWLONxI2-Qv-1NhSYdUD3cILKioNgnDZJAOTzRxbULo=', 320, 460, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'GP06601');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'GP06601' AND c.name = 'Accesorios'
+  AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- 50
+INSERT INTO products (name, description, price, unit_price, sku, barcode, brand, img_URL, stock_quantity, sold_quantity, discount_percentage)
+SELECT 'Altavoz Portátil Outdoor', 'Altavoz resistente al agua con autonomía larga y gancho para colgar.', 7499.00, 56000.00, 'AS06701', '100000000050', 'SoundBrand', 'https://images.unsplash.com/photo-1758996543028-a84902b022cb?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8QWx0YXZveiUyMFBvcnQlQzMlQTF0aWwlMjBPdXRkb29yfGVufDB8fDB8fHww', 46, 88, 0
+WHERE NOT EXISTS (SELECT 1 FROM products WHERE sku = 'AS06701');
+
+INSERT INTO products_categories (product_id, category_id)
+SELECT p.id, c.id FROM products p, categories c
+WHERE p.sku = 'AS06701' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
