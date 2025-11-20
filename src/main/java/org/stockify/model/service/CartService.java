@@ -9,7 +9,7 @@ import org.stockify.model.entity.CartEntity;
 import org.stockify.model.entity.CartItemEntity;
 import org.stockify.model.entity.ProductEntity;
 import org.stockify.model.entity.UserEntity;
-import org.stockify.model.exception.ClientNotFoundException;
+import org.stockify.model.exception.UserNotFoundException;
 import org.stockify.model.exception.DuplicatedUniqueConstraintException;
 import org.stockify.model.exception.InsufficientStockException;
 import org.stockify.model.exception.NotFoundException;
@@ -34,11 +34,12 @@ public class CartService {
         return cartMapper.toResponse(cartEntity);
     }
 
-    public void createUserCart(Long userId){
+    public void createCart(Long userId){
         if(!hasCart(userId)){
-            UserEntity client = resolveClient(userId);
+            UserEntity user = userRepository.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
             CartEntity cart = new CartEntity();
-            cart.setClient(client);
+            cart.setUser(user);
             cartRepository.save(cart);
             cartMapper.toResponse(cart);
         }
@@ -111,8 +112,8 @@ public class CartService {
 
     //Helpers
     private boolean hasCart(Long userId) {
-        if(cartRepository.findByClientId(userId).isPresent()){
-            throw new DuplicatedUniqueConstraintException("Cart for client id " + userId + " already exists");
+        if(cartRepository.findByUserId(userId).isPresent()){
+            throw new DuplicatedUniqueConstraintException("Cart for user id " + userId + " already exists");
         }
         return false;
     }
@@ -130,14 +131,10 @@ public class CartService {
     }
 
     private CartEntity resolveCart(Long userId) {
-        return cartRepository.findByClientId(userId)
-                .orElseThrow(() -> new NotFoundException("Cart for client id " + userId + " not found"));
+        return cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("Cart for user id " + userId + " not found"));
     }
 
-    private UserEntity resolveClient(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new ClientNotFoundException("Client with id " + userId + " not found"));
-    }
 
 
 

@@ -10,19 +10,19 @@ create table public.categories
 alter table public.categories
     owner to postgres;
 
-create table public.clients
+create table public.users
 (
-    client_date_of_registration date,
-    client_dni                  varchar(8)  not null,
-    client_id                   bigserial
+    user_date_of_registration date,
+    user_dni                  varchar(8)  not null,
+    user_id                   bigserial
         primary key,
-    client_first_name           varchar(20) not null,
-    client_last_name            varchar(20) not null,
-    client_phone                varchar(20) not null,
-    client_img                  varchar(255)
+    user_first_name           varchar(20) not null,
+    user_last_name            varchar(20) not null,
+    user_phone                varchar(20) not null,
+    user_img                  varchar(255)
 );
 
-alter table public.clients
+alter table public.users
     owner to postgres;
 
 create table public.credentials
@@ -32,7 +32,7 @@ create table public.credentials
     user_id  bigint
         unique
         constraint fkiqlblk63xq1ylv3hhuoj6mdrq
-            references public.clients,
+            references public.users,
     email    varchar(255)
         unique,
     password varchar(255),
@@ -213,7 +213,7 @@ create table public.sales_aud
         constraint fkhmuff9a34p7hfmyuq6sf2hpcd
             references public.revinfo,
     revtype        smallint,
-    client_id      bigint,
+    user_id        bigint,
     id             bigint  not null,
     transaction_id bigint,
     primary key (rev, id)
@@ -312,9 +312,9 @@ alter table public.purchases
 
 create table public.sales
 (
-    client_id      bigint
+    user_id        bigint
         constraint fkbbif9cb3ecyusyms54yvwlhd5
-            references public.clients,
+            references public.users,
     id             bigserial
         primary key,
     transaction_id bigint not null

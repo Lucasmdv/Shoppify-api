@@ -19,8 +19,8 @@ public class CartEntity {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id", nullable = false, unique = true)
-    private UserEntity client;
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private UserEntity user;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<CartItemEntity> products = new HashSet<>();

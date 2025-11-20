@@ -126,7 +126,7 @@ public class AuthController {
     @PostMapping("/register")
     @Operation(
         summary = "Register user profile and credentials",
-        description = "Registers a new user profile and credentials in one step and assigns default CLIENT role"
+        description = "Registers a new user profile and credentials in one step and assigns default USER role"
     )
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
         System.out.println(request);

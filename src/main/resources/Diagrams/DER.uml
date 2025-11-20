@@ -4,7 +4,7 @@
   <OriginalElement>87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.categories</OriginalElement>
   <nodes>
     <node x="1411.26804527208" y="265.3732557510149">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.providers</node>
-    <node x="427.51297428958037" y="826.4872746955343">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.clients</node>
+    <node x="427.51297428958037" y="826.4872746955343">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.users</node>
     <node x="-193.03991880920157" y="198.98353450608937">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.purchases_aud</node>
     <node x="-311.45833288227334" y="-83.74425981055481">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.sales_aud</node>
     <node x="197.99750473613" y="115.9366278755075">87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.stores</node>
@@ -90,11 +90,11 @@
       <point x="1671.0" y="381.37298105548035" />
       <point x="106.000293640054" y="-2.7469553452874607E-4" />
     </edge>
-    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.sales" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.clients" relationship="REFERENCES">
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.sales" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.users" relationship="REFERENCES">
       <point x="-32.718687415426416" y="56.0" />
       <point x="107.0" y="-104.0" />
     </edge>
-    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.credentials" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.clients" relationship="REFERENCES">
+    <edge source="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.credentials" target="87d9ae60-88c9-4b6d-9046-2442d974e51f.TABLE:postgres.public.users" relationship="REFERENCES">
       <point x="89.0" y="-42.30064952638713" />
       <point x="-114.5" y="96.5" />
     </edge>

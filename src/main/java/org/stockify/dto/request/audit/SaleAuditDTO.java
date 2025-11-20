@@ -28,6 +28,6 @@ public class SaleAuditDTO {
     @Schema(description = "Transaction data associated with the audit", implementation = TransactionResponse.class)
     private TransactionResponse transaction;
 
-    @Schema(description = "Identifier of the client involved in the transaction", example = "150")
-    private Long clientId;
+    @Schema(description = "Identifier of the user involved in the transaction", example = "150")
+    private Long userId;
 }

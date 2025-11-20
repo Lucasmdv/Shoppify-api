@@ -58,8 +58,8 @@ WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'ADMIN');
 
 
 INSERT INTO roles (name, description)
-SELECT 'CLIENT', 'Default client role'
-WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'CLIENT');
+SELECT 'USER', 'Default user role'
+WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'USER');
 
 /* ================================
    ROLE → PERMIT mappings (avoid duplicates)
@@ -74,46 +74,46 @@ WHERE r.name = 'ADMIN'
     SELECT 1 FROM role_permits rp WHERE rp.role_id = r.id AND rp.permit_id = p.id
 );
 
--- CLIENT:
+-- USER:
 
 INSERT INTO role_permits (role_id, permit_id)
 SELECT r.id, p.id
 FROM roles r, permits p
-WHERE r.name = 'CLIENT'
+WHERE r.name = 'USER'
   AND p.permit IN ('USER')
   AND NOT EXISTS (
     SELECT 1 FROM role_permits rp WHERE rp.role_id = r.id AND rp.permit_id = p.id
 );
 
 /* ================================
-   DEMO USERS (CLIENT & ADMIN)
+   DEMO USERS (USER & ADMIN)
    ================================ */
-INSERT INTO clients (client_first_name, client_last_name, client_dni, client_phone, client_img)
-SELECT 'Test', 'Cliente', '40289718', '2232057591', 'https://img.freepik.com/foto-gratis/joven-hombre-barbudo-camisa-rayas_273609-5677.jpg?semt=ais_hybrid&w=740&q=80'
-WHERE NOT EXISTS (SELECT 1 FROM clients WHERE client_dni = '40289718');
+INSERT INTO users (user_first_name, user_last_name, user_dni, user_phone, user_img)
+SELECT 'Test', 'User', '40289718', '2232057591', 'https://img.freepik.com/foto-gratis/joven-hombre-barbudo-camisa-rayas_273609-5677.jpg?semt=ais_hybrid&w=740&q=80'
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE user_dni = '40289718');
 
-INSERT INTO clients (client_first_name, client_last_name, client_dni, client_phone, client_img)
+INSERT INTO users (user_first_name, user_last_name, user_dni, user_phone, user_img)
 SELECT 'Test', 'Admin', '41689718', '2232057295', 'https://media.istockphoto.com/id/1090878494/es/foto/retrato-de-joven-sonriente-a-hombre-guapo-en-camiseta-polo-azul-aislado-sobre-fondo-gris-de.jpg?s=612x612&w=0&k=20&c=dHFsDEJSZ1kuSO4wTDAEaGOJEF-HuToZ6Gt-E2odc6U='
-WHERE NOT EXISTS (SELECT 1 FROM clients WHERE client_dni = '41689718');
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE user_dni = '41689718');
 
 
 INSERT INTO credentials (username, email, password, user_id)
-SELECT 'test.client', 'client@client', '$2a$10$ETW1zaXw0ZHn2rAMvfuwE.4dF6bl/g5Gr42GNXV5uZz./moucSZ3i', c.client_id
-FROM clients c
-WHERE c.client_dni = '40289718'
-  AND NOT EXISTS (SELECT 1 FROM credentials WHERE email = 'client@client');
+SELECT 'test.user', 'user@user', '$2a$10$ETW1zaXw0ZHn2rAMvfuwE.4dF6bl/g5Gr42GNXV5uZz./moucSZ3i', u.user_id
+FROM users u
+WHERE u.user_dni = '40289718'
+  AND NOT EXISTS (SELECT 1 FROM credentials WHERE email = 'user@user');
 
 INSERT INTO credentials (username, email, password, user_id)
-SELECT 'test.admin', 'admin@admin', '$2a$10$ETW1zaXw0ZHn2rAMvfuwE.4dF6bl/g5Gr42GNXV5uZz./moucSZ3i', c.client_id
-FROM clients c
-WHERE c.client_dni = '41689718'
+SELECT 'test.admin', 'admin@admin', '$2a$10$ETW1zaXw0ZHn2rAMvfuwE.4dF6bl/g5Gr42GNXV5uZz./moucSZ3i', u.user_id
+FROM users u
+WHERE u.user_dni = '41689718'
   AND NOT EXISTS (SELECT 1 FROM credentials WHERE email = 'admin@admin');
 
 INSERT INTO credentials_roles (credential_id, role_id)
 SELECT cred.id, r.id
 FROM credentials cred, roles r
-WHERE cred.email = 'client@client'
-  AND r.name = 'CLIENT'
+WHERE cred.email = 'user@user'
+  AND r.name = 'USER'
   AND NOT EXISTS (
     SELECT 1 FROM credentials_roles cr WHERE cr.credential_id = cred.id AND cr.role_id = r.id
 );
@@ -126,6 +126,32 @@ WHERE cred.email = 'admin@admin'
   AND NOT EXISTS (
     SELECT 1 FROM credentials_roles cr WHERE cr.credential_id = cred.id AND cr.role_id = r.id
 );
+
+/* ================================
+   CARTS for demo users
+   ================================ */
+INSERT INTO cart (user_id)
+SELECT u.user_id FROM users u
+WHERE u.user_dni = '40289718'
+  AND NOT EXISTS (SELECT 1 FROM cart c WHERE c.user_id = u.user_id);
+
+INSERT INTO cart (user_id)
+SELECT u.user_id FROM users u
+WHERE u.user_dni = '41689718'
+  AND NOT EXISTS (SELECT 1 FROM cart c WHERE c.user_id = u.user_id);
+
+/* ================================
+   WISHLISTS for demo users
+   ================================ */
+INSERT INTO wishlists (name, user_id)
+SELECT 1, u.user_id FROM users u
+WHERE u.user_dni = '40289718'
+  AND NOT EXISTS (SELECT 1 FROM wishlists w WHERE w.user_id = u.user_id);
+
+INSERT INTO wishlists (name, user_id)
+SELECT 2, u.user_id FROM users u
+WHERE u.user_dni = '41689718'
+  AND NOT EXISTS (SELECT 1 FROM wishlists w WHERE w.user_id = u.user_id);
 
 /* ================================
    STORE (singleton ID=1)
