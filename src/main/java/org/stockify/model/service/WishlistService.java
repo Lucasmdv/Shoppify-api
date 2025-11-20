@@ -59,6 +59,18 @@ public class WishlistService {
         return added;
     }
 
+    public boolean isFavorite(Long userId,Long productId){
+        WishlistEntity wishlist = resolveWishlist(userId);
+        ProductEntity product = resolveProduct(productId);
+
+        WishlistProductEntity wishlistProductEntity = WishlistProductEntity.builder()
+                .product(product)
+                .wishlist(wishlist)
+                .build();
+
+        return wishlist.getWishlistProducts().contains(wishlistProductEntity);
+    }
+
 
     //Helpers
     private WishlistEntity resolveWishlist(Long userId){

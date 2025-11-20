@@ -48,4 +48,18 @@ public class WishlistController {
             @PathVariable Long productId) {
         return ResponseEntity.ok(wishlistService.toggleProduct(userId, productId));
     }
+
+    @Operation(summary = "Check if product is in wishlist")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Returns true if product is in wishlist"),
+            @ApiResponse(responseCode = "404", description = "Wishlist or product not found")
+    })
+    @GetMapping("/products/{productId}")
+    public ResponseEntity<Boolean> isFavorite(
+            @Parameter(description = "Identifier of the user who owns the wishlist", example = "12")
+            @PathVariable("userId") Long userId,
+            @Parameter(description = "Identifier of the product to check", example = "45")
+            @PathVariable Long productId) {
+        return ResponseEntity.ok(wishlistService.isFavorite(userId, productId));
+    }
 }
