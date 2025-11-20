@@ -25,7 +25,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final CartService cartService;
-    //private final WishlistService wishlistService;
+    private final WishlistService wishlistService;
     // Removed security-related dependencies from UserService
 
     /**
@@ -70,7 +70,7 @@ public class UserService {
         UserEntity userEntity = userMapper.toEntity(userRequest);
         UserEntity createdUser = userRepository.save(userEntity);
         cartService.createCart(createdUser.getId());
-       // wishlistService.createWishlist(createdUser.getId());
+       wishlistService.createWishlist(createdUser.getId());
         return userMapper.toDto(createdUser);
     }
 

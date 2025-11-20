@@ -2,6 +2,7 @@ package org.stockify.security.service;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,6 +14,7 @@ import org.stockify.model.entity.UserEntity;
 import org.stockify.model.repository.UserRepository;
 import org.stockify.model.service.CartService;
 
+import org.stockify.model.service.WishlistService;
 import org.stockify.security.exception.AuthenticationException;
 import org.stockify.security.model.dto.request.RegisterCredentialsRequest;
 import org.stockify.security.model.dto.request.RegisterRequest;
@@ -31,6 +33,7 @@ import java.util.Set;
  * Service responsible for authentication and user management operations.
  * Handles user registration, authentication, role and permission management.
  */
+@AllArgsConstructor
 @Transactional
 @Service
 public class AuthService {
@@ -43,37 +46,9 @@ public class AuthService {
     private final RolRepository rolRepository;
     private final UserRepository userRepository;
     private final CartService cartService;
-  //  private final WishlistService wishlistService;
+    private final WishlistService wishlistService;
 
-    /**
-     * Constructor for AuthService
-     *
-     * @param credentialsRepository Repository for user credentials
-     * @param authenticationManager Spring Security authentication manager
-     * @param passwordEncoder Password encoder for secure password storage
-     * @param jwtService Service for JWT token operations
-     * @param permitRepository Repository for permission data
-     * @param rolRepository Repository for role data
-     */
-    public AuthService(CredentialRepository credentialsRepository,
-                       AuthenticationManager authenticationManager,
-                       PasswordEncoder passwordEncoder,
-                       JwtService jwtService,
-                       PermitRepository permitRepository,
-                       RolRepository rolRepository,
-                       UserRepository userRepository, CartService cartService
-                       //,WishlistService wishlistService
-    ) {
-        this.credentialsRepository = credentialsRepository;
-        this.authenticationManager = authenticationManager;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-        this.permitRepository = permitRepository;
-        this.rolRepository = rolRepository;
-        this.userRepository = userRepository;
-        this.cartService = cartService;
-       // this.wishlistService = wishlistService;
-    }
+
 
     /**
      * Registers a user profile together with credentials using a composite request.
@@ -102,7 +77,7 @@ public class AuthService {
         // create Cart linked to user
         //hardcodeado
         cartService.createCart(user.getId());
-     //   wishlistService.createWishlist(user.getId());
+        wishlistService.createWishlist(user.getId());
 
         // Create credentials linked to profile
         CredentialsEntity credentials = CredentialsEntity.builder()
@@ -173,7 +148,7 @@ public class AuthService {
         user = userRepository.save(user);
 
         cartService.createCart(user.getId());
-      //  wishlistService.createWishlist(user.getId());
+        wishlistService.createWishlist(user.getId());
 
         // Create credentials linked to the user
         CredentialsEntity credentials = CredentialsEntity.builder()

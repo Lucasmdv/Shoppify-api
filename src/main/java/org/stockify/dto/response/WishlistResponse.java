@@ -14,6 +14,6 @@ import java.util.Set;
 public class WishlistResponse {
     private Long id;
     private Long userId;
-    private Set<ProductResponse> products;
+    private Set<WishlistProductResponse> products;
 
 }

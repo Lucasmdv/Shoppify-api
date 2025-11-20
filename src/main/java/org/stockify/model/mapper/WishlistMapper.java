@@ -1,21 +1,15 @@
-/*package org.stockify.model.mapper;
-
-import java.util.List;
+package org.stockify.model.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.stockify.dto.response.WishlistResponse;
-import org.stockify.model.entity.UserEntity;
-import org.stockify.model.entity.WishlistItem;
+import org.stockify.model.entity.WishlistEntity;
+import org.stockify.model.mapper.WishlistProductMapper;
 
-@Mapper(componentModel = "spring", uses = ProductMapper.class)
+@Mapper(componentModel = "spring", uses = WishlistProductMapper.class)
 public interface WishlistMapper {
 
-    @Mapping(target = "id", source = "user.id")
+    @Mapping(target = "id", source = "id")
     @Mapping(target = "userId", source = "user.id")
-    @Mapping(target = "products", source = "items")
-    WishlistResponse toResponse(UserEntity user, List<WishlistItem> items);
-
-    default org.stockify.model.entity.ProductEntity map(WishlistItem item) {
-        return item != null ? item.getProduct() : null;
-    }
-}*/
+    @Mapping(target = "products", source = "wishlistProducts")
+    WishlistResponse toResponse(WishlistEntity wishlist);
+}

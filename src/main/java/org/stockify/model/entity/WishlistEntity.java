@@ -2,17 +2,16 @@ package org.stockify.model.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "wishlists")
 public class WishlistEntity {
     @Id
@@ -21,7 +20,7 @@ public class WishlistEntity {
     private Long id;
 
     @Column(name = "name", nullable = false)
-    private Long name;
+    private String name;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY, optional = false)
@@ -29,7 +28,19 @@ public class WishlistEntity {
     private UserEntity user;
 
     @OneToMany(mappedBy = "wishlist",cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("createdAt desc ")
-    private List<WishlistProductEntity> wishlistProducts = new ArrayList<>();
+    @OrderBy("createdAt desc")
+    private Set<WishlistProductEntity> wishlistProducts = new LinkedHashSet<>();
+
+    public boolean addProduct(WishlistProductEntity item) {
+        boolean rta = this.wishlistProducts.add(item);
+        item.setWishlist(this);
+        return rta;
+    }
+
+    public boolean removeProduct(WishlistProductEntity item) {
+        boolean rta = this.wishlistProducts.remove(item);
+        item.setWishlist(null);
+        return rta;
+    }
 
 }
