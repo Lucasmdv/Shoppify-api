@@ -5,7 +5,8 @@ import org.stockify.dto.request.user.UserRequest;
 import org.stockify.dto.response.UserResponse;
 import org.stockify.model.entity.UserEntity;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring" ,uses = CartMapper.class)
+
 public interface UserMapper {
 
     @Mapping(target = "sales", ignore = true)
@@ -15,6 +16,7 @@ public interface UserMapper {
     @Mapping(target = "links", ignore = true)
     @Mapping(target = "dateOfRegistration", source = "dateOfRegistration", dateFormat = "yyyy-MM-dd")
     @Mapping(target = "email", source = "credentials.email")
+    @Mapping(target = "cart" , source = "cart")
     UserResponse toDto(UserEntity clientEntity);
 
     @Mapping(target = "sales", ignore = true)

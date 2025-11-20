@@ -14,11 +14,8 @@ import lombok.*;
 public class UserRequest {
 
 
-
-
     @Schema(description = "Client's image", example = "http//:image.com", maxLength = 20)
     private String img;
-
 
     @NotBlank
     @Size(max = 20, message = "Max length for first name is 20 characters")
@@ -36,8 +33,6 @@ public class UserRequest {
     @Pattern(regexp = "^[0-9]{8}$", message = "DNI must contain exactly 8 digits")
     @Schema(description = "Client's DNI (National ID Number)", example = "33445566", maxLength = 8)
     private String dni;
-
-    // Email is managed by credentials, not by the user profile
 
     @NotBlank
     @Pattern(regexp = "^[0-9]{7,20}$", message = "Phone number must contain only numbers (7 to 20 digits)")

@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.stockify.model.entity.UserEntity;
 import org.stockify.model.repository.UserRepository;
+import org.stockify.model.service.CartService;
 import org.stockify.security.exception.AuthenticationException;
 import org.stockify.security.model.dto.request.RegisterCredentialsRequest;
 import org.stockify.security.model.dto.request.RegisterRequest;
@@ -40,6 +41,7 @@ public class AuthService {
     private final PermitRepository permitRepository;
     private final RolRepository rolRepository;
     private final UserRepository userRepository;
+    private final CartService cartService;
 
     /**
      * Constructor for AuthService
@@ -57,7 +59,7 @@ public class AuthService {
                        JwtService jwtService,
                        PermitRepository permitRepository,
                        RolRepository rolRepository,
-                       UserRepository userRepository) {
+                       UserRepository userRepository, CartService cartService) {
         this.credentialsRepository = credentialsRepository;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
@@ -65,6 +67,7 @@ public class AuthService {
         this.permitRepository = permitRepository;
         this.rolRepository = rolRepository;
         this.userRepository = userRepository;
+        this.cartService = cartService;
     }
 
     /**
@@ -90,6 +93,10 @@ public class AuthService {
                 .img(request.getUser().getImg())
                 .build();
         user = userRepository.save(user);
+
+        // create Cart linked to user
+        //hardcodeado
+        cartService.createUserCart(user.getId());
 
         // Create credentials linked to profile
         CredentialsEntity credentials = CredentialsEntity.builder()
