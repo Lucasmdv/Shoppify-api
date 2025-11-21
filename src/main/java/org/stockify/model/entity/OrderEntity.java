@@ -8,7 +8,6 @@ import org.hibernate.envers.RelationTargetAuditMode;
 import org.stockify.model.enums.OrderStatus;
 
 import java.time.LocalDate;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -20,11 +19,6 @@ public class OrderEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "client_id")
-    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
-    private UserEntity client;
-
     @Column(name = "status", nullable = false)
     private OrderStatus status;
 
@@ -35,7 +29,7 @@ public class OrderEntity {
     private LocalDate endDate;
 
     @OneToOne
-    @JoinColumn(name = "transaction_id", nullable = false)
+    @JoinColumn(name = "sale_id", nullable = false)
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
-    private TransactionEntity transaction;
+    private SaleEntity sale;
 }

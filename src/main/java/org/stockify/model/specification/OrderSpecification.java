@@ -15,7 +15,7 @@ public class OrderSpecification {
 
     public static Specification<OrderEntity> byClient(Long id) {
         return ((root, query, cb) ->
-            id == null ? null : cb.equal(root.get("client").get("id"), id));
+            id == null ? null : cb.equal(root.get("sale").get("client").get("id"), id));
     }
 
     public static Specification<OrderEntity> byStatus(OrderStatus status) {
@@ -43,11 +43,11 @@ public class OrderSpecification {
         return (root, query, cb) -> {
             if (min == null && max == null) return null;
             if (min != null && max != null) {
-                return cb.between(root.get("transaction").get("total"), min, max);
+                return cb.between(root.get("sale").get("transaction").get("total"), min, max);
             } else if (min != null) {
-                return cb.greaterThanOrEqualTo(root.get("transaction").get("total"), min);
+                return cb.greaterThanOrEqualTo(root.get("sale").get("transaction").get("total"), min);
             } else {
-                return cb.lessThanOrEqualTo(root.get("transaction").get("total"), max);
+                return cb.lessThanOrEqualTo(root.get("sale").get("transaction").get("total"), max);
             }
         };
     }
