@@ -44,6 +44,9 @@ public class UserEntity {
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
     private Set<SaleEntity> sales;
 
+    @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
+    private Set<OrderEntity> orders;
+
     @OneToOne(mappedBy = "user")
     private CredentialsEntity credentials;
 
