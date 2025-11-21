@@ -1,9 +1,7 @@
 package org.stockify.model.specification;
 
-import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.domain.Specification;
 import org.stockify.model.entity.OrderEntity;
-import org.stockify.model.entity.SaleEntity;
 import org.stockify.model.enums.OrderStatus;
 
 import java.time.LocalDate;
@@ -20,11 +18,6 @@ public class OrderSpecification {
             id == null ? null : cb.equal(root.get("client").get("id"), id));
     }
 
-    public static Specification<OrderEntity> byProductName(String name) {
-        return (((root, query, cb) ->
-                name == null || name.isEmpty() ? null : cb.equal(root.get("products").get("name"), name)));
-    }
-
     public static Specification<OrderEntity> byStatus(OrderStatus status) {
         return (((root, query, cb) ->
                 status == null ? null : cb.equal(root.get("status"), status)));
@@ -34,7 +27,7 @@ public class OrderSpecification {
         return (root, query, cb) -> {
             if (startDate == null) return null;
             LocalDateTime startOfDay = startDate.atStartOfDay();
-            return cb.greaterThanOrEqualTo(root.get("transaction").get("dateTime"), startOfDay);
+            return cb.greaterThanOrEqualTo(root.get("startDate"), startOfDay);
         };
     }
 
@@ -42,7 +35,7 @@ public class OrderSpecification {
         return (root, query, cb) -> {
             if (endDate == null) return null;
             LocalDateTime endOfDay = endDate.atTime(23, 59, 59);
-            return cb.lessThanOrEqualTo(root.get("transaction").get("dateTime"), endOfDay);
+            return cb.lessThanOrEqualTo(root.get("endDate"), endOfDay);
         };
     }
 

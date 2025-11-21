@@ -7,9 +7,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.stockify.model.enums.OrderStatus;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Set;
 
 @Getter
@@ -27,19 +25,14 @@ public class OrderEntity {
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private UserEntity client;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "products_orders",
-            joinColumns = @JoinColumn(name = "order_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_id")
-    )
-    private Set<ProductEntity> products;
-
     @Column(name = "status", nullable = false)
     private OrderStatus status;
 
-    @Column(name = "date", nullable = false)
-    private LocalDate date;
+    @Column(name = "start_date", nullable = false)
+    private LocalDate startDate;
+
+    @Column(name = "end_date")
+    private LocalDate endDate;
 
     @OneToOne
     @JoinColumn(name = "transaction_id", nullable = false)
