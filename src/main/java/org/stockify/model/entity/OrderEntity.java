@@ -8,6 +8,7 @@ import org.hibernate.envers.RelationTargetAuditMode;
 import org.stockify.model.enums.OrderStatus;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -37,9 +38,11 @@ public class OrderEntity {
     @Column(name = "status", nullable = false)
     private OrderStatus status;
 
-    @Column(name = "total", nullable = false)
-    private BigDecimal total;
-
     @Column(name = "date", nullable = false)
-    private LocalDateTime date;
+    private LocalDate date;
+
+    @OneToOne
+    @JoinColumn(name = "transaction_id", nullable = false)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+    private TransactionEntity transaction;
 }
