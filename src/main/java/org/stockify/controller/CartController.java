@@ -56,7 +56,7 @@ public class CartController {
             @ApiResponse(responseCode = "400", description = "Invalid payload"),
             @ApiResponse(responseCode = "404", description = "Cart or item not found")
     })
-    @PutMapping("/items/{itemId}")
+    @PatchMapping("/items/{itemId}")
     public ResponseEntity<CartResponse> updateItem(
             @Parameter(description = "Identifier of the user who owns the cart", example = "12")
             @PathVariable("userId") Long userId,
