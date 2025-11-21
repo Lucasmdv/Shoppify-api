@@ -1,9 +1,11 @@
 package org.stockify.dto.request.order;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
 
 import java.time.LocalDate;
 
+@Getter
 public class OrderFilterRequest {
     @Schema(description = "Filter by ID of the order", example = "1")
     private Long orderId;
@@ -25,4 +27,7 @@ public class OrderFilterRequest {
 
     @Schema(description = "Filter by max price", example = "500")
     private Double maxPrice;
+
+    @Schema(description = "Filter by pickup in store or not")
+    private Boolean pickup;
 }

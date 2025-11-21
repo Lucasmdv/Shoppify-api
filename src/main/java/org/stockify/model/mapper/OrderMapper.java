@@ -17,10 +17,12 @@ public interface OrderMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "startDate", ignore = true)
+    @Mapping(target = "sale", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void partialUpdateOrderEntity(UpdateOrderRequest dto, @MappingTarget OrderEntity entity);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "startDate", ignore = true)
+    @Mapping(target = "sale", ignore = true)
     void updateOrderEntity(UpdateOrderRequest dto, @MappingTarget OrderEntity entity);
 }

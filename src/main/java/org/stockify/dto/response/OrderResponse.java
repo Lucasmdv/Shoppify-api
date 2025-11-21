@@ -19,4 +19,7 @@ public class OrderResponse {
 
     @Schema(description = "Sale details of the order")
     SaleResponse sale;
+
+    @Schema(description = "Boolean for pickup in store or not")
+    private Boolean pickup;
 }

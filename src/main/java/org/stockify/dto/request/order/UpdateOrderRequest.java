@@ -10,4 +10,7 @@ public class UpdateOrderRequest {
 
     @Schema(description = "Edit end date of order")
     private LocalDate endDate;
+
+    @Schema(description = "Boolean for pickup in store or not")
+    private Boolean pickup;
 }

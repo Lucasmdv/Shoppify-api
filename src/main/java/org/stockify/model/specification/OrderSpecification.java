@@ -51,4 +51,9 @@ public class OrderSpecification {
             }
         };
     }
+
+    public static Specification<OrderEntity> byPickup(Boolean pickup) {
+        return (((root, query, cb) ->
+                pickup == null ? null : cb.equal(root.get("pickup"), pickup)));
+    }
 }

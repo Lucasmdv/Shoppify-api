@@ -32,4 +32,15 @@ public class OrderEntity {
     @JoinColumn(name = "sale_id", nullable = false)
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private SaleEntity sale;
+
+    @Column(name = "pickup")
+    private Boolean pickup;
+
+    public OrderEntity(SaleEntity sale, Boolean pickup) {
+        this.status = OrderStatus.PROCESSING;
+        this.startDate = LocalDate.now();
+        this.endDate = null;
+        this.sale = sale;
+        this.pickup = pickup;
+    }
 }
