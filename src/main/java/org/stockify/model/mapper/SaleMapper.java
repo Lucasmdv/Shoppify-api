@@ -11,6 +11,7 @@ public interface SaleMapper {
     @Mapping(target = "client", ignore = true)
     @Mapping(target = "transaction", ignore = true)
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "pickup", ignore = true)
     SaleEntity toEntity(SaleRequest dto);
 
     @Mapping(target = "clientDni", source = "client.dni")

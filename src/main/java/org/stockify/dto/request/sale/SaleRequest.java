@@ -19,4 +19,7 @@ public class SaleRequest {
     @Valid
     @Schema(description = "Transaction details for the sale")
     TransactionRequest transaction;
+
+    @Schema(description = "Boolean of pickup in store or not")
+    Boolean pickup;
 }

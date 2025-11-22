@@ -13,6 +13,7 @@ import org.stockify.dto.request.sale.SaleRequest;
 import org.stockify.dto.request.transaction.DetailTransactionRequest;
 import org.stockify.dto.response.SaleResponse;
 import org.stockify.dto.response.TransactionResponse;
+import org.stockify.model.entity.OrderEntity;
 import org.stockify.model.entity.ProductEntity;
 import org.stockify.model.entity.SaleEntity;
 import org.stockify.model.entity.TransactionEntity;
@@ -40,6 +41,7 @@ public class SaleService {
     private final SaleRepository saleRepository;
     private final TransactionMapper transactionMapper;
     private final ProductRepository productRepository;
+    private final OrderService orderService;
 
     public SaleResponse createSale(SaleRequest request) {
         if (request.getTransaction() == null || request.getTransaction().getDetailTransactions() == null
@@ -81,6 +83,7 @@ public class SaleService {
 
         productRepository.saveAll(productsToUpdate);
         SaleEntity saved = saleRepository.save(sale);
+        orderService.createOrderFromSale(saved, request.getPickup());
         SaleResponse saleResponse = saleMapper.toResponseDTO(saved);
         saleResponse.setTransaction(transactionMapper.toDto(transaction));
         return saleResponse;

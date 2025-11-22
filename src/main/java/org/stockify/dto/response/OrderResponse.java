@@ -1,9 +1,11 @@
 package org.stockify.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
 
 import java.time.LocalDate;
 
+@Getter
 public class OrderResponse {
     @Schema(description = "Unique identifier of the order", example = "1")
     Long id;
