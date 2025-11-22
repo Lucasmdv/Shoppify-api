@@ -2,6 +2,7 @@ package org.stockify.model.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -17,10 +18,7 @@ import org.stockify.dto.request.transaction.DetailTransactionRequest;
 import org.stockify.dto.response.OrderResponse;
 import org.stockify.dto.response.SaleResponse;
 import org.stockify.dto.response.TransactionResponse;
-import org.stockify.model.entity.OrderEntity;
-import org.stockify.model.entity.ProductEntity;
-import org.stockify.model.entity.SaleEntity;
-import org.stockify.model.entity.TransactionEntity;
+import org.stockify.model.entity.*;
 import org.stockify.model.enums.OrderStatus;
 import org.stockify.model.enums.TransactionType;
 import org.stockify.model.exception.InsufficientStockException;
@@ -102,6 +100,16 @@ public class OrderService {
 
         SaleEntity saleEntity = orderEntity.getSale();
         return saleMapper.toResponseDTO(saleEntity);
+    }
+
+    public List<OrderResponse> findOrdersByUser(Long userId) {
+        List<OrderEntity> orders = orderRepository.findByClientId(userId);
+        if (orders.isEmpty()) {
+            throw new NotFoundException("Orders for client id " + userId + " not found");
+        }
+        return orders.stream()
+                .map(orderMapper::toResponseDTO)
+                .toList();
     }
 
     public OrderResponse updateOrderPartial(Long id, UpdateOrderRequest orderRequest) {

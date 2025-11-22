@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -25,12 +26,13 @@ import org.springframework.web.bind.annotation.*;
 import org.stockify.dto.request.order.OrderFilterRequest;
 import org.stockify.dto.request.order.OrderRequest;
 import org.stockify.dto.request.order.UpdateOrderRequest;
-import org.stockify.dto.request.sale.SaleFilterRequest;
 import org.stockify.dto.request.sale.SaleRequest;
 import org.stockify.dto.response.OrderResponse;
 import org.stockify.dto.response.SaleResponse;
 import org.stockify.model.assembler.OrderModelAssembler;
 import org.stockify.model.service.OrderService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/orders")
@@ -91,6 +93,18 @@ public class OrderController {
             @PathVariable Long orderID) {
         OrderResponse orderResponse = orderService.findById(orderID);
         return ResponseEntity.ok(orderModelAssembler.toModel(orderResponse));
+    }
+
+    @Operation(summary = "Get Orders for a specific user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Orders returned successfully"),
+            @ApiResponse(responseCode = "404", description = "Orders or user not found")
+    })
+    @GetMapping
+    public ResponseEntity<List<OrderResponse>> findOrdersByUser(
+            @Parameter(description = "Identifier of the user who owns the orders", example = "12")
+            @PathVariable("userId") Long userId) {
+        return ResponseEntity.ok(orderService.findOrdersByUser(userId));
     }
 
     @Operation(
