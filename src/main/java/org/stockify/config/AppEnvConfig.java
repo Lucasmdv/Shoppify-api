@@ -17,5 +17,6 @@ public final class AppEnvConfig {
         System.setProperty("EMAIL_PORT", Objects.requireNonNull(dotenv.get("EMAIL_PORT")));
         System.setProperty("EMAIL_USERNAME", Objects.requireNonNull(dotenv.get("EMAIL_USERNAME")));
         System.setProperty("EMAIL_PASSWORD", Objects.requireNonNull(dotenv.get("EMAIL_PASSWORD")));
+        System.setProperty("TEST_ACCESS_TOKEN",Objects.requireNonNull(dotenv.get("TEST_ACCESS_TOKEN")));
     }
 }
