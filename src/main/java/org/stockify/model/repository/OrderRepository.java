@@ -12,6 +12,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<OrderEntity,Long>, JpaSpecificationExecutor<OrderEntity> {
-    @Query("SELECT o FROM OrderEntity o WHERE o.sale.client.id = :clientId")
+    @Query("SELECT o FROM OrderEntity o WHERE o.sale.user.id = :clientId")
     List<OrderEntity> findByClientId(@Param("clientId") Long clientId);
 }
