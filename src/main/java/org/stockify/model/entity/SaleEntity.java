@@ -26,7 +26,7 @@ public class SaleEntity {
     private OrderEntity order;
 
     @ManyToOne
-    @JoinColumn(name = "client_id")
+    @JoinColumn(name = "user_id")
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
-    private UserEntity client;
+    private UserEntity user;
 }

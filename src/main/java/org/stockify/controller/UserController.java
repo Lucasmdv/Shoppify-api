@@ -30,13 +30,13 @@ import org.stockify.model.service.UserService;
 @Tag(name = "Users", description = "Endpoints for managing users")
 public class UserController {
 
-    private final UserService clientService;
-    private final UserModelAssembler clientModelAssembler;
+    private final UserService userService;
+    private final UserModelAssembler userModelAssembler;
 
 
     @Operation(summary = "List all users with optional filters")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Paged list of clients retrieved successfully")
+            @ApiResponse(responseCode = "200", description = "Paged list of users retrieved successfully")
     })
     @GetMapping
     public ResponseEntity<PagedModel<EntityModel<UserResponse>>> getAllUsers(
@@ -46,63 +46,63 @@ public class UserController {
             PagedResourcesAssembler<UserResponse> pagedAssembler) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("firstName").ascending());
-        Page<UserResponse> clientResponsePage = clientService.findAll(filterRequest, pageable);
+        Page<UserResponse> userResponsePage = userService.findAll(filterRequest, pageable);
 
-        return ResponseEntity.ok(pagedAssembler.toModel(clientResponsePage, clientModelAssembler));
+        return ResponseEntity.ok(pagedAssembler.toModel(userResponsePage, userModelAssembler));
     }
 
-    @Operation(summary = "Get client by ID")
+    @Operation(summary = "Get user by ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Client found"),
-            @ApiResponse(responseCode = "404", description = "Client not found")
+            @ApiResponse(responseCode = "200", description = "User found"),
+            @ApiResponse(responseCode = "404", description = "User not found")
     })
-    @GetMapping("/{clientID}")
+    @GetMapping("/{userID}")
     public ResponseEntity<EntityModel<UserResponse>> getUserById(
-            @Parameter(description = "ID of the client") @PathVariable Long clientID) {
+            @Parameter(description = "ID of the user") @PathVariable Long userID) {
 
-        UserResponse clientResponse = clientService.findById(clientID);
-        return ResponseEntity.ok(clientModelAssembler.toModel(clientResponse));
+        UserResponse userResponse = userService.findById(userID);
+        return ResponseEntity.ok(userModelAssembler.toModel(userResponse));
     }
 
-    @Operation(summary = "Delete a client by ID")
+    @Operation(summary = "Delete a user by ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Client deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Client not found")
+            @ApiResponse(responseCode = "204", description = "User deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found")
     })
-    @DeleteMapping("/{clientID}")
+    @DeleteMapping("/{userID}")
     public ResponseEntity<Void> deleteUserById(
-            @Parameter(description = "ID of the client") @PathVariable Long clientID) {
+            @Parameter(description = "ID of the user") @PathVariable Long userID) {
 
-        clientService.delete(clientID);
+        userService.delete(userID);
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Partially update a client by ID")
+    @Operation(summary = "Partially update a user by ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Client updated successfully"),
-            @ApiResponse(responseCode = "404", description = "Client not found")
+            @ApiResponse(responseCode = "200", description = "User updated successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found")
     })
-    @PatchMapping("/{clientID}")
+    @PatchMapping("/{userID}")
     public ResponseEntity<EntityModel<UserResponse>> patchUser(
-            @Parameter(description = "ID of the client") @PathVariable Long clientID,
-            @RequestBody UserRequest client) {
+            @Parameter(description = "ID of the user") @PathVariable Long userID,
+            @RequestBody UserRequest user) {
 
-        UserResponse updatedClient = clientService.updateClientPartial(clientID, client);
-        return ResponseEntity.ok(clientModelAssembler.toModel(updatedClient));
+        UserResponse updatedUser = userService.updateUserPartial(userID, user);
+        return ResponseEntity.ok(userModelAssembler.toModel(updatedUser));
     }
 
-    @Operation(summary = "Fully update a client by ID")
+    @Operation(summary = "Fully update a user by ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Client updated successfully"),
+            @ApiResponse(responseCode = "200", description = "User updated successfully"),
             @ApiResponse(responseCode = "400", description = "Validation error"),
-            @ApiResponse(responseCode = "404", description = "Client not found")
+            @ApiResponse(responseCode = "404", description = "User not found")
     })
-    @PutMapping("/{clientID}")
+    @PutMapping("/{userID}")
     public ResponseEntity<EntityModel<UserResponse>> putUser(
-            @Parameter(description = "ID of the client") @PathVariable Long clientID,
-            @Valid @RequestBody UserRequest client) {
+            @Parameter(description = "ID of the user") @PathVariable Long userID,
+            @Valid @RequestBody UserRequest user) {
 
-        UserResponse updatedClient = clientService.updateClientFull(clientID, client);
-        return ResponseEntity.ok(clientModelAssembler.toModel(updatedClient));
+        UserResponse updatedUser = userService.updateUserFull(userID, user);
+        return ResponseEntity.ok(userModelAssembler.toModel(updatedUser));
     }
 }

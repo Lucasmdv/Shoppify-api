@@ -12,8 +12,8 @@ import org.stockify.dto.request.transaction.TransactionRequest;
 @Getter
 @Setter
 public class SaleRequest {
-    @Schema(description = "ID of the client", example = "10")
-    Long clientId;
+    @Schema(description = "ID of the user", example = "10")
+    Long userId;
 
     @NotNull(message = "Transaction is required")
     @Valid

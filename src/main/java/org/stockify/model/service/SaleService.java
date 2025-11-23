@@ -38,7 +38,7 @@ public class SaleService {
 
     private final TransactionService transactionService;
     private final SaleMapper saleMapper;
-    private final UserRepository clientRepository;
+    private final UserRepository userRepository;
     private final SaleRepository saleRepository;
     private final TransactionMapper transactionMapper;
     private final ProductRepository productRepository;
@@ -77,9 +77,9 @@ public class SaleService {
         SaleEntity sale = saleMapper.toEntity(request);
         sale.setTransaction(transaction);
 
-        if (request.getClientId() != null) {
-            sale.setClient(clientRepository.findById(request.getClientId())
-                    .orElseThrow(() -> new NotFoundException("Client not found with ID " + request.getClientId())));
+        if (request.getUserId() != null) {
+            sale.setUser(userRepository.findById(request.getUserId())
+                    .orElseThrow(() -> new NotFoundException("User not found with ID " + request.getUserId())));
         }
 
         productRepository.saveAll(productsToUpdate);
@@ -100,7 +100,7 @@ public class SaleService {
 
     public Page<SaleResponse> findAll(SaleFilterRequest filterRequest, Pageable pageable) {
         Specification<SaleEntity> specification = Specification
-                .where(SaleSpecification.byClientId(filterRequest.getClientId()))
+                .where(SaleSpecification.byUserId(filterRequest.getUserId()))
                 .and(SaleSpecification.bySaleId(filterRequest.getSaleId()))
                 .and(SaleSpecification.byTransactionId(filterRequest.getTransactionId()))
                 .and(SaleSpecification.byEndDate(filterRequest.getEndDate()))

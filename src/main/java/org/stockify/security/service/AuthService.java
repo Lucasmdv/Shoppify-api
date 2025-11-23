@@ -2,6 +2,7 @@ package org.stockify.security.service;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.stockify.model.entity.UserEntity;
 import org.stockify.model.repository.UserRepository;
 import org.stockify.model.service.CartService;
+
+import org.stockify.model.service.WishlistService;
 import org.stockify.security.exception.AuthenticationException;
 import org.stockify.security.model.dto.request.RegisterCredentialsRequest;
 import org.stockify.security.model.dto.request.RegisterRequest;
@@ -30,6 +33,7 @@ import java.util.Set;
  * Service responsible for authentication and user management operations.
  * Handles user registration, authentication, role and permission management.
  */
+@AllArgsConstructor
 @Transactional
 @Service
 public class AuthService {
@@ -42,37 +46,13 @@ public class AuthService {
     private final RolRepository rolRepository;
     private final UserRepository userRepository;
     private final CartService cartService;
+    private final WishlistService wishlistService;
 
-    /**
-     * Constructor for AuthService
-     *
-     * @param credentialsRepository Repository for user credentials
-     * @param authenticationManager Spring Security authentication manager
-     * @param passwordEncoder Password encoder for secure password storage
-     * @param jwtService Service for JWT token operations
-     * @param permitRepository Repository for permission data
-     * @param rolRepository Repository for role data
-     */
-    public AuthService(CredentialRepository credentialsRepository,
-                       AuthenticationManager authenticationManager,
-                       PasswordEncoder passwordEncoder,
-                       JwtService jwtService,
-                       PermitRepository permitRepository,
-                       RolRepository rolRepository,
-                       UserRepository userRepository, CartService cartService) {
-        this.credentialsRepository = credentialsRepository;
-        this.authenticationManager = authenticationManager;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-        this.permitRepository = permitRepository;
-        this.rolRepository = rolRepository;
-        this.userRepository = userRepository;
-        this.cartService = cartService;
-    }
+
 
     /**
      * Registers a user profile together with credentials using a composite request.
-     * Assigns default CLIENT role which must exist.
+     * Assigns default USER role which must exist.
      */
     public CredentialsEntity register(RegisterRequest request) {
         if (request == null || request.getCredentials() == null || request.getUser() == null) {
@@ -96,7 +76,8 @@ public class AuthService {
 
         // create Cart linked to user
         //hardcodeado
-        cartService.createUserCart(user.getId());
+        cartService.createCart(user.getId());
+        wishlistService.createWishlist(user.getId());
 
         // Create credentials linked to profile
         CredentialsEntity credentials = CredentialsEntity.builder()
@@ -106,11 +87,11 @@ public class AuthService {
                 .user(user)
                 .build();
 
-        // Assign default CLIENT role (must exist)
-        RoleEntity clientRole = rolRepository.findByName("CLIENT")
-                .orElseThrow(() -> new AuthenticationException("No se encontró el rol predeterminado CLIENT. Creá el rol antes de continuar.", null));
+        // Assign default USER role (must exist)
+        RoleEntity USERRole = rolRepository.findByName("USER")
+                .orElseThrow(() -> new AuthenticationException("No se encontró el rol predeterminado USER. Creá el rol antes de continuar.", null));
         Set<RoleEntity> roles = new HashSet<>();
-        roles.add(clientRole);
+        roles.add(USERRole);
         credentials.setRoles(roles);
 
         return credentialsRepository.save(credentials);
@@ -130,11 +111,11 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
-        // Assign default CLIENT role (must exist)
-        RoleEntity clientRole = rolRepository.findByName("CLIENT")
-                .orElseThrow(() -> new AuthenticationException("No se encontró el rol predeterminado CLIENT. Creá el rol antes de continuar.", null));
+        // Assign default USER role (must exist)
+        RoleEntity USERRole = rolRepository.findByName("USER")
+                .orElseThrow(() -> new AuthenticationException("No se encontró el rol predeterminado USER. Creá el rol antes de continuar.", null));
         Set<RoleEntity> roles = new HashSet<>();
-        roles.add(clientRole);
+        roles.add(USERRole);
         credentials.setRoles(roles);
 
         // Optionally link to existing user profile
@@ -166,6 +147,9 @@ public class AuthService {
                 .build();
         user = userRepository.save(user);
 
+        cartService.createCart(user.getId());
+        wishlistService.createWishlist(user.getId());
+
         // Create credentials linked to the user
         CredentialsEntity credentials = CredentialsEntity.builder()
                 .username(request.getUsername())
@@ -174,11 +158,11 @@ public class AuthService {
                 .user(user)
                 .build();
 
-        // Assign default CLIENT role (must exist)
-        RoleEntity clientRole = rolRepository.findByName("CLIENT")
-                .orElseThrow(() -> new AuthenticationException("No se encontró el rol predeterminado CLIENT. Creá el rol antes de continuar.", null));
+        // Assign default USER role (must exist)
+        RoleEntity USERRole = rolRepository.findByName("USER")
+                .orElseThrow(() -> new AuthenticationException("No se encontró el rol predeterminado USER. Creá el rol antes de continuar.", null));
         Set<RoleEntity> roles = new HashSet<>();
-        roles.add(clientRole);
+        roles.add(USERRole);
         credentials.setRoles(roles);
 
         return credentialsRepository.save(credentials);

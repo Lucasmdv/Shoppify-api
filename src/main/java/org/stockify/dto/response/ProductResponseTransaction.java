@@ -25,6 +25,9 @@ public class ProductResponseTransaction {
     @Schema(description = "Barcode of the product", example = "1234567890123")
     String barcode;
 
+    @Schema(description = "Stock of the product", example = "30")
+    String stock;
+
     @Schema(description = "Image URL of the product", example = "https://example.com/image.jpg")
     String imgURL;
 
