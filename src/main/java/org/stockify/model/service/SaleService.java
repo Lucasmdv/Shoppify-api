@@ -22,6 +22,7 @@ import org.stockify.model.exception.InsufficientStockException;
 import org.stockify.model.exception.NotFoundException;
 import org.stockify.model.mapper.SaleMapper;
 import org.stockify.model.mapper.TransactionMapper;
+import org.stockify.model.repository.OrderRepository;
 import org.stockify.model.repository.ProductRepository;
 import org.stockify.model.repository.SaleRepository;
 import org.stockify.model.repository.UserRepository;
@@ -41,7 +42,7 @@ public class SaleService {
     private final SaleRepository saleRepository;
     private final TransactionMapper transactionMapper;
     private final ProductRepository productRepository;
-    private final OrderService orderService;
+    private final OrderRepository orderRepository;
 
     public SaleResponse createSale(SaleRequest request) {
         if (request.getTransaction() == null || request.getTransaction().getDetailTransactions() == null
@@ -82,8 +83,9 @@ public class SaleService {
         }
 
         productRepository.saveAll(productsToUpdate);
+        sale.setOrder(new OrderEntity(sale, request.getPickup()));
+
         SaleEntity saved = saleRepository.save(sale);
-        orderService.createOrderFromSale(saved, request.getPickup());
         SaleResponse saleResponse = saleMapper.toResponseDTO(saved);
         saleResponse.setTransaction(transactionMapper.toDto(transaction));
         return saleResponse;

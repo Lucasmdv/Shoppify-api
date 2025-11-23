@@ -24,9 +24,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.stockify.dto.request.order.OrderFilterRequest;
-import org.stockify.dto.request.order.OrderRequest;
 import org.stockify.dto.request.order.UpdateOrderRequest;
-import org.stockify.dto.request.sale.SaleRequest;
 import org.stockify.dto.response.OrderResponse;
 import org.stockify.dto.response.SaleResponse;
 import org.stockify.model.assembler.OrderModelAssembler;
@@ -100,10 +98,10 @@ public class OrderController {
             @ApiResponse(responseCode = "200", description = "Orders returned successfully"),
             @ApiResponse(responseCode = "404", description = "Orders or user not found")
     })
-    @GetMapping
+    @GetMapping("/my-orders/{userID}")
     public ResponseEntity<List<OrderResponse>> findOrdersByUser(
             @Parameter(description = "Identifier of the user who owns the orders", example = "12")
-            @PathVariable("userId") Long userId) {
+            @PathVariable Long userId) {
         return ResponseEntity.ok(orderService.findOrdersByUser(userId));
     }
 
@@ -131,7 +129,7 @@ public class OrderController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Order update request",
                     required = true,
-                    content = @Content(schema = @Schema(implementation = OrderRequest.class))
+                    content = @Content(schema = @Schema(implementation = UpdateOrderRequest.class))
             ),
             responses = {
                     @ApiResponse(
@@ -150,7 +148,7 @@ public class OrderController {
             @PathVariable Long orderID,
 
             @Parameter(description = "Order request body", required = true)
-            @Valid @RequestBody UpdateOrderRequest orderRequest) {
+            @Valid @org.springframework.web.bind.annotation.RequestBody UpdateOrderRequest orderRequest) {
         OrderResponse updatedOrder = orderService.updateOrderFull(orderID, orderRequest);
         EntityModel<OrderResponse> entityModel = orderModelAssembler.toModel(updatedOrder);
         return ResponseEntity.ok(entityModel);
@@ -162,7 +160,7 @@ public class OrderController {
             requestBody = @RequestBody(
                     description = "Partial order update request",
                     required = true,
-                    content = @Content(schema = @Schema(implementation = SaleRequest.class))
+                    content = @Content(schema = @Schema(implementation = UpdateOrderRequest.class))
             ),
             responses = {
                     @ApiResponse(
@@ -180,7 +178,9 @@ public class OrderController {
             @PathVariable Long orderID,
 
             @Parameter(description = "Order request body", required = true)
-            @Valid @RequestBody UpdateOrderRequest orderRequest) {
+            @Valid @org.springframework.web.bind.annotation.RequestBody UpdateOrderRequest orderRequest) {
+        System.out.println(orderRequest.getStatus());
+        System.out.println(orderRequest.getEndDate());
         OrderResponse updatedOrder = orderService.updateOrderPartial(orderID, orderRequest);
         EntityModel<OrderResponse> entityModel = orderModelAssembler.toModel(updatedOrder);
         return ResponseEntity.ok(entityModel);

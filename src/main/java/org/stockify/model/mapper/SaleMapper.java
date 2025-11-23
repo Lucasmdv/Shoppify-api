@@ -11,12 +11,12 @@ public interface SaleMapper {
     @Mapping(target = "client", ignore = true)
     @Mapping(target = "transaction", ignore = true)
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "pickup", ignore = true)
     SaleEntity toEntity(SaleRequest dto);
 
     @Mapping(target = "clientDni", source = "client.dni")
     @Mapping(target = "clientId", source = "client.id")
     @Mapping(target = "transaction", source = "transaction")
+    @Mapping(target = "orderId", source = "order.id")
     SaleResponse toResponseDTO (SaleEntity entity);
 
     @Mapping(target = "id", ignore = true)

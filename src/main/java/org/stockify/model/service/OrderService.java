@@ -38,34 +38,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional
 public class OrderService {
-    private final SaleService saleService;
-    private final SaleMapper saleMapper;
-    private final SaleRepository saleRepository;
-
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
-
-    public OrderResponse createOrder(OrderRequest request) {
-        if (request.getSale() == null) throw new
-                ResponseStatusException(HttpStatus.BAD_REQUEST, "Order requires a sale");
-
-        SaleResponse saleResponse = saleService.createSale(request.getSale());
-        SaleEntity saleEntity = saleRepository.findById(saleResponse.getId())
-                .orElseThrow(() -> new NotFoundException("Sale not found"));
-
-        OrderEntity order = orderMapper.toEntity(request);
-        order.setSale(saleEntity);
-        order.setStatus(OrderStatus.PROCESSING);
-        order.setStartDate(LocalDate.now());
-
-        OrderEntity saved = orderRepository.save(order);
-        return orderMapper.toResponseDTO(saved);
-    }
-
-    public OrderResponse createOrderFromSale(SaleEntity sale, Boolean pickup) {
-        OrderEntity saved = orderRepository.save(new OrderEntity(sale, pickup));
-        return orderMapper.toResponseDTO(saved);
-    }
 
     public void delete(Long id) {
         if (!orderRepository.existsById(id)) {
@@ -78,7 +52,7 @@ public class OrderService {
         Specification<OrderEntity> specification = Specification
                 .where(OrderSpecification.byClient(filterRequest.getClientId()))
                 .and(OrderSpecification.byOrder(filterRequest.getOrderId()))
-                .and(OrderSpecification.byStatus(OrderStatus.valueOf(filterRequest.getStatus())))
+                .and(OrderSpecification.byStatus(mapStatus(filterRequest.getStatus())))
                 .and(OrderSpecification.byEndDate(filterRequest.getEndDate()))
                 .and(OrderSpecification.byStartDate(filterRequest.getStartDate()))
                 .and(OrderSpecification.byTotalRange(filterRequest.getMinPrice(),  filterRequest.getMaxPrice()))
@@ -92,14 +66,6 @@ public class OrderService {
         OrderEntity orderEntity = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order with ID " + id + " not found"));
         return orderMapper.toResponseDTO(orderEntity);
-    }
-
-    public SaleResponse findSaleByOrderId(Long orderId) {
-        OrderEntity orderEntity = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundException("Order with ID " + orderId + " not found"));
-
-        SaleEntity saleEntity = orderEntity.getSale();
-        return saleMapper.toResponseDTO(saleEntity);
     }
 
     public List<OrderResponse> findOrdersByUser(Long userId) {
@@ -129,5 +95,10 @@ public class OrderService {
 
         OrderEntity updatedOrder = orderRepository.save(existingOrder);
         return orderMapper.toResponseDTO(updatedOrder);
+    }
+
+    private OrderStatus mapStatus(String status) {
+        if (status == null || status.isBlank()) return null;
+        return OrderStatus.valueOf(status);
     }
 }

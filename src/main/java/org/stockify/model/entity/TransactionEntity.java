@@ -45,7 +45,6 @@ public class TransactionEntity {
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
-
     @ManyToOne
     @JoinColumn(name = "store_id")
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)

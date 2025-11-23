@@ -15,8 +15,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.stockify.dto.request.sale.SaleRequest;
+import org.stockify.dto.response.OrderResponse;
 import org.stockify.dto.response.SaleResponse;
+import org.stockify.model.assembler.OrderModelAssembler;
 import org.stockify.model.assembler.SaleModelAssembler;
+import org.stockify.model.entity.SaleEntity;
+import org.stockify.model.service.OrderService;
 import org.stockify.model.service.SaleService;
 
 @RestController
@@ -46,7 +50,6 @@ public class TransactionSaleController {
 
         SaleResponse saleResponse = saleService.createSale(request);
         EntityModel<SaleResponse> entityModel = saleModelAssembler.toModel(saleResponse);
-
         return ResponseEntity
                 .created(entityModel.getRequiredLink("self").toUri())
                 .body(entityModel);
