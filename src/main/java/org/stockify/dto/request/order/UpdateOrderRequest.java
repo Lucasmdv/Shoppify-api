@@ -12,7 +12,4 @@ import java.time.LocalDate;
 public class UpdateOrderRequest {
     @Schema(description = "Edit status of the order")
     private String status;
-
-    @Schema(description = "Edit end date of order")
-    private LocalDate endDate;
 }

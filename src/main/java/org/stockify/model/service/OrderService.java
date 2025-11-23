@@ -2,36 +2,21 @@ package org.stockify.model.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import org.stockify.dto.request.order.OrderFilterRequest;
-import org.stockify.dto.request.order.OrderRequest;
 import org.stockify.dto.request.order.UpdateOrderRequest;
-import org.stockify.dto.request.sale.SaleFilterRequest;
-import org.stockify.dto.request.sale.SaleRequest;
-import org.stockify.dto.request.transaction.DetailTransactionRequest;
 import org.stockify.dto.response.OrderResponse;
-import org.stockify.dto.response.SaleResponse;
-import org.stockify.dto.response.TransactionResponse;
 import org.stockify.model.entity.*;
 import org.stockify.model.enums.OrderStatus;
-import org.stockify.model.enums.TransactionType;
-import org.stockify.model.exception.InsufficientStockException;
 import org.stockify.model.exception.NotFoundException;
 import org.stockify.model.mapper.OrderMapper;
-import org.stockify.model.mapper.SaleMapper;
 import org.stockify.model.repository.OrderRepository;
-import org.stockify.model.repository.SaleRepository;
 import org.stockify.model.specification.OrderSpecification;
-import org.stockify.model.specification.SaleSpecification;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -83,15 +68,10 @@ public class OrderService {
                 .orElseThrow(() -> new NotFoundException("Order with ID " + id + " not found"));
         orderMapper.partialUpdateOrderEntity(orderRequest, existingOrder);
 
-        OrderEntity updatedOrder = orderRepository.save(existingOrder);
-        return orderMapper.toResponseDTO(updatedOrder);
-    }
-
-    public OrderResponse updateOrderFull(Long id, UpdateOrderRequest orderRequest) {
-        OrderEntity existingOrder = orderRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Order with ID " + id + " not found"));
-
-        orderMapper.updateOrderEntity(orderRequest, existingOrder);
+        switch(orderRequest.getStatus()) {
+            case "DELIVERED", "CANCELLED", "RETURNED"
+                    -> existingOrder.setEndDate(LocalDate.now());
+        }
 
         OrderEntity updatedOrder = orderRepository.save(existingOrder);
         return orderMapper.toResponseDTO(updatedOrder);

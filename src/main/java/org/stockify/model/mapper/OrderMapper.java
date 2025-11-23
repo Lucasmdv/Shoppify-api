@@ -18,23 +18,16 @@ public interface OrderMapper {
     @Mapping(target = "saleId", source = "sale.id")
     OrderResponse toResponseDTO(OrderEntity entity);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "startDate", ignore = true)
+    @Mapping(target = "sale", ignore = true)
+    @Mapping(target = "endDate", ignore = true)
+    @Mapping(target = "status", source = "status", qualifiedByName = "stringToOrderStatus")
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void partialUpdateOrderEntity(UpdateOrderRequest dto, @MappingTarget OrderEntity entity);
+
     @Named("stringToOrderStatus")
     default OrderStatus stringToOrderStatus(String status) {
         return status == null ? null : OrderStatus.valueOf(status);
     }
-
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "startDate", ignore = true)
-    @Mapping(target = "sale", ignore = true)
-    @Mapping(target = "status", source = "status", qualifiedByName = "stringToOrderStatus")
-    @Mapping(target = "endDate", source = "endDate")
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void partialUpdateOrderEntity(UpdateOrderRequest dto, @MappingTarget OrderEntity entity);
-
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "startDate", ignore = true)
-    @Mapping(target = "sale", ignore = true)
-    @Mapping(target = "status", source = "status", qualifiedByName = "stringToOrderStatus")
-    @Mapping(target = "endDate", source = "endDate")
-    void updateOrderEntity(UpdateOrderRequest dto, @MappingTarget OrderEntity entity);
 }

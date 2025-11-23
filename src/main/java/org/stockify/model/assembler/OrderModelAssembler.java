@@ -21,7 +21,6 @@ public class OrderModelAssembler implements RepresentationModelAssembler<OrderRe
                 linkTo(methodOn(OrderController.class).getOrderById(orderResponse.getId())).withSelfRel(),
                 linkTo(methodOn(OrderController.class).getAll(new OrderFilterRequest(),0, 20, null)).withRel("clients"),
                 linkTo(methodOn(OrderController.class).deleteOrderById(orderResponse.getId())).withRel("delete"),
-                linkTo(methodOn(OrderController.class).putOrder(orderResponse.getId(), null)).withRel("update"),
                 linkTo(methodOn(OrderController.class).patchOrder(orderResponse.getId(), null)).withRel("partial-update"));
     }
 }

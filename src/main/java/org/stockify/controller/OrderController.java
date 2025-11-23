@@ -101,7 +101,7 @@ public class OrderController {
     @GetMapping("/my-orders/{userID}")
     public ResponseEntity<List<OrderResponse>> findOrdersByUser(
             @Parameter(description = "Identifier of the user who owns the orders", example = "12")
-            @PathVariable Long userId) {
+            @PathVariable("userID") Long userId) {
         return ResponseEntity.ok(orderService.findOrdersByUser(userId));
     }
 
@@ -121,37 +121,6 @@ public class OrderController {
             @PathVariable Long orderID) {
         orderService.delete(orderID);
         return ResponseEntity.noContent().build();
-    }
-
-    @Operation(
-            summary = "Update entire order by ID",
-            description = "Performs full update of a order given its ID",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Order update request",
-                    required = true,
-                    content = @Content(schema = @Schema(implementation = UpdateOrderRequest.class))
-            ),
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Order updated successfully",
-                            content = @Content(schema = @Schema(implementation = OrderResponse.class))
-                    ),
-                    @ApiResponse(responseCode = "404", description = "Order not found", content = @Content)
-            }
-    )
-    @PutMapping("/{orderID}")
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('WRITE')")
-    public ResponseEntity<EntityModel<OrderResponse>> putOrder(
-            @Parameter(description = "Order ID", required = true, example = "1")
-            @PathVariable Long orderID,
-
-            @Parameter(description = "Order request body", required = true)
-            @Valid @org.springframework.web.bind.annotation.RequestBody UpdateOrderRequest orderRequest) {
-        OrderResponse updatedOrder = orderService.updateOrderFull(orderID, orderRequest);
-        EntityModel<OrderResponse> entityModel = orderModelAssembler.toModel(updatedOrder);
-        return ResponseEntity.ok(entityModel);
     }
 
     @Operation(
@@ -179,8 +148,6 @@ public class OrderController {
 
             @Parameter(description = "Order request body", required = true)
             @Valid @org.springframework.web.bind.annotation.RequestBody UpdateOrderRequest orderRequest) {
-        System.out.println(orderRequest.getStatus());
-        System.out.println(orderRequest.getEndDate());
         OrderResponse updatedOrder = orderService.updateOrderPartial(orderID, orderRequest);
         EntityModel<OrderResponse> entityModel = orderModelAssembler.toModel(updatedOrder);
         return ResponseEntity.ok(entityModel);
