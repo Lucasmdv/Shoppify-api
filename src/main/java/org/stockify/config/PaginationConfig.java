@@ -4,7 +4,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -31,25 +33,20 @@ public class PaginationConfig implements WebMvcConfigurer {
                                                     NativeWebRequest webRequest,
                                                     WebDataBinderFactory binderFactory) {
 
-                        Pageable pageable = super.resolveArgument(methodParameter, mavContainer, webRequest, binderFactory);
+                        Pageable pageable = (Pageable) super.resolveArgument(methodParameter, mavContainer, webRequest, binderFactory);
 
                         if (pageable == null) {
                             return PageRequest.of(0, DEFAULT_SIZE);
                         }
+                        int sanitizedSize = ALLOWED_SIZES.contains(pageable.getPageSize()) ? pageable.getPageSize() : DEFAULT_SIZE;
 
-                        int size = pageable.getPageSize();
-                        int sanitizedSize = ALLOWED_SIZES.contains(size) ? size : DEFAULT_SIZE;
-
-                        return PageRequest.of(
-                                pageable.getPageNumber(),
-                                sanitizedSize,
-                                pageable.getSort()
-                        );
+                        int sanitizedPage = pageable.getPageNumber() >= 0 ? pageable.getPageNumber() : 0;
+                        return PageRequest.of(sanitizedPage, sanitizedSize, pageable.getSort());
                     }
                 };
 
         resolver.setFallbackPageable(PageRequest.of(0, DEFAULT_SIZE));
-        resolver.setMaxPageSize(20);
+        resolver.setMaxPageSize(ALLOWED_SIZES.stream().max(Integer::compareTo).orElse(DEFAULT_SIZE));
 
         resolvers.add(resolver);
     }

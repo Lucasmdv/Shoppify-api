@@ -711,3 +711,6 @@ INSERT INTO products_categories (product_id, category_id)
 SELECT p.id, c.id FROM products p, categories c
 WHERE p.sku = 'AS06701' AND c.name = 'Electronica'
   AND NOT EXISTS (SELECT 1 FROM products_categories pc WHERE pc.product_id = p.id AND pc.category_id = c.id);
+
+-- Creacion de unaccent() function for accents removal
+CREATE EXTENSION IF NOT EXISTS unaccent;

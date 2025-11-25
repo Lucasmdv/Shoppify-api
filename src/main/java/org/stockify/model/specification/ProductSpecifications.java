@@ -12,8 +12,8 @@ public class ProductSpecifications {
 
     public static Specification<ProductEntity> byName(String name) {
         return (root, query, cb) -> {
-            if (name == null) return null;
-            String pattern = "%'" + normalizeSql(name) + "'%";
+            if (name == null || name.isBlank()) return null;
+            String pattern = name + "%";
             return cb.like(
                 cb.function("unaccent", String.class, cb.lower(root.get("name"))),
                 pattern
@@ -23,15 +23,19 @@ public class ProductSpecifications {
 
     public static Specification<ProductEntity> byProvider(String provider) {
         return (root, query, cb) -> {
-            if (provider == null) return null;
-            return cb.like(cb.lower(root.join("providers").get("name")), "%" + provider.toLowerCase() + "%");
+            if (provider == null || provider.isBlank()) return null;
+            String pattern = provider + "%";
+            return cb.like(
+                cb.function("unaccent", String.class, cb.lower(root.join("providers").get("name"))),
+                pattern
+            );
         };
     }
 
     public static Specification<ProductEntity> byCategory(String category) {
         return (root, query, cb) -> {
-            if (category == null) return null;
-            String pattern = "%'" + normalizeSql(category) + "'%";
+            if (category == null || category.isBlank()) return null;
+            String pattern = category + "%";
             return cb.like(
                 cb.function("unaccent", String.class, cb.lower(root.join("categories").get("name"))),
                 pattern
@@ -40,14 +44,20 @@ public class ProductSpecifications {
     }
 
     public static Specification<ProductEntity> bySku(String sku) {
-        return (root, query, cb) ->
-                sku == null ? null : cb.like(cb.lower(root.get("sku")), "%" + sku.toLowerCase() + "%");
+        return (root, query, cb) -> {
+            if (sku == null || sku.isBlank()) return null;
+            String pattern = sku + "%";
+            return cb.like(
+                    cb.function("unaccent", String.class, cb.lower(root.get("sku"))),
+                    pattern
+            );
+        };
     }
 
     public static Specification<ProductEntity> byBarCode(String barCode) {
         return (root, query, cb) -> {
-            if (barCode == null) return null;
-            String pattern = "%'" + normalizeSql(barCode) + "'%";
+            if (barCode == null || barCode.isBlank()) return null;
+            String pattern = barCode + "%";
             return cb.like(
                 cb.function("unaccent", String.class, cb.lower(root.get("barcode"))),
                 pattern
@@ -62,7 +72,13 @@ public class ProductSpecifications {
         return (root, query, cb) -> {
             query.distinct(true);
             return cb.or(categories.stream()
-                    .map(category -> cb.like(cb.lower(root.join("categories").get("name")), "%" + category.toLowerCase() + "%"))
+                    .map(category -> {
+                        String pattern = category + "%";
+                        return cb.like(
+                            cb.function("unaccent", String.class, cb.lower(root.join("categories").get("name"))),
+                            pattern
+                        );
+                    })
                     .toArray(jakarta.persistence.criteria.Predicate[]::new));
         };
     }
@@ -74,17 +90,26 @@ public class ProductSpecifications {
         return (root, query, cb) -> {
             query.distinct(true);
             return cb.or(providers.stream()
-                    .map(provider -> cb.like(cb.lower(root.join("providers").get("name")), "%" + provider.toLowerCase() + "%"))
+                    .map(provider -> {
+                        String pattern = provider + "%";
+                        return cb.like(
+                            cb.function("unaccent", String.class, cb.lower(root.join("providers").get("name"))),
+                            pattern
+                        );
+                    })
                     .toArray(jakarta.persistence.criteria.Predicate[]::new));
         };
     }
 
     public static Specification<ProductEntity> byBrand(String brand) {
-        return (root, query, cb) ->
-            brand == null ? null : cb.like(
+        return (root, query, cb) -> {
+            if (brand == null || brand.isBlank()) return null;
+            String pattern = brand + "%";
+            return cb.like(
                 cb.function("unaccent", String.class, cb.lower(root.get("brand"))),
-                "%'" + normalizeSql(brand) + "'%"
+                pattern
             );
+        };
     }
 
     public static Specification<ProductEntity> byPrice(Double price) {
@@ -125,8 +150,14 @@ public class ProductSpecifications {
     }
 
     public static Specification<ProductEntity> byDescription(String description) {
-        return (root, query, cb) ->
-                description == null ? null : cb.like(cb.lower(root.get("description")), "%" + description.toLowerCase() + "%");
+        return (root, query, cb) -> {
+            if (description == null || description.isBlank()) return null;
+            String pattern = description + "%";
+            return cb.like(
+                cb.function("unaccent", String.class, cb.lower(root.get("description"))),
+                pattern
+            );
+        };
     }
 
     public static Specification<ProductEntity> byStock(Long stock) {
@@ -157,12 +188,12 @@ public class ProductSpecifications {
             }
 
             query.distinct(true);
-            String pattern = "%" + value.toLowerCase() + "%";
+            String pattern = value + "%";
             Join<ProductEntity, ?> categoriesJoin = root.join("categories", JoinType.LEFT);
 
             return cb.or(
-                    cb.like(cb.lower(root.get("name")), pattern),
-                    cb.like(cb.lower(categoriesJoin.get("name")), pattern)
+                    cb.like(cb.function("unaccent", String.class, cb.lower(root.get("name"))), pattern),
+                    cb.like(cb.function("unaccent", String.class, cb.lower(categoriesJoin.get("name"))), pattern)
             );
         };
     }
@@ -170,10 +201,5 @@ public class ProductSpecifications {
     public static Specification<ProductEntity> notDeleted() {
         return (root, query, cb) -> cb.isFalse(root.get("deleted"));
     }
-    private static String normalizeSql(String input) {
-        if (input == null) return null;
-        String normalized = java.text.Normalizer.normalize(input, java.text.Normalizer.Form.NFD)
-                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-        return normalized.toLowerCase();
-    }
+
 }
