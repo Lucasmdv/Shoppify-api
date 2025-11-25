@@ -33,6 +33,7 @@ import org.stockify.model.repository.ProductRepository;
 import org.stockify.model.repository.ProviderRepository;
 import org.stockify.model.specification.ProductSpecifications;
 import org.stockify.model.specification.SpecificationBuilder;
+import org.stockify.util.StringNormalizer;
 
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -79,6 +80,28 @@ public class ProductService {
      * @throws DuplicatedUniqueConstraintException if a product with the same barcode or SKU already exists
      */
     public ProductResponse save(ProductRequest request) throws DuplicatedUniqueConstraintException {
+        ProductEntity existing = null;
+        String normalizedName = StringNormalizer.normalize(request.name());
+        String normalizedBarcode = StringNormalizer.normalize(request.barcode());
+        List<ProductEntity> allProducts = productRepository.findAll();
+        for (ProductEntity p : allProducts) {
+            if (p.getName() != null && StringNormalizer.normalize(p.getName()).equals(normalizedName)
+                && Boolean.TRUE.equals(p.getDeleted())) {
+                existing = p;
+                break;
+            }
+            if (existing == null && p.getBarcode() != null && normalizedBarcode != null && StringNormalizer.normalize(p.getBarcode()).equals(normalizedBarcode)
+                && Boolean.TRUE.equals(p.getDeleted())) {
+                existing = p;
+                break;
+            }
+        }
+        if (existing != null) {
+            existing.setDeleted(false);
+            existing.setCategories(resolveCategories(request.categories()));
+            productMapper.updateEntityFromRequest(request, existing);
+            return productMapper.toResponse(productRepository.save(existing));
+        }
         ProductEntity product = productMapper.toEntity(request);
         product.setCategories(resolveCategories(request.categories()));
         product = productRepository.save(product);
@@ -164,7 +187,10 @@ public class ProductService {
      * @param id the ID of the product to delete
      */
     public void deleteById(Long id) {
-        productRepository.deleteById(id);
+        ProductEntity product = productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Product with ID " + id + " not found"));
+        product.setDeleted(true);
+        productRepository.save(product);
     }
 
     /**
@@ -354,8 +380,12 @@ public class ProductService {
     }
 
     private ProductEntity getProductById(Long id) {
-        return productRepository.findById(id)
+        ProductEntity product = productRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Product with ID " + id + " not found"));
+        if (Boolean.TRUE.equals(product.getDeleted())) {
+            throw new NotFoundException("Product with ID " + id + " not found");
+        }
+        return product;
     }
 
     /**
@@ -439,16 +469,13 @@ public class ProductService {
                         filterRequest.getStockBetween().get(0),
                         filterRequest.getStockBetween().get(1))
                         : null)
+                .add(ProductSpecifications.notDeleted())
                 .build();
-
         Pageable pageableWithSort = applyCustomSorts(pageable, filterRequest);
-
         Page<ProductEntity> page = productRepository.findAll(spec, pageableWithSort);
-
         if (page.isEmpty()) {
             logger.warn("Products list is empty for pageable: {}", pageable);
         }
-
         return page.map(productMapper::toResponse);
     }
 

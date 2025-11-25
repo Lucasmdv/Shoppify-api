@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.stockify.model.entity.CategoryEntity;
 import org.stockify.model.entity.ProductEntity;
 
+import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<ProductEntity,Long>, JpaSpecificationExecutor<ProductEntity> {
@@ -18,6 +19,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity,Long>, Jp
 
     Page<ProductEntity> findAllByProviders_Id(Long providerId, Pageable pageable);
 
+    Optional<ProductEntity> findByName(String name);
 
-
+    Optional<ProductEntity> findByBarcode(String barcode);
 }
