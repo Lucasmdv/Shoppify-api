@@ -23,7 +23,7 @@ public class SaleEntity {
     private TransactionEntity transaction;
 
     @OneToOne(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
-    private OrderEntity order;
+    private ShipmentEntity shipment;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

@@ -1,22 +1,26 @@
 package org.stockify.model.mapper;
 
 import org.mapstruct.*;
-import org.stockify.dto.request.order.OrderRequest;
-import org.stockify.dto.request.order.UpdateOrderRequest;
-import org.stockify.dto.response.OrderResponse;
-import org.stockify.model.entity.OrderEntity;
+import org.stockify.dto.request.shipment.ShipmentRequest;
+import org.stockify.dto.request.shipment.UpdateShipmentRequest;
+import org.stockify.dto.response.ShipmentResponse;
+import org.stockify.model.entity.SaleEntity;
+import org.stockify.model.entity.ShipmentEntity;
 import org.stockify.model.enums.OrderStatus;
 
+import java.time.LocalDate;
+
 @Mapper(componentModel = "spring")
-public interface OrderMapper {
+public interface ShipmentMapper {
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "status", ignore = true)
-    @Mapping(target = "startDate", ignore = true)
     @Mapping(target = "endDate", ignore = true)
-    OrderEntity toEntity(OrderRequest dto);
+    @Mapping(target = "status", constant = "PROCESSING")
+    @Mapping(target = "startDate", expression = "java(java.time.LocalDate.now())")
+    @Mapping(target = "sale", source = "sale")
+    ShipmentEntity toEntity(ShipmentRequest dto, SaleEntity sale);
 
     @Mapping(target = "saleId", source = "sale.id")
-    OrderResponse toResponseDTO(OrderEntity entity);
+    ShipmentResponse toResponseDTO(ShipmentEntity entity);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "startDate", ignore = true)
@@ -24,7 +28,7 @@ public interface OrderMapper {
     @Mapping(target = "endDate", ignore = true)
     @Mapping(target = "status", source = "status", qualifiedByName = "stringToOrderStatus")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void partialUpdateOrderEntity(UpdateOrderRequest dto, @MappingTarget OrderEntity entity);
+    void partialUpdateOrderEntity(UpdateShipmentRequest dto, @MappingTarget ShipmentEntity entity);
 
     @Named("stringToOrderStatus")
     default OrderStatus stringToOrderStatus(String status) {

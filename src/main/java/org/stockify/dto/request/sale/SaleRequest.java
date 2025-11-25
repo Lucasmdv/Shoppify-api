@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.stockify.dto.request.shipment.ShipmentRequest;
 import org.stockify.dto.request.transaction.TransactionRequest;
 
 @NoArgsConstructor
@@ -20,6 +21,6 @@ public class SaleRequest {
     @Schema(description = "Transaction details for the sale")
     TransactionRequest transaction;
 
-    @Schema(description = "Boolean of pickup in store or not")
-    Boolean pickup;
+    @Schema(description = "Details of the shipment")
+    ShipmentRequest shipment;
 }

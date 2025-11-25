@@ -16,7 +16,7 @@ public interface SaleMapper {
     @Mapping(target = "userDni", source = "user.dni")
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "transaction", source = "transaction")
-    @Mapping(target = "orderId", source = "order.id")
+    @Mapping(target = "shipmentId", source = "shipment.id")
     SaleResponse toResponseDTO (SaleEntity entity);
 
     @Mapping(target = "id", ignore = true)

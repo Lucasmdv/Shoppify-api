@@ -1,7 +1,6 @@
 package org.stockify.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,7 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Entity
 @Table(name = "orders")
-public class OrderEntity {
+public class ShipmentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -39,11 +38,6 @@ public class OrderEntity {
     @Column(name = "pickup")
     private Boolean pickup;
 
-    public OrderEntity(SaleEntity sale, Boolean pickup) {
-        this.status = OrderStatus.PROCESSING;
-        this.startDate = LocalDate.now();
-        this.endDate = null;
-        this.sale = sale;
-        this.pickup = pickup;
-    }
+    @Column(name = "adress")
+    private String adress;
 }

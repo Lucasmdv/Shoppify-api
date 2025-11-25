@@ -1,4 +1,4 @@
-package org.stockify.dto.request.order;
+package org.stockify.dto.request.shipment;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -8,18 +8,16 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.stockify.dto.request.sale.SaleRequest;
-import org.stockify.dto.request.transaction.TransactionRequest;
 
 @Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderRequest {
-    @NotNull(message = "Sale is required")
-    @Valid
-    @Schema(description = "Sale details for the order")
-    private SaleRequest sale;
-
+public class ShipmentRequest {
     @Schema(description = "Boolean for pickup in store or not")
     private Boolean pickup;
+
+    @NotNull(message = "Adress is required")
+    @Schema(description = "Adress were the shipment will be delivered")
+    private String adress;
 }

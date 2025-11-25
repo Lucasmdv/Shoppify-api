@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderResponse {
+public class ShipmentResponse {
     @Schema(description = "Unique identifier of the order", example = "1")
     private Long id;
 
@@ -30,4 +30,7 @@ public class OrderResponse {
 
     @Schema(description = "Boolean for pickup in store or not")
     private Boolean pickup;
+
+    @Schema(description = "Adress were the shipment will be delivered")
+    private String adress;
 }

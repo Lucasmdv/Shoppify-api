@@ -1,29 +1,29 @@
 package org.stockify.model.specification;
 
 import org.springframework.data.jpa.domain.Specification;
-import org.stockify.model.entity.OrderEntity;
+import org.stockify.model.entity.ShipmentEntity;
 import org.stockify.model.enums.OrderStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class OrderSpecification {
-    public static Specification<OrderEntity> byOrder(Long id) {
+public class ShipmentSpecification {
+    public static Specification<ShipmentEntity> byOrder(Long id) {
         return (root, query, cb) ->
                 id == null ? null : cb.equal(root.get("id"), id);
     }
 
-    public static Specification<OrderEntity> byClient(Long id) {
+    public static Specification<ShipmentEntity> byClient(Long id) {
         return ((root, query, cb) ->
             id == null ? null : cb.equal(root.get("sale").get("client").get("id"), id));
     }
 
-    public static Specification<OrderEntity> byStatus(OrderStatus status) {
+    public static Specification<ShipmentEntity> byStatus(OrderStatus status) {
         return (((root, query, cb) ->
                 status == null ? null : cb.equal(root.get("status"), status)));
     }
 
-    public static Specification<OrderEntity> byStartDate(LocalDate startDate) {
+    public static Specification<ShipmentEntity> byStartDate(LocalDate startDate) {
         return (root, query, cb) -> {
             if (startDate == null) return null;
             LocalDateTime startOfDay = startDate.atStartOfDay();
@@ -31,7 +31,7 @@ public class OrderSpecification {
         };
     }
 
-    public static Specification<OrderEntity> byEndDate(LocalDate endDate) {
+    public static Specification<ShipmentEntity> byEndDate(LocalDate endDate) {
         return (root, query, cb) -> {
             if (endDate == null) return null;
             LocalDateTime endOfDay = endDate.atTime(23, 59, 59);
@@ -39,7 +39,7 @@ public class OrderSpecification {
         };
     }
 
-    public static Specification<OrderEntity> byTotalRange(Double min, Double max) {
+    public static Specification<ShipmentEntity> byTotalRange(Double min, Double max) {
         return (root, query, cb) -> {
             if (min == null && max == null) return null;
             if (min != null && max != null) {
@@ -52,7 +52,7 @@ public class OrderSpecification {
         };
     }
 
-    public static Specification<OrderEntity> byPickup(Boolean pickup) {
+    public static Specification<ShipmentEntity> byPickup(Boolean pickup) {
         return (((root, query, cb) ->
                 pickup == null ? null : cb.equal(root.get("pickup"), pickup)));
     }

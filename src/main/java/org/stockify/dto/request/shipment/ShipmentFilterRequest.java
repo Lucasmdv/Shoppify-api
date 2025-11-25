@@ -1,4 +1,4 @@
-package org.stockify.dto.request.order;
+package org.stockify.dto.request.shipment;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderFilterRequest {
+public class ShipmentFilterRequest {
     @Schema(description = "Filter by ID of the order", example = "1")
     private Long orderId;
 
