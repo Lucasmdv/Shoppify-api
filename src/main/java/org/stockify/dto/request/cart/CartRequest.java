@@ -17,9 +17,9 @@ import java.util.List;
 @AllArgsConstructor
 public class CartRequest {
 
-    @Schema(description = "Identifier of the client that owns the cart", example = "12")
-    @NotNull(message = "Client identifier is required")
-    private Long clientId;
+    @Schema(description = "Identifier of the user that owns the cart", example = "12")
+    @NotNull(message = "User identifier is required")
+    private Long userId;
 
     @Schema(description = "Items that should be stored inside the cart")
     @Valid

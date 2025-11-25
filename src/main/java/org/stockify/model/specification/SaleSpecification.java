@@ -13,9 +13,9 @@ public class SaleSpecification {
                 transactionId == null ? null : cb.equal(root.get("transaction").get("id"), transactionId);
     }
 
-    public static Specification<SaleEntity> byClientId(Long clientId) {
+    public static Specification<SaleEntity> byUserId(Long userId) {
         return (root, query, cb) ->
-                clientId == null ? null : cb.equal(root.get("client").get("id"), clientId);
+                userId == null ? null : cb.equal(root.get("user").get("id"), userId);
     }
 
     public static Specification<SaleEntity> bySaleId(Long saleId) {

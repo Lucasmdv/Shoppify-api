@@ -80,5 +80,5 @@ public class ProductEntity {
     private Set<DetailTransactionEntity> detailTransactions = new HashSet<>();
 
 
-
 }
+

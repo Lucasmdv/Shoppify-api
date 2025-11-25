@@ -25,6 +25,6 @@ public class SaleAuditFilterRequest {
     @Schema(description = "Filter by transaction ID", example = "7003")
     private Long transactionId;
 
-    @Schema(description = "Filter by client ID", example = "150")
-    private Long clientId;
+    @Schema(description = "Filter by user ID", example = "150")
+    private Long userId;
 }

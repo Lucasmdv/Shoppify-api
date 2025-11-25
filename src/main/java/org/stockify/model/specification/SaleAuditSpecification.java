@@ -25,8 +25,8 @@ public class SaleAuditSpecification {
                 transactionId == null ? null : criteriaBuilder.equal(root.get("transaction").get("id"), transactionId);
     }
 
-    public static Specification<SaleEntity> byClientId(Long clientId) {
+    public static Specification<SaleEntity> byUserId(Long userId) {
         return (root, query, criteriaBuilder) ->
-                clientId == null ? null : criteriaBuilder.equal(root.get("client").get("id"), clientId);
+                userId == null ? null : criteriaBuilder.equal(root.get("user").get("id"), userId);
     }
 }

@@ -24,18 +24,18 @@ public class RegisterUserCredentialsRequest {
     private String password;
 
     // User profile
-    @Schema(description = "Client's image", example = "http://image.com/avatar.png")
+    @Schema(description = "User's image", example = "http://image.com/avatar.png")
     private String img;
 
-    @Schema(description = "Client's first name", example = "María")
+    @Schema(description = "User's first name", example = "María")
     private String firstName;
 
-    @Schema(description = "Client's last name", example = "Rodríguez")
+    @Schema(description = "User's last name", example = "Rodríguez")
     private String lastName;
 
-    @Schema(description = "Client's DNI (National ID Number)", example = "33445566")
+    @Schema(description = "User's DNI (National ID Number)", example = "33445566")
     private String dni;
 
-    @Schema(description = "Client's phone number", example = "+54 9 11 6543-9876")
+    @Schema(description = "User's phone number", example = "+54 9 11 6543-9876")
     private String phone;
 }

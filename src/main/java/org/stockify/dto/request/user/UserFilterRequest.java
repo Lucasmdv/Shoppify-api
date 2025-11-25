@@ -10,18 +10,18 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-@Schema(name = "ClientFilterRequest", description = "Filter parameters for searching clients.")
+@Schema(name = "UserFilterRequest", description = "Filter parameters for searching Users.")
 public class UserFilterRequest {
 
-    @Schema(description = "Client's first name to filter by", example = "Lucas")
+    @Schema(description = "User's first name to filter by", example = "Lucas")
     private String firstName;
 
-    @Schema(description = "Client's last name to filter by", example = "Gómez")
+    @Schema(description = "User's last name to filter by", example = "Gómez")
     private String lastName;
 
-    @Schema(description = "Client's DNI (National ID number)", example = "40555444")
+    @Schema(description = "User's DNI (National ID number)", example = "40555444")
     private String dni;
 
-    @Schema(description = "Client's phone number", example = "+54 9 11 5555-1234")
+    @Schema(description = "User's phone number", example = "+54 9 11 5555-1234")
     private String phone;
 }
