@@ -2,6 +2,7 @@ package org.stockify.model.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -17,6 +18,7 @@ import org.stockify.model.entity.ProductEntity;
 import org.stockify.model.entity.SaleEntity;
 import org.stockify.model.entity.TransactionEntity;
 import org.stockify.model.enums.TransactionType;
+import org.stockify.model.event.ProductStockUpdatedEvent;
 import org.stockify.model.exception.InsufficientStockException;
 import org.stockify.model.exception.NotFoundException;
 import org.stockify.model.mapper.SaleMapper;
@@ -28,6 +30,7 @@ import org.stockify.model.specification.SaleSpecification;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +43,7 @@ public class SaleService {
     private final SaleRepository saleRepository;
     private final TransactionMapper transactionMapper;
     private final ProductRepository productRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public SaleResponse createSale(SaleRequest request) {
         if (request.getTransaction() == null || request.getTransaction().getDetailTransactions() == null
@@ -48,6 +52,7 @@ public class SaleService {
         }
 
         List<ProductEntity> productsToUpdate = new ArrayList<>();
+
         for (DetailTransactionRequest detail : request.getTransaction().getDetailTransactions()) {
             ProductEntity product = productRepository.findById(detail.getProductID())
                     .orElseThrow(() -> new NotFoundException("Product not found with ID " + detail.getProductID()));
@@ -62,9 +67,18 @@ public class SaleService {
                 );
             }
 
-            product.setStock(currentStock - quantity);
+            long newStock = currentStock - quantity;
+            product.setStock(newStock);
             product.setSoldQuantity(currentSold + quantity);
             productsToUpdate.add(product);
+
+
+            eventPublisher.publishEvent(new ProductStockUpdatedEvent(
+                    product.getId(),
+                    product.getName(),
+                    currentStock,
+                    newStock
+            ));
         }
 
         TransactionEntity transaction = transactionService.createTransaction(
@@ -79,8 +93,9 @@ public class SaleService {
                     .orElseThrow(() -> new NotFoundException("User not found with ID " + request.getUserId())));
         }
 
-        productRepository.saveAll(productsToUpdate);
+        productRepository.saveAll(productsToUpdate); // Se guardan todos los cambios de stock
         SaleEntity saved = saleRepository.save(sale);
+
         SaleResponse saleResponse = saleMapper.toResponseDTO(saved);
         saleResponse.setTransaction(transactionMapper.toDto(transaction));
         return saleResponse;

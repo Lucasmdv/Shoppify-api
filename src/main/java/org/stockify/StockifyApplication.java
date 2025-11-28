@@ -2,10 +2,12 @@ package org.stockify;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.stockify.config.AppEnvConfig;
 import com.mercadopago.MercadoPagoConfig;
 
 @SpringBootApplication
+@EnableScheduling
 public class StockifyApplication {
     public static void main(String[] args) {
         AppEnvConfig.loadEnv();

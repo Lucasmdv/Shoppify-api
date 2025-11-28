@@ -2,6 +2,7 @@ package org.stockify.model.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -17,6 +18,7 @@ import org.stockify.model.entity.ProviderEntity;
 import org.stockify.model.entity.PurchaseEntity;
 import org.stockify.model.entity.TransactionEntity;
 import org.stockify.model.enums.TransactionType;
+import org.stockify.model.event.ProductStockUpdatedEvent;
 import org.stockify.model.exception.NotFoundException;
 import org.stockify.model.mapper.PurchaseMapper;
 import org.stockify.model.repository.ProductRepository;
@@ -38,6 +40,8 @@ public class PurchaseService {
     private final ProviderRepository providerRepository;
     private final ProductRepository productRepository;
 
+    private final ApplicationEventPublisher eventPublisher;
+
     @Transactional
     public PurchaseResponse createPurchase(PurchaseRequest request) {
         if (request.getTransaction() == null || request.getTransaction().getDetailTransactions() == null
@@ -49,14 +53,24 @@ public class PurchaseService {
                 .orElseThrow(() -> new NotFoundException("Provider not found with ID " + request.getProviderId()));
 
         List<ProductEntity> productsToUpdate = new ArrayList<>();
+
         for (DetailTransactionRequest detail : request.getTransaction().getDetailTransactions()) {
             ProductEntity product = productRepository.findById(detail.getProductID())
                     .orElseThrow(() -> new NotFoundException("Product not found with ID " + detail.getProductID()));
 
             long quantity = detail.getQuantity();
-            long currentStock = product.getStock() == null ? 0L : product.getStock();
-            product.setStock(currentStock + quantity);
+            long oldStock = product.getStock() == null ? 0L : product.getStock();
+            long newStock = oldStock + quantity;
+
+            product.setStock(newStock);
             productsToUpdate.add(product);
+
+            eventPublisher.publishEvent(new ProductStockUpdatedEvent(
+                    product.getId(),
+                    product.getName(),
+                    oldStock,
+                    newStock
+            ));
         }
 
         TransactionEntity transaction = transactionService.createTransaction(
