@@ -61,6 +61,9 @@ public class ProductEntity {
     @ColumnDefault("false")
     private Boolean deleted = false;
 
+    @ColumnDefault("false")
+    private Boolean inactive = false;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "products_categories",
             joinColumns = @JoinColumn(name = "product_id"),

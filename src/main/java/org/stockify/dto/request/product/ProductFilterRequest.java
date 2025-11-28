@@ -82,4 +82,7 @@ public class ProductFilterRequest {
 
     @Schema(description = "Sort direction for discount percentage (asc or desc)", example = "asc", nullable = true)
     private String sortByDiscountPercentage;
+
+    @Schema(description = "Filter by inactive status. If not provided, it will show only active products.", example = "false", nullable = true)
+    private Boolean inactive;
 }

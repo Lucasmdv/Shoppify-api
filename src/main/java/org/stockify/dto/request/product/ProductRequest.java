@@ -46,7 +46,10 @@ public record ProductRequest(
         String brand,
 
         @Schema(description = "Set of categories the product belongs to", example = "[\"Electronics\", \"Mobile\"]")
-        Set<String> categories
+        Set<String> categories,
+
+        @Schema(description = "Indicates if the product is inactive", example = "false")
+        Boolean inactive
 ) {
     public ProductRequest {
         if (discountPercentage == null) discountPercentage = BigDecimal.ZERO;

@@ -476,6 +476,7 @@ public class ProductService {
                         filterRequest.getStockBetween().get(1))
                         : null)
                 .add(ProductSpecifications.notDeleted())
+                .add(filterRequest.getInactive() != null ? ProductSpecifications.byInactive(filterRequest.getInactive().booleanValue()) : null)
                 .build();
         Pageable pageableWithSort = applyCustomSorts(pageable, filterRequest);
         Page<ProductEntity> page = productRepository.findAll(spec, pageableWithSort);

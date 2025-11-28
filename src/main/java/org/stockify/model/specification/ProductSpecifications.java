@@ -202,4 +202,11 @@ public class ProductSpecifications {
         return (root, query, cb) -> cb.isFalse(root.get("deleted"));
     }
 
+    public static Specification<ProductEntity> byInactive(Boolean inactive) {
+        return (root, query, cb) -> {
+            if (inactive == null) return null;
+            return cb.equal(root.get("inactive"), inactive);
+        };
+    }
+
 }

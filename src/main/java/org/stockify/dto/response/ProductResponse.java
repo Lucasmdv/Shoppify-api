@@ -48,7 +48,10 @@ public record ProductResponse(
         Set<String> categories,
 
         @Schema(description = "Provider IDs associated with the product")
-        Set<Long> providers
+        Set<Long> providers,
+
+        @Schema(description = "Whether the product is inactive", example = "false")
+        boolean inactive
 ) {
     public ProductResponse {
         if (categories == null) categories = Set.of();
