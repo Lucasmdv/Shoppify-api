@@ -12,6 +12,7 @@ import org.stockify.dto.request.transaction.TransactionRequest;
 @Getter
 @Setter
 public class SaleRequest {
+    @NotNull(message = "User identifier is required")
     @Schema(description = "ID of the user", example = "10")
     Long userId;
 

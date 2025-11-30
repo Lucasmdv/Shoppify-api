@@ -10,7 +10,6 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.stockify.model.enums.PaymentMethod;
 import org.stockify.model.enums.PaymentStatus;
-import org.stockify.model.enums.Status;
 import org.stockify.model.enums.TransactionType;
 
 import java.math.BigDecimal;
@@ -47,10 +46,10 @@ public class TransactionEntity {
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
-    private PaymentStatus paymentStatus;
-
-
-
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    @Builder.Default
+    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
     @ManyToOne
     @JoinColumn(name = "store_id")

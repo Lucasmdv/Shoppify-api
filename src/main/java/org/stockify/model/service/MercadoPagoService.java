@@ -35,6 +35,7 @@ public class MercadoPagoService {
 
     private final ProductRepository productRepository;
     private final PriceCalculator priceCalculator;
+    private final SaleService saleService;
 
     public Preference createPreference(SaleRequest request) {
         if (request == null || request.getTransaction() == null ||
@@ -60,6 +61,7 @@ public class MercadoPagoService {
                 .build();
 
         try {
+            saleService.createSale(request);
             return new PreferenceClient().create(preferenceRequest);
         } catch (MPApiException e) {
             String apiMessage = e.getApiResponse() != null ? e.getApiResponse().getContent() : e.getMessage();
