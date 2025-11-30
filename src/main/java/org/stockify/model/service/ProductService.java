@@ -4,6 +4,7 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +25,8 @@ import org.stockify.dto.response.ProductResponse;
 import org.stockify.model.entity.CategoryEntity;
 import org.stockify.model.entity.ProductEntity;
 import org.stockify.model.entity.ProviderEntity;
+import org.stockify.model.event.ProductDiscountUpdatedEvent;
+import org.stockify.model.event.ProductStockUpdatedEvent;
 import org.stockify.model.exception.DuplicatedUniqueConstraintException;
 import org.stockify.model.exception.NotFoundException;
 import org.stockify.model.mapper.CategoryMapper;
@@ -35,6 +38,7 @@ import org.stockify.model.specification.ProductSpecifications;
 import org.stockify.model.specification.SpecificationBuilder;
 
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -58,6 +62,7 @@ public class ProductService {
     private final Logger logger = LoggerFactory.getLogger(ProductService.class);
     private final CategoryMapper categoryMapper;
     private final ProviderRepository providerRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Finds a product by its ID.
@@ -177,9 +182,19 @@ public class ProductService {
      */
     public ProductResponse update(Long id, ProductRequest request) {
         ProductEntity product = getProductById(id);
+        Long oldStock = product.getStock();
+        BigDecimal oldDiscount = product.getDiscountPercentage();
         productMapper.updateEntityFromRequest(request, product);
         product.setCategories(resolveCategories(request.categories()));
-        return productMapper.toResponse(productRepository.save(product));
+
+        ProductEntity savedEntity = productRepository.save(product);
+
+
+        //Notification triggers
+        stockTrigger(request,savedEntity,oldStock);
+        discountTrigger(request,savedEntity,oldDiscount);
+
+        return productMapper.toResponse(savedEntity);
     }
 
     /**
@@ -192,9 +207,18 @@ public class ProductService {
      */
     public ProductResponse patch(Long id, ProductRequest request) {
         ProductEntity product = getProductById(id);
+        Long oldStock = product.getStock();
+        BigDecimal oldDiscount = product.getDiscountPercentage();
+
         productMapper.patchEntityFromRequest(request, product);
         product.setCategories(resolveCategories(request.categories()));
-        return productMapper.toResponse(productRepository.save(product));
+        ProductEntity savedEntity = productRepository.save(product);
+
+        //Notification triggers
+        stockTrigger(request,savedEntity,oldStock);
+        discountTrigger(request,savedEntity,oldDiscount);
+
+        return productMapper.toResponse(savedEntity);
     }
 
     /**
@@ -482,5 +506,32 @@ public class ProductService {
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), combinedSort);
     }
 
+    private void stockTrigger(ProductRequest request, ProductEntity savedEntity, Long oldStock){
+        if (request.stock() == null) return;
+        long prev = oldStock == null ? 0L : oldStock;
+        long current = savedEntity.getStock() == null ? 0L : savedEntity.getStock();
+        if (prev != current) {
+            eventPublisher.publishEvent(new ProductStockUpdatedEvent(
+                    savedEntity.getId(),
+                    savedEntity.getName(),
+                    prev,
+                    current
+            ));
+        }
+    }
+
+    private void discountTrigger(ProductRequest request, ProductEntity savedEntity, BigDecimal oldDiscount){
+        if (request.discountPercentage() == null) return;
+        BigDecimal previous = oldDiscount == null ? BigDecimal.ZERO : oldDiscount;
+        BigDecimal current = savedEntity.getDiscountPercentage() == null ? BigDecimal.ZERO : savedEntity.getDiscountPercentage();
+        if (previous.compareTo(current) != 0) {
+            eventPublisher.publishEvent(new ProductDiscountUpdatedEvent(
+                    savedEntity.getId(),
+                    savedEntity.getName(),
+                    previous,
+                    current
+            ));
+        }
+    }
 
 }
