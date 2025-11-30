@@ -15,7 +15,7 @@ public class ShipmentSpecification {
 
     public static Specification<ShipmentEntity> byClient(Long id) {
         return ((root, query, cb) ->
-            id == null ? null : cb.equal(root.get("sale").get("client").get("id"), id));
+            id == null ? null : cb.equal(root.get("sale").get("user").get("id"), id));
     }
 
     public static Specification<ShipmentEntity> byStatus(OrderStatus status) {
@@ -55,5 +55,10 @@ public class ShipmentSpecification {
     public static Specification<ShipmentEntity> byPickup(Boolean pickup) {
         return (((root, query, cb) ->
                 pickup == null ? null : cb.equal(root.get("pickup"), pickup)));
+    }
+
+    public static Specification<ShipmentEntity> byAdress(String adress) {
+        return (((root, query, cb) ->
+                adress == null ? null : cb.like(cb.lower(root.get("adress")), "%" + adress.toLowerCase() + "%")));
     }
 }

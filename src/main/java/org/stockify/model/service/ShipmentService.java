@@ -46,7 +46,8 @@ public class ShipmentService {
                 .and(ShipmentSpecification.byEndDate(filterRequest.getEndDate()))
                 .and(ShipmentSpecification.byStartDate(filterRequest.getStartDate()))
                 .and(ShipmentSpecification.byTotalRange(filterRequest.getMinPrice(),  filterRequest.getMaxPrice()))
-                .and(ShipmentSpecification.byPickup(filterRequest.getPickup()));
+                .and(ShipmentSpecification.byPickup(filterRequest.getPickup()))
+                .and(ShipmentSpecification.byAdress(filterRequest.getAdress()));
 
         Page<ShipmentEntity> orderEntities = shipmentRepository.findAll(specification, pageable);
         return orderEntities.map(shipmentMapper::toResponseDTO);
