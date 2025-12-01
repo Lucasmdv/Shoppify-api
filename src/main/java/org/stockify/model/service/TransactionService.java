@@ -12,6 +12,7 @@ import org.stockify.model.entity.DetailTransactionEntity;
 import org.stockify.model.entity.ProductEntity;
 import org.stockify.model.entity.StoreEntity;
 import org.stockify.model.entity.TransactionEntity;
+import org.stockify.model.enums.PaymentMethod;
 import org.stockify.model.enums.PaymentStatus;
 import org.stockify.model.enums.TransactionType;
 import org.stockify.model.exception.NotFoundException;
@@ -93,11 +94,25 @@ public class TransactionService {
     public void updatePaymentStatus(Long transactionId, PaymentStatus status) {
         TransactionEntity transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new NotFoundException("Transaction with ID " + transactionId + " not found"));
-        
+
         transaction.setPaymentStatus(status);
         transactionRepository.save(transaction);
-        
+
         log.info("Payment status updated for transaction {} to {}", transactionId, status);
+    }
+
+    @Transactional
+    public void updatePaymentStatusAndMethod(Long transactionId, PaymentStatus status, PaymentMethod method) {
+        TransactionEntity transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new NotFoundException("Transaction with ID " + transactionId + " not found"));
+
+        transaction.setPaymentStatus(status);
+        if (method != null) {
+            transaction.setPaymentMethod(method);
+        }
+
+        transactionRepository.save(transaction);
+        log.info("Payment status/method updated for transaction {} to {} / {}", transactionId, status, method);
     }
 
     private BigDecimal resolveUnitPrice(ProductEntity product, TransactionType type) {
