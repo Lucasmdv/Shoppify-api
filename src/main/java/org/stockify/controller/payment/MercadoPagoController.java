@@ -7,18 +7,20 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.stockify.dto.request.sale.SaleRequest;
 import org.stockify.dto.response.MercadoPagoPreferenceResponse;
 import org.stockify.model.service.MercadoPagoService;
 
+import java.util.Map;
+
+@Slf4j
 @RestController
 @RequestMapping("/mercadopago")
 @RequiredArgsConstructor
@@ -45,5 +47,33 @@ public class MercadoPagoController {
                 preference.getSandboxInitPoint()
         );
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Webhook para notificaciones de pago de MercadoPago",
+            description = "Endpoint que recibe las notificaciones de pago de MercadoPago"
+    )
+    @PostMapping("/webhook")
+    public ResponseEntity<String> webhookNotification(
+            @RequestParam Map<String, String> params,
+            @RequestHeader(value = "x-signature", required = false) String signature,
+            HttpServletRequest request) {
+        try {
+            String topic = params.get("type");
+            String paymentId = params.get("data.id");
+            
+            log.info("Notificación recibida - Tipo: {}, ID de pago: {}", topic, paymentId);
+            
+            // Procesar la notificación según el tipo
+            if (paymentId != null) {
+                mercadoPagoService.processWebhookNotification(topic, paymentId);
+                return ResponseEntity.ok("Notificación recibida correctamente");
+            }
+            
+            return ResponseEntity.badRequest().body("ID de pago no proporcionado");
+        } catch (Exception e) {
+            log.error("Error al procesar notificación de webhook", e);
+            return ResponseEntity.status(500).body("Error al procesar la notificación");
+        }
     }
 }

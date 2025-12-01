@@ -2,6 +2,7 @@ package org.stockify.model.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.stockify.dto.request.transaction.DetailTransactionRequest;
 import org.stockify.dto.request.transaction.TransactionCreatedRequest;
@@ -11,6 +12,7 @@ import org.stockify.model.entity.DetailTransactionEntity;
 import org.stockify.model.entity.ProductEntity;
 import org.stockify.model.entity.StoreEntity;
 import org.stockify.model.entity.TransactionEntity;
+import org.stockify.model.enums.PaymentStatus;
 import org.stockify.model.enums.TransactionType;
 import org.stockify.model.exception.NotFoundException;
 import org.stockify.model.mapper.TransactionMapper;
@@ -26,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -83,7 +86,18 @@ public class TransactionService {
         return transactionRepository.findAll()
                 .stream()
                 .map(transactionMapper::toDto)
-                .toList();
+                .collect(Collectors.toList());
+    }
+    
+    @Transactional
+    public void updatePaymentStatus(Long transactionId, PaymentStatus status) {
+        TransactionEntity transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new NotFoundException("Transaction with ID " + transactionId + " not found"));
+        
+        transaction.setPaymentStatus(status);
+        transactionRepository.save(transaction);
+        
+        log.info("Payment status updated for transaction {} to {}", transactionId, status);
     }
 
     private BigDecimal resolveUnitPrice(ProductEntity product, TransactionType type) {
