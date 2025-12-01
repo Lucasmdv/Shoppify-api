@@ -33,8 +33,7 @@ public class PdfGeneratorController {
             @ApiResponse(responseCode = "400", description = "Transaction type not supported for PDF generation")
     })
     @GetMapping("/transaction/pdf/{idTransaction}")
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('READ') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('READ')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('GENERATE_REPORTS')")
     public ResponseEntity<EntityModel<TransactionPDFResponse>> generatePdf(
             @Parameter(description = "ID of the transaction") @PathVariable Long idTransaction) throws Exception {
 

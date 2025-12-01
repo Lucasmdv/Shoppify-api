@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,7 @@ public class WishlistController {
             @ApiResponse(responseCode = "200", description = "Wishlist returned successfully"),
             @ApiResponse(responseCode = "404", description = "Wishlist or user not found")
     })
+    @PreAuthorize("hasAuthority('ADMIN') or #userId == authentication.principal.user.id")
     @GetMapping
     public ResponseEntity<WishlistResponse> getWishlist(
             @Parameter(description = "Identifier of the user who owns the wishlist", example = "12")
@@ -40,6 +42,7 @@ public class WishlistController {
             @ApiResponse(responseCode = "200", description = "Product toggled successfully"),
             @ApiResponse(responseCode = "404", description = "Wishlist or product not found")
     })
+    @PreAuthorize("hasAuthority('ADMIN') or #userId == authentication.principal.user.id")
     @PatchMapping("/products/{productId}/toggle")
     public ResponseEntity<Boolean> toggleProduct(
             @Parameter(description = "Identifier of the user who owns the wishlist", example = "12")
@@ -54,6 +57,7 @@ public class WishlistController {
             @ApiResponse(responseCode = "200", description = "Returns true if product is in wishlist"),
             @ApiResponse(responseCode = "404", description = "Wishlist or product not found")
     })
+    @PreAuthorize("hasAuthority('ADMIN') or #userId == authentication.principal.user.id")
     @GetMapping("/products/{productId}")
     public ResponseEntity<Boolean> isFavorite(
             @Parameter(description = "Identifier of the user who owns the wishlist", example = "12")
