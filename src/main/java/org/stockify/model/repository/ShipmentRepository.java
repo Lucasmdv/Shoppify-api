@@ -7,8 +7,13 @@ import org.springframework.data.repository.query.Param;
 import org.stockify.model.entity.ShipmentEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ShipmentRepository extends JpaRepository<ShipmentEntity,Long>, JpaSpecificationExecutor<ShipmentEntity> {
     @Query("SELECT s FROM ShipmentEntity s WHERE s.sale.user.id = :clientId")
     List<ShipmentEntity> findByClientId(@Param("clientId") Long clientId);
+
+    Optional<Long> findUserByShipmentId(Long shipmentId);
+    @Query("SELECT s.sale.user.id FROM ShipmentEntity s WHERE s.id = :shipmentId")
+    Optional<Long> findUserIdByShipmentId(@Param("shipmentId") Long ShipmentId);
 }
