@@ -1,3 +1,5 @@
 package org.stockify.model.event;
 
-public record ShipmentStateUpdatedEvent(Long shipmentId, String oldState, String newState) {}
+import org.stockify.model.enums.OrderStatus;
+
+public record ShipmentStateUpdatedEvent(Long shipmentId, OrderStatus oldState, OrderStatus newState) {}

@@ -8,6 +8,7 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.stockify.dto.request.notifications.NotificationRequest;
 import org.stockify.model.enums.NotificationType;
+import org.stockify.model.enums.OrderStatus;
 import org.stockify.model.event.ProductStockUpdatedEvent;
 import org.stockify.model.event.ShipmentStateUpdatedEvent;
 import org.stockify.model.repository.ShipmentRepository;
@@ -26,8 +27,8 @@ public class ShipmentEventListener {
             phase = TransactionPhase.AFTER_COMMIT,
             fallbackExecution = true)
     public void handleShipmentStateUpdate(ShipmentStateUpdatedEvent event) {
-        String oldState = event.oldState() == null ? "" : event.oldState();
-        String newState = event.newState() == null ? "" : event.newState();
+        String oldState = event.oldState().getTranslation();
+        String newState = event.newState().getTranslation();
 
         notifySubscribers(event.shipmentId(),
             "Cambio el estado de tu envío!",
@@ -42,7 +43,7 @@ public class ShipmentEventListener {
         log.info("ShipmentListener: Notificando a {} usuarios. Evento: {}", userId, title);
 
         NotificationRequest request = NotificationRequest.builder()
-                .type(NotificationType.PERSONAL)
+                .type(NotificationType.PRODUCT_ALERT)
                 .title(title)
                 .message(message)
                 .icon(icon)

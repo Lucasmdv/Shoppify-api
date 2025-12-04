@@ -2,16 +2,20 @@ package org.stockify.model.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.stockify.dto.request.product.ProductRequest;
 import org.stockify.dto.request.shipment.ShipmentFilterRequest;
 import org.stockify.dto.request.shipment.ShipmentRequest;
 import org.stockify.dto.request.shipment.UpdateShipmentRequest;
 import org.stockify.dto.response.ShipmentResponse;
 import org.stockify.model.entity.*;
 import org.stockify.model.enums.OrderStatus;
+import org.stockify.model.event.ProductStockUpdatedEvent;
+import org.stockify.model.event.ShipmentStateUpdatedEvent;
 import org.stockify.model.exception.NotFoundException;
 import org.stockify.model.mapper.ShipmentMapper;
 import org.stockify.model.repository.ShipmentRepository;
@@ -26,6 +30,7 @@ import java.util.List;
 public class ShipmentService {
     private final ShipmentRepository shipmentRepository;
     private final ShipmentMapper shipmentMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     public ShipmentEntity mapShipment(ShipmentRequest request, SaleEntity sale) {
         return shipmentMapper.toEntity(request, sale);
@@ -69,22 +74,36 @@ public class ShipmentService {
                 .toList();
     }
 
-    public ShipmentResponse updateOrderPartial(Long id, UpdateShipmentRequest orderRequest) {
-        ShipmentEntity existingOrder = shipmentRepository.findById(id)
+    public ShipmentResponse updateOrderPartial(Long id, UpdateShipmentRequest request) {
+        ShipmentEntity existingShipment = shipmentRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order with ID " + id + " not found"));
-        shipmentMapper.partialUpdateOrderEntity(orderRequest, existingOrder);
+        shipmentMapper.partialUpdateOrderEntity(request, existingShipment);
+        OrderStatus oldStatus = existingShipment.getStatus();
 
-        switch(orderRequest.getStatus()) {
+        switch(request.getStatus()) {
             case "DELIVERED", "CANCELLED", "RETURNED"
-                    -> existingOrder.setEndDate(LocalDate.now());
+                    -> existingShipment.setEndDate(LocalDate.now());
         }
 
-        ShipmentEntity updatedOrder = shipmentRepository.save(existingOrder);
-        return shipmentMapper.toResponseDTO(updatedOrder);
+        ShipmentEntity updatedShipment = shipmentRepository.save(existingShipment);
+        statusTrigger(request, updatedShipment, oldStatus);
+
+        return shipmentMapper.toResponseDTO(updatedShipment);
     }
 
     private OrderStatus mapStatus(String status) {
         if (status == null || status.isBlank()) return null;
         return OrderStatus.valueOf(status);
+    }
+
+    private void statusTrigger(UpdateShipmentRequest request, ShipmentEntity savedEntity, OrderStatus oldStatus){
+        if (request.getStatus() == null) return;
+        if (savedEntity.getStatus() != oldStatus) {
+            eventPublisher.publishEvent(new ShipmentStateUpdatedEvent(
+                    savedEntity.getId(),
+                    oldStatus,
+                    savedEntity.getStatus()
+            ));
+        }
     }
 }
