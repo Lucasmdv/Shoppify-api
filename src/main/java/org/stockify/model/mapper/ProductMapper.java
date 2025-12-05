@@ -18,7 +18,6 @@ import java.util.stream.Stream;
 @Mapper(componentModel = "spring", uses = PriceCalculator.class)
 public interface ProductMapper {
 
-
     @Mapping(source = "categories", target = "categories", qualifiedByName = "entitiesToNames")
     @Mapping(source = "providers", target = "providers", qualifiedByName = "providerEntitiesToIds")
     @Mapping(target = "stock")
@@ -34,7 +33,6 @@ public interface ProductMapper {
     @Mapping(target = "providers", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "categories", ignore = true)
-    @Mapping(target = "stock",  ignore = true)
     @Mapping(target = "soldQuantity", ignore = true)
     ProductEntity toEntity(ProductRequest request);
 
@@ -75,7 +73,6 @@ public interface ProductMapper {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-
     @Named("providerEntitiesToIds")
     default Set<Long> providerEntitiesToIds(Set<ProviderEntity> providers) {
         if (providers == null || providers.isEmpty()) return new LinkedHashSet<>();
@@ -88,6 +85,7 @@ public interface ProductMapper {
     @Mapping(target = "providers", ignore = true)
     @Mapping(target = "categories", ignore = true)
     @Mapping(target = "detailTransactions", ignore = true)
+    @Mapping(target = "discountPercentage", ignore = true)
     ProductEntity toEntity(ProductCSVRequest dto);
 
     @Mapping(target = "categories", source = "categories", qualifiedByName = "stringToCategorySet")
@@ -101,6 +99,5 @@ public interface ProductMapper {
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
-
 
 }

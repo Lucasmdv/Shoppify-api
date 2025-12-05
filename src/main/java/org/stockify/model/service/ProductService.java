@@ -41,11 +41,17 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.poi.ss.usermodel.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.math.BigDecimal;
+import java.util.Iterator;
 
 /**
  * Service class for managing products in the system.
  * <p>
- * This class handles CRUD operations, CSV imports, category and provider assignments,
+ * This class handles CRUD operations, CSV imports, category and provider
+ * assignments,
  * and other business logic related to products.
  * </p>
  */
@@ -86,12 +92,12 @@ public class ProductService {
         List<ProductEntity> allProducts = productRepository.findAll();
         for (ProductEntity p : allProducts) {
             if (p.getName() != null && StringNormalizer.normalize(p.getName()).equals(normalizedName)
-                && Boolean.TRUE.equals(p.getDeleted())) {
+                    && Boolean.TRUE.equals(p.getDeleted())) {
                 existing = p;
                 break;
             }
             if (existing == null && p.getBarcode() != null && normalizedBarcode != null && StringNormalizer.normalize(p.getBarcode()).equals(normalizedBarcode)
-                && Boolean.TRUE.equals(p.getDeleted())) {
+                    && Boolean.TRUE.equals(p.getDeleted())) {
                 existing = p;
                 break;
             }
@@ -129,40 +135,53 @@ public class ProductService {
                 results.add(new BulkItemResponse(
                         req.name(),
                         "SKIPPED",
-                        "Duplicated, item skipped"
-                ));
+                        "Duplicated, item skipped"));
             } catch (DuplicatedUniqueConstraintException ex) {
                 skipped++;
                 results.add(new BulkItemResponse(
                         req.name(),
                         "SKIPPED",
-                        ex.getMessage()
-                ));
+                        ex.getMessage()));
             } catch (IllegalArgumentException | IllegalStateException ex) {
                 error++;
                 results.add(new BulkItemResponse(
                         req.name(),
                         "ERROR",
-                        "Invalid data: " + ex.getMessage()
-                ));
+                        "Invalid data: " + ex.getMessage()));
             } catch (Exception ex) {
                 error++;
                 logger.error("Unexpected error saving product {}: {}", req.name(), ex.getMessage(), ex);
                 results.add(new BulkItemResponse(
                         req.name(),
                         "ERROR",
-                        "Unexpected error: " + ex.getMessage()
-                ));
+                        "Unexpected error: " + ex.getMessage()));
             }
         }
         return new BulkProductResponse(requests.size(), created, skipped, error, results);
     }
 
     /**
+     * Imports products from a CSV or Excel file.
+     *
+     * @param file the file containing product data
+     * @return a response summarizing the import operation including counts and
+     *         detailed results
+     * @throws Exception if an error occurs while processing the file
+     */
+    public BulkProductResponse importProducts(MultipartFile file) throws Exception {
+        String filename = file.getOriginalFilename();
+        if (filename != null && (filename.endsWith(".xls") || filename.endsWith(".xlsx"))) {
+            return importProductsExcel(file);
+        }
+        return importProductsCsv(file);
+    }
+
+    /**
      * Imports products from a CSV file.
      *
      * @param file the CSV file containing product data
-     * @return a response summarizing the import operation including counts and detailed results
+     * @return a response summarizing the import operation including counts and
+     *         detailed results
      * @throws Exception if an error occurs while processing the file
      */
     public BulkProductResponse importProductsCsv(MultipartFile file) throws Exception {
@@ -179,6 +198,98 @@ public class ProductService {
                 .collect(Collectors.toList());
 
         return saveAll(requests);
+    }
+
+    private BulkProductResponse importProductsExcel(MultipartFile file) throws Exception {
+        List<ProductRequest> requests = new ArrayList<>();
+        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+            Sheet sheet = workbook.getSheetAt(0);
+            Iterator<Row> rowIterator = sheet.iterator();
+
+            Map<String, Integer> headerMap = new HashMap<>();
+            if (rowIterator.hasNext()) {
+                Row headerRow = rowIterator.next();
+                for (Cell cell : headerRow) {
+                    headerMap.put(cell.getStringCellValue().toLowerCase().trim(), cell.getColumnIndex());
+                }
+            }
+
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+                ProductCSVRequest csvRequest = new ProductCSVRequest();
+
+                csvRequest.setName(getCellValueAsString(row, headerMap.get("name")));
+                csvRequest.setDescription(getCellValueAsString(row, headerMap.get("description")));
+                csvRequest.setPrice(getCellValueAsBigDecimal(row, headerMap.get("price")));
+                csvRequest.setUnitPrice(getCellValueAsBigDecimal(row, headerMap.get("unit_price")));
+                csvRequest.setStock(getCellValueAsLong(row, headerMap.get("stock")));
+                csvRequest.setSku(getCellValueAsString(row, headerMap.get("sku")));
+                csvRequest.setBarcode(getCellValueAsString(row, headerMap.get("barcode")));
+                csvRequest.setBrand(getCellValueAsString(row, headerMap.get("brand")));
+                csvRequest.setImgURL(getCellValueAsString(row, headerMap.get("img_url")));
+                csvRequest.setCategories(getCellValueAsString(row, headerMap.get("categories")));
+
+                requests.add(productMapper.toRequest(csvRequest));
+            }
+        }
+        return saveAll(requests);
+    }
+
+    private String getCellValueAsString(Row row, Integer columnIndex) {
+        if (columnIndex == null)
+            return null;
+        Cell cell = row.getCell(columnIndex);
+        if (cell == null)
+            return null;
+
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue();
+            case NUMERIC:
+                return String.valueOf((long) cell.getNumericCellValue());
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue());
+            default:
+                return null;
+        }
+    }
+
+    private BigDecimal getCellValueAsBigDecimal(Row row, Integer columnIndex) {
+        if (columnIndex == null)
+            return null;
+        Cell cell = row.getCell(columnIndex);
+        if (cell == null)
+            return null;
+
+        if (cell.getCellType() == CellType.NUMERIC) {
+            return BigDecimal.valueOf(cell.getNumericCellValue());
+        } else if (cell.getCellType() == CellType.STRING) {
+            try {
+                return new BigDecimal(cell.getStringCellValue());
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private Long getCellValueAsLong(Row row, Integer columnIndex) {
+        if (columnIndex == null)
+            return null;
+        Cell cell = row.getCell(columnIndex);
+        if (cell == null)
+            return null;
+
+        if (cell.getCellType() == CellType.NUMERIC) {
+            return (long) cell.getNumericCellValue();
+        } else if (cell.getCellType() == CellType.STRING) {
+            try {
+                return Long.parseLong(cell.getStringCellValue());
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
     }
 
     /**
@@ -229,7 +340,8 @@ public class ProductService {
      * @param categoryId the ID of the category to remove from the product
      * @param productId  the ID of the product from which to remove the category
      * @return a DTO with the updated product data
-     * @throws NotFoundException if the product or category with the specified IDs is not found
+     * @throws NotFoundException if the product or category with the specified IDs
+     *                           is not found
      */
     public ProductResponse deleteCategoryFromProduct(int categoryId, Long productId) {
         ProductEntity product = getProductById(productId);
@@ -241,7 +353,8 @@ public class ProductService {
     /**
      * Removes all categories from a product.
      *
-     * @param productId the ID of the product from which all categories will be removed
+     * @param productId the ID of the product from which all categories will be
+     *                  removed
      * @return a DTO with the updated product data
      * @throws NotFoundException if the product with the specified ID is not found
      */
@@ -279,7 +392,8 @@ public class ProductService {
      * @param categoryId the ID of the category to add
      * @param productId  the ID of the product to which the category will be added
      * @return a DTO with the updated product data
-     * @throws NotFoundException if the product or category with the specified IDs is not found
+     * @throws NotFoundException if the product or category with the specified IDs
+     *                           is not found
      */
     public ProductResponse addCategoryToProduct(int categoryId, Long productId) {
         ProductEntity product = getProductById(productId);
@@ -288,15 +402,16 @@ public class ProductService {
         return productMapper.toResponse(productRepository.save(product));
     }
 
-
     /**
      * Assigns a provider to a product.
      *
      * @param productID  the ID of the product to assign the provider to
      * @param providerID the ID of the provider to assign
      * @return a DTO with the updated product data
-     * @throws NotFoundException         if the product or provider with the specified IDs is not found
-     * @throws ResponseStatusException if the provider is already assigned to the product
+     * @throws NotFoundException       if the product or provider with the specified
+     *                                 IDs is not found
+     * @throws ResponseStatusException if the provider is already assigned to the
+     *                                 product
      */
     public ProductResponse assignProviderToProduct(Long productID, Long providerID) {
         ProductEntity product = getProductById(productID);
@@ -311,7 +426,8 @@ public class ProductService {
         } catch (DataIntegrityViolationException ex) {
             logger.error("Error saving product {} and provider {}: {}", productID, providerID, ex.getMessage());
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Provider " + providerID + " already assigned to product " + productID + " or the other way around");
+                    "Provider " + providerID + " already assigned to product " + productID
+                            + " or the other way around");
         }
 
         return productMapper.toResponse(product);
@@ -323,7 +439,8 @@ public class ProductService {
      * @param productID  the ID of the product to unassign the provider from
      * @param providerID the ID of the provider to unassign
      * @return a DTO with the updated product data
-     * @throws NotFoundException if the product or provider with the specified IDs is not found
+     * @throws NotFoundException if the product or provider with the specified IDs
+     *                           is not found
      */
     public ProductResponse unassignProviderFromProduct(Long productID, Long providerID) {
         ProductEntity product = getProductById(productID);
@@ -361,6 +478,7 @@ public class ProductService {
 
     /**
      * Auxiliary method to find a product entity by its ID.
+     * 
      * @return the found product entity
      * @throws NotFoundException if no product is found with the given ID
      */
@@ -414,13 +532,16 @@ public class ProductService {
 
     /**
      * Searches for products applying filters and pagination.
-     * This method builds a dynamic query specification based on the provided filter criteria,
-     * allowing for flexible searching by various product attributes such as price, name, description,
+     * This method builds a dynamic query specification based on the provided filter
+     * criteria,
+     * allowing for flexible searching by various product attributes such as price,
+     * name, description,
      * barcode, SKU, brand, categories, providers, and stock levels.
      * It supports exact matches,
      * ranges, and collections for categories and providers.
      *
-     * @param pageable Pagination information including page number, size, and sorting.
+     * @param pageable      Pagination information including page number, size, and
+     *                      sorting.
      * @param filterRequest DTO containing the filtering criteria to apply.
      *                      Supported filters include:
      *                      - price, priceGreater, priceLess, priceBetween
@@ -434,49 +555,83 @@ public class ProductService {
     public Page<ProductResponse> findAll(Pageable pageable, ProductFilterRequest filterRequest) {
         Specification<ProductEntity> spec = new SpecificationBuilder<ProductEntity>()
                 .add(filterRequest.getPrice() != null ? ProductSpecifications.byPrice(filterRequest.getPrice()) : null)
-                .add(filterRequest.getName() != null && !filterRequest.getName().isEmpty() ? ProductSpecifications.byName(StringNormalizer.normalize(filterRequest.getName())) : null)
-                .add(filterRequest.getDescription() != null && !filterRequest.getDescription().isEmpty() ? ProductSpecifications.byDescription(StringNormalizer.normalize(filterRequest.getDescription())) : null)
-                .add(filterRequest.getBarcode() != null && !filterRequest.getBarcode().isEmpty() ? ProductSpecifications.byBarCode(StringNormalizer.normalize(filterRequest.getBarcode())) : null)
-                .add(filterRequest.getSku() != null && !filterRequest.getSku().isEmpty() ? ProductSpecifications.bySku(StringNormalizer.normalize(filterRequest.getSku())) : null)
-                .add(filterRequest.getBrand() != null && !filterRequest.getBrand().isEmpty() ? ProductSpecifications.byBrand(StringNormalizer.normalize(filterRequest.getBrand())) : null)
-                .add(filterRequest.getCategory() != null && !filterRequest.getCategory().isEmpty() ? ProductSpecifications.byCategory(StringNormalizer.normalize(filterRequest.getCategory())) : null)
-                .add(filterRequest.getProvider() != null && !filterRequest.getProvider().isEmpty() ? ProductSpecifications.byProvider(StringNormalizer.normalize(filterRequest.getProvider())) : null)
+                .add(filterRequest.getName() != null && !filterRequest.getName().isEmpty()
+                        ? ProductSpecifications.byName(StringNormalizer.normalize(filterRequest.getName()))
+                        : null)
+                .add(filterRequest.getDescription() != null && !filterRequest.getDescription().isEmpty()
+                        ? ProductSpecifications
+                                .byDescription(StringNormalizer.normalize(filterRequest.getDescription()))
+                        : null)
+                .add(filterRequest.getBarcode() != null && !filterRequest.getBarcode().isEmpty()
+                        ? ProductSpecifications.byBarCode(StringNormalizer.normalize(filterRequest.getBarcode()))
+                        : null)
+                .add(filterRequest.getSku() != null && !filterRequest.getSku().isEmpty()
+                        ? ProductSpecifications.bySku(StringNormalizer.normalize(filterRequest.getSku()))
+                        : null)
+                .add(filterRequest.getBrand() != null && !filterRequest.getBrand().isEmpty()
+                        ? ProductSpecifications.byBrand(StringNormalizer.normalize(filterRequest.getBrand()))
+                        : null)
+                .add(filterRequest.getCategory() != null && !filterRequest.getCategory().isEmpty()
+                        ? ProductSpecifications.byCategory(StringNormalizer.normalize(filterRequest.getCategory()))
+                        : null)
+                .add(filterRequest.getProvider() != null && !filterRequest.getProvider().isEmpty()
+                        ? ProductSpecifications.byProvider(StringNormalizer.normalize(filterRequest.getProvider()))
+                        : null)
                 .add(filterRequest.getProviders() != null && !filterRequest.getProviders().isEmpty()
                         ? ProductSpecifications.byProviders(
-                                filterRequest.getProviders().stream().map(StringNormalizer::normalize).collect(Collectors.toList()))
+                                filterRequest.getProviders().stream().map(StringNormalizer::normalize)
+                                        .collect(Collectors.toList()))
                         : null)
                 .add(filterRequest.getCategories() != null && !filterRequest.getCategories().isEmpty()
                         ? ProductSpecifications.byCategories(
-                                filterRequest.getCategories().stream().map(StringNormalizer::normalize).collect(Collectors.toList()))
+                                filterRequest.getCategories().stream().map(StringNormalizer::normalize)
+                                        .collect(Collectors.toList()))
                         : null)
-                .add(filterRequest.getPriceGreater() != null ? ProductSpecifications.byPriceGreaterThan(filterRequest.getPriceGreater()) : null)
-                .add(filterRequest.getPriceLess() != null ? ProductSpecifications.byPriceLessThan(filterRequest.getPriceLess()) : null)
+                .add(filterRequest.getPriceGreater() != null
+                        ? ProductSpecifications.byPriceGreaterThan(filterRequest.getPriceGreater())
+                        : null)
+                .add(filterRequest.getPriceLess() != null
+                        ? ProductSpecifications.byPriceLessThan(filterRequest.getPriceLess())
+                        : null)
                 .add(filterRequest.getPriceBetween() != null && filterRequest.getPriceBetween().size() == 2
                         ? ProductSpecifications.byPriceBetween(
-                        filterRequest.getPriceBetween().get(0),
-                        filterRequest.getPriceBetween().get(1))
+                                filterRequest.getPriceBetween().get(0),
+                                filterRequest.getPriceBetween().get(1))
                         : null)
-                .add(filterRequest.getDiscountPercentage() != null ? ProductSpecifications.byDiscount(filterRequest.getDiscountPercentage()) : null)
-                .add(filterRequest.getDiscountGreater() != null ? ProductSpecifications.byDiscountGreaterThan(filterRequest.getDiscountGreater()) : null)
-                .add(filterRequest.getDiscountLess() != null ? ProductSpecifications.byDiscountLessThan(filterRequest.getDiscountLess()) : null)
+                .add(filterRequest.getDiscountPercentage() != null
+                        ? ProductSpecifications.byDiscount(filterRequest.getDiscountPercentage())
+                        : null)
+                .add(filterRequest.getDiscountGreater() != null
+                        ? ProductSpecifications.byDiscountGreaterThan(filterRequest.getDiscountGreater())
+                        : null)
+                .add(filterRequest.getDiscountLess() != null
+                        ? ProductSpecifications.byDiscountLessThan(filterRequest.getDiscountLess())
+                        : null)
                 .add(filterRequest.getDiscountBetween() != null && filterRequest.getDiscountBetween().size() == 2
                         ? ProductSpecifications.byDiscountBetween(
-                        filterRequest.getDiscountBetween().get(0),
-                        filterRequest.getDiscountBetween().get(1))
+                                filterRequest.getDiscountBetween().get(0),
+                                filterRequest.getDiscountBetween().get(1))
                         : null)
                 .add(filterRequest.getProductOrCategory() != null && !filterRequest.getProductOrCategory().isEmpty()
-                        ? ProductSpecifications.byProductOrCategories(StringNormalizer.normalize(filterRequest.getProductOrCategory()))
+                        ? ProductSpecifications
+                                .byProductOrCategories(StringNormalizer.normalize(filterRequest.getProductOrCategory()))
                         : null)
                 .add(filterRequest.getStock() != null ? ProductSpecifications.byStock(filterRequest.getStock()) : null)
-                .add(filterRequest.getStockLessThan() != null ? ProductSpecifications.byStockLessThan(filterRequest.getStockLessThan()) : null)
-                .add(filterRequest.getStockGreaterThan() != null ? ProductSpecifications.byStockGreaterThan(filterRequest.getStockGreaterThan()) : null)
+                .add(filterRequest.getStockLessThan() != null
+                        ? ProductSpecifications.byStockLessThan(filterRequest.getStockLessThan())
+                        : null)
+                .add(filterRequest.getStockGreaterThan() != null
+                        ? ProductSpecifications.byStockGreaterThan(filterRequest.getStockGreaterThan())
+                        : null)
                 .add(filterRequest.getStockBetween() != null && filterRequest.getStockBetween().size() == 2
                         ? ProductSpecifications.byStockBetween(
-                        filterRequest.getStockBetween().get(0),
-                        filterRequest.getStockBetween().get(1))
+                                filterRequest.getStockBetween().get(0),
+                                filterRequest.getStockBetween().get(1))
                         : null)
                 .add(ProductSpecifications.notDeleted())
-                .add(filterRequest.getInactive() != null ? ProductSpecifications.byInactive(filterRequest.getInactive().booleanValue()) : null)
+                .add(filterRequest.getInactive() != null
+                        ? ProductSpecifications.byInactive(filterRequest.getInactive().booleanValue())
+                        : null)
                 .build();
         Pageable pageableWithSort = applyCustomSorts(pageable, filterRequest);
         Page<ProductEntity> page = productRepository.findAll(spec, pageableWithSort);
@@ -493,7 +648,8 @@ public class ProductService {
 
         Sort combinedSort = pageable.getSort();
 
-        if (filterRequest.getSortByDiscountPercentage() != null && !filterRequest.getSortByDiscountPercentage().isBlank()) {
+        if (filterRequest.getSortByDiscountPercentage() != null
+                && !filterRequest.getSortByDiscountPercentage().isBlank()) {
             Sort.Direction discountDirection = "asc".equalsIgnoreCase(filterRequest.getSortByDiscountPercentage())
                     ? Sort.Direction.ASC
                     : Sort.Direction.DESC;
@@ -515,6 +671,5 @@ public class ProductService {
 
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), combinedSort);
     }
-
 
 }

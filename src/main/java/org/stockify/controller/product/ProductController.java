@@ -45,7 +45,7 @@ public class ProductController {
         @Operation(summary = "List all products with optional filters")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "Paged list of products returned successfully")
-        })     
+        })
         @GetMapping
         public ResponseEntity<PagedModel<EntityModel<ProductResponse>>> listProducts(
                         @ParameterObject ProductFilterRequest filter,
@@ -68,7 +68,7 @@ public class ProductController {
         }
 
         @PostMapping(value = "/import", consumes = "multipart/form-data")
-        @Operation(summary = "Import products from CSV file")
+        @Operation(summary = "Import products from CSV or Excel file")
         @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('WRITE')")
         @ApiResponse(responseCode = "200", description = "Successful import")
         public ResponseEntity<BulkProductResponse> importProducts(
@@ -80,7 +80,7 @@ public class ProductController {
                         @RequestParam("file") MultipartFile archivo) {
 
                 try {
-                        BulkProductResponse response = productService.importProductsCsv(archivo);
+                        BulkProductResponse response = productService.importProducts(archivo);
                         return ResponseEntity.ok(response);
                 } catch (Exception e) {
                         return ResponseEntity.badRequest().build();

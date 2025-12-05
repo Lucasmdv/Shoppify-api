@@ -4,9 +4,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -18,7 +16,7 @@ import java.util.List;
 @Configuration
 public class PaginationConfig implements WebMvcConfigurer {
 
-    private static final List<Integer> ALLOWED_SIZES = List.of(8, 12, 16, 20);
+    private static final List<Integer> ALLOWED_SIZES = List.of(1, 2, 3, 4, 5, 8, 12, 16, 20);
     private static final int DEFAULT_SIZE = 12;
 
     @Override

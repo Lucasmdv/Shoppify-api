@@ -41,6 +41,10 @@ public class ProductCSVRequest {
     @CsvBindByName(column = "brand")
     private String brand;
 
+    @Schema(description = "URL of the product image", example = "http://image.com")
+    @CsvBindByName(column = "img_url")
+    private String imgURL;
+
     @Schema(description = "Comma-separated list of categories", example = "Electronics,Mobile")
     @CsvBindByName(column = "categories") // multiple categories separated by commas
     private String categories;
