@@ -235,6 +235,84 @@ public class ProductService {
         return saveAll(requests);
     }
 
+    /**
+     * Previews products from a CSV or Excel file.
+     *
+     * @param file the file containing product data
+     * @return a list of maps representing the preview data
+     * @throws Exception if an error occurs while processing the file
+     */
+    public List<Map<String, String>> previewProducts(MultipartFile file) throws Exception {
+        String filename = file.getOriginalFilename();
+        if (filename != null && (filename.endsWith(".xls") || filename.endsWith(".xlsx"))) {
+            return previewProductsExcel(file);
+        }
+        return previewProductsCsv(file);
+    }
+
+    private List<Map<String, String>> previewProductsCsv(MultipartFile file) throws Exception {
+        InputStreamReader reader = new InputStreamReader(file.getInputStream());
+        List<ProductCSVRequest> csvDtos = new CsvToBeanBuilder<ProductCSVRequest>(reader)
+                .withType(ProductCSVRequest.class)
+                .withIgnoreLeadingWhiteSpace(true)
+                .build()
+                .parse();
+
+        List<Map<String, String>> previewData = new ArrayList<>();
+        int count = 0;
+        for (ProductCSVRequest dto : csvDtos) {
+            if (count >= 10)
+                break;
+            Map<String, String> row = new HashMap<>();
+            row.put("name", dto.getName());
+            row.put("description", dto.getDescription());
+            row.put("price", String.valueOf(dto.getPrice()));
+            row.put("unit_price", String.valueOf(dto.getUnitPrice()));
+            row.put("stock", String.valueOf(dto.getStock()));
+            row.put("sku", dto.getSku());
+            row.put("barcode", dto.getBarcode());
+            row.put("brand", dto.getBrand());
+            row.put("img_url", dto.getImgURL());
+            row.put("categories", dto.getCategories());
+            previewData.add(row);
+            count++;
+        }
+        return previewData;
+    }
+
+    private List<Map<String, String>> previewProductsExcel(MultipartFile file) throws Exception {
+        List<Map<String, String>> previewData = new ArrayList<>();
+        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+            Sheet sheet = workbook.getSheetAt(0);
+            Iterator<Row> rowIterator = sheet.iterator();
+
+            Map<String, Integer> headerMap = new HashMap<>();
+            List<String> headers = new ArrayList<>();
+
+            if (rowIterator.hasNext()) {
+                Row headerRow = rowIterator.next();
+                for (Cell cell : headerRow) {
+                    String header = cell.getStringCellValue().toLowerCase().trim();
+                    headerMap.put(header, cell.getColumnIndex());
+                    headers.add(header);
+                }
+            }
+
+            int count = 0;
+            while (rowIterator.hasNext() && count < 10) {
+                Row row = rowIterator.next();
+                Map<String, String> rowData = new HashMap<>();
+
+                for (String header : headers) {
+                    rowData.put(header, getCellValueAsString(row, headerMap.get(header)));
+                }
+                previewData.add(rowData);
+                count++;
+            }
+        }
+        return previewData;
+    }
+
     private String getCellValueAsString(Row row, Integer columnIndex) {
         if (columnIndex == null)
             return null;
