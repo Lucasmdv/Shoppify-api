@@ -16,6 +16,9 @@ public class SaleResponse {
     @Schema(description = "Transaction details of the sale")
     TransactionResponse transaction;
 
+    @Schema(description = "Order details of the sale")
+    Long shipmentId;
+
     @Schema(description = "User's DNI number", example = "12345678")
     Long userDni;
 }

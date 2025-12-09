@@ -46,7 +46,6 @@ public class TransactionSaleController {
 
         SaleResponse saleResponse = saleService.createSale(request);
         EntityModel<SaleResponse> entityModel = saleModelAssembler.toModel(saleResponse);
-
         return ResponseEntity
                 .created(entityModel.getRequiredLink("self").toUri())
                 .body(entityModel);

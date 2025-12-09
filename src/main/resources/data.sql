@@ -108,8 +108,8 @@ SELECT 'test.admin', 'admin@admin', '$2a$10$ETW1zaXw0ZHn2rAMvfuwE.4dF6bl/g5Gr42G
 FROM users u
 WHERE u.user_dni = '41689718'
   AND NOT EXISTS (SELECT 1 FROM credentials WHERE email = 'admin@admin');
-
 INSERT INTO credentials_roles (credential_id, role_id)
+
 SELECT cred.id, r.id
 FROM credentials cred, roles r
 WHERE cred.email = 'user@user'

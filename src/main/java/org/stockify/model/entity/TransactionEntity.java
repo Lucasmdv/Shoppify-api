@@ -9,6 +9,8 @@ import lombok.Setter;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.stockify.model.enums.PaymentMethod;
+import org.stockify.model.enums.PaymentStatus;
+import org.stockify.model.enums.Status;
 import org.stockify.model.enums.TransactionType;
 
 import java.math.BigDecimal;
@@ -44,6 +46,10 @@ public class TransactionEntity {
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
     private TransactionType type;
+
+    private PaymentStatus paymentStatus;
+
+
 
 
     @ManyToOne

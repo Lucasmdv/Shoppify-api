@@ -22,6 +22,9 @@ public class SaleEntity {
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private TransactionEntity transaction;
 
+    @OneToOne(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ShipmentEntity shipment;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
