@@ -31,6 +31,7 @@ import org.stockify.model.assembler.ProductModelAssembler;
 import org.stockify.model.service.ProductService;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/products")
@@ -39,132 +40,131 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth")
 public class ProductController {
 
-    private final ProductService productService;
-    private final ProductModelAssembler productModelAssembler;
+        private final ProductService productService;
+        private final ProductModelAssembler productModelAssembler;
 
-
-    @Operation(summary = "List all products with optional filters")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Paged list of products returned successfully")
-    })
-    @PreAuthorize("hasAuthority('READ')")
-    @GetMapping
-    public ResponseEntity<PagedModel<EntityModel<ProductResponse>>> listProducts(
-            @ParameterObject ProductFilterRequest filter,
-            @Parameter(hidden = true)
-            @PageableDefault(sort = "name", direction = Sort.Direction.ASC) Pageable pageable,
-            PagedResourcesAssembler<ProductResponse> assembler
-    ) {
-        Page<ProductResponse> products = productService.findAll(pageable, filter);
-        return ResponseEntity.ok(assembler.toModel(products, productModelAssembler));
-    }
-
-
-    @Operation(summary = "Create multiple products in bulk")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "207", description = "Multi-status response with results of each product creation")
-    })
-    @PostMapping("/bulk")
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('WRITE')")
-    public ResponseEntity<BulkProductResponse> bulkSaveProducts(
-            @RequestBody List<@Valid ProductRequest> products) {
-        return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(productService.saveAll(products));
-    }
-
-
-    @PostMapping(value = "/import", consumes = "multipart/form-data")
-    @Operation(summary = "Import products from CSV file")
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('WRITE')")
-    @ApiResponse(responseCode = "200", description = "Successful import")
-    public ResponseEntity<BulkProductResponse> importProducts(
-            @Parameter(description = "CSV file with products", required = true,
-                    content = @Content(mediaType = "multipart/form-data",
-                            schema = @Schema(type = "string", format = "binary")))
-            @RequestParam("file") MultipartFile archivo) {
-
-        try {
-            BulkProductResponse response = productService.importProductsCsv(archivo);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+        @Operation(summary = "List all products with optional filters")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Paged list of products returned successfully")
+        })
+        @GetMapping
+        public ResponseEntity<PagedModel<EntityModel<ProductResponse>>> listProducts(
+                        @ParameterObject ProductFilterRequest filter,
+                        @Parameter(hidden = true)
+                        @PageableDefault(sort = "name", direction = Sort.Direction.ASC) Pageable pageable,
+                        PagedResourcesAssembler<ProductResponse> assembler) {
+                Page<ProductResponse> products = productService.findAll(pageable, filter);
+                return ResponseEntity.ok(assembler.toModel(products, productModelAssembler));
         }
-    }
 
+        @Operation(summary = "Create multiple products in bulk")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "207", description = "Multi-status response with results of each product creation")
+        })
+        @PostMapping("/bulk")
+        @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('WRITE')")
+        public ResponseEntity<BulkProductResponse> bulkSaveProducts(
+                        @RequestBody List<@Valid ProductRequest> products) {
+                return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(productService.saveAll(products));
+        }
 
-    @Operation(summary = "Get a product by ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Product found"),
-            @ApiResponse(responseCode = "404", description = "Product not found")
-    })
-    @PreAuthorize("hasAuthority('READ')")
-    @GetMapping("/{productID}")
-    public ResponseEntity<EntityModel<ProductResponse>> getProductById(
-            @Parameter(description = "ID of the product") @PathVariable Long productID) {
-        return ResponseEntity.ok(productModelAssembler.toModel(productService.findById(productID)));
-    }
+        @PostMapping(value = "/import", consumes = "multipart/form-data")
+        @Operation(summary = "Import products from CSV or Excel file")
+        @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('WRITE')")
+        @ApiResponse(responseCode = "200", description = "Successful import")
+        public ResponseEntity<BulkProductResponse> importProducts(
+                        @Parameter(
+                                description = "CSV file with products",
+                                required = true,
+                                content = @Content(mediaType = "multipart/form-data",
+                                schema = @Schema(type = "string", format = "binary")))
+                        @RequestParam("file") MultipartFile archivo) {
 
+                try {
+                        BulkProductResponse response = productService.importProducts(archivo);
+                        return ResponseEntity.ok(response);
+                } catch (Exception e) {
+                        return ResponseEntity.badRequest().build();
+                }
+        }
 
+        @PostMapping(value = "/import/preview", consumes = "multipart/form-data")
+        @Operation(summary = "Preview products from CSV or Excel file")
+        @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('WRITE')")
+        @ApiResponse(responseCode = "200", description = "Successful preview")
+        public ResponseEntity<List<Map<String, String>>> previewProducts(
+                        @Parameter(description = "File to preview", required = true, content = @Content(mediaType = "multipart/form-data", schema = @Schema(type = "string", format = "binary"))) @RequestParam("file") MultipartFile archivo) {
 
-    @Operation(summary = "Create a new product")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Product created successfully"),
-            @ApiResponse(responseCode = "400", description = "Validation failed")
-    })
-    @PostMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('WRITE')")
-    public ResponseEntity<EntityModel<ProductResponse>> createProduct(
-            @Valid @RequestBody ProductRequest product) {
-        return ResponseEntity.ok(productModelAssembler.toModel(productService.save(product)));
-    }
+                try {
+                        List<Map<String, String>> response = productService.previewProducts(archivo);
+                        return ResponseEntity.ok(response);
+                } catch (Exception e) {
+                        return ResponseEntity.badRequest().build();
+                }
+        }
 
+        @Operation(summary = "Get a product by ID")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Product found"),
+                        @ApiResponse(responseCode = "404", description = "Product not found")
+        })
+        @GetMapping("/{productID}")
+        public ResponseEntity<EntityModel<ProductResponse>> getProductById(
+                        @Parameter(description = "ID of the product") @PathVariable Long productID) {
+                return ResponseEntity.ok(productModelAssembler.toModel(productService.findById(productID)));
+        }
 
-    @Operation(summary = "Delete a product by ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Product deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Product not found")
-    })
-    @DeleteMapping("/{productID}")
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('DELETE') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('DELETE')")
-    public ResponseEntity<Void> deleteProduct(
-            @Parameter(description = "ID of the product") @PathVariable Long productID) {
-        productService.deleteById(productID);
-        return ResponseEntity.noContent().build();
-    }
+        @Operation(summary = "Create a new product")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Product created successfully"),
+                        @ApiResponse(responseCode = "400", description = "Validation failed")
+        })
+        @PostMapping
+        @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('WRITE')")
+        public ResponseEntity<EntityModel<ProductResponse>> createProduct(
+                        @Valid @RequestBody ProductRequest product) {
+                return ResponseEntity.ok(productModelAssembler.toModel(productService.save(product)));
+        }
 
+        @Operation(summary = "Delete a product by ID")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "204", description = "Product deleted successfully"),
+                        @ApiResponse(responseCode = "404", description = "Product not found")
+        })
+        @DeleteMapping("/{productID}")
+        @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('DELETE')")
+        public ResponseEntity<Void> deleteProduct(
+                        @Parameter(description = "ID of the product") @PathVariable Long productID) {
+                productService.deleteById(productID);
+                return ResponseEntity.noContent().build();
+        }
 
-    @Operation(summary = "Update an existing product by ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Product updated successfully"),
-            @ApiResponse(responseCode = "400", description = "Validation failed"),
-            @ApiResponse(responseCode = "404", description = "Product not found")
-    })
-    @PutMapping("/{productID}")
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('WRITE')")
-    public ResponseEntity<EntityModel<ProductResponse>> updateProduct(
-            @Parameter(description = "ID of the product") @PathVariable Long productID,
-            @Valid @RequestBody ProductRequest product) {
-        return ResponseEntity.ok().body(productModelAssembler.toModel(productService.update(productID, product)));
-    }
+        @Operation(summary = "Update an existing product by ID")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Product updated successfully"),
+                        @ApiResponse(responseCode = "400", description = "Validation failed"),
+                        @ApiResponse(responseCode = "404", description = "Product not found")
+        })
+        @PutMapping("/{productID}")
+        @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('WRITE')")
+        public ResponseEntity<EntityModel<ProductResponse>> updateProduct(
+                        @Parameter(description = "ID of the product") @PathVariable Long productID,
+                        @Valid @RequestBody ProductRequest product) {
+                return ResponseEntity.ok().body(productModelAssembler.toModel(productService.update(productID, product)));
+        }
 
-
-    @Operation(summary = "Patch an existing product by ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Product patched successfully"),
-            @ApiResponse(responseCode = "400", description = "Validation failed"),
-            @ApiResponse(responseCode = "404", description = "Product not found")
-    })
-    @PatchMapping("/{productID}")
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('WRITE')")
-    public ResponseEntity<EntityModel<ProductResponse>> patchProduct(
-            @Parameter(description = "ID of the product") @PathVariable Long productID,
-            @Valid @RequestBody ProductRequest product) {
-        return ResponseEntity.ok().body(productModelAssembler.toModel(productService.patch(productID, product)));
-    }
+        @Operation(summary = "Patch an existing product by ID")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Product patched successfully"),
+                        @ApiResponse(responseCode = "400", description = "Validation failed"),
+                        @ApiResponse(responseCode = "404", description = "Product not found")
+        })
+        @PatchMapping("/{productID}")
+        @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('WRITE')")
+        public ResponseEntity<EntityModel<ProductResponse>> patchProduct(
+                        @Parameter(description = "ID of the product") @PathVariable Long productID,
+                        @Valid @RequestBody ProductRequest product) {
+                return ResponseEntity.ok().body(productModelAssembler.toModel(productService.patch(productID, product)));
+        }
 
 }

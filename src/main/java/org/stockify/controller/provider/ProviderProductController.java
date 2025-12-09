@@ -42,8 +42,7 @@ public class ProviderProductController {
             @ApiResponse(responseCode = "404", description = "Provider not found")
     })
     @GetMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('READ') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('READ')")
+    @PreAuthorize("hasAuthority('READ')")
     public ResponseEntity<PagedModel<EntityModel<ProductResponse>>> listProducts(
             @Parameter(description = "ID of the provider") @PathVariable Long providerID,
             @Parameter(hidden = true)
@@ -61,8 +60,7 @@ public class ProviderProductController {
             @ApiResponse(responseCode = "409", description = "Product already assigned to provider")
     })
     @PutMapping("/{productID}")
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('WRITE')")
+    @PreAuthorize("hasAuthority('WRITE')")
     public ResponseEntity<EntityModel<ProviderResponse>> assignProduct(
             @Parameter(description = "ID of the provider") @PathVariable Long providerID,
             @Parameter(description = "ID of the product") @PathVariable Long productID
@@ -77,8 +75,7 @@ public class ProviderProductController {
             @ApiResponse(responseCode = "404", description = "Product or Provider not found")
     })
     @PatchMapping("/{productID}")
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('WRITE')")
+    @PreAuthorize("hasAuthority('WRITE')")
     public ResponseEntity<EntityModel<ProviderResponse>> unassignProducts(
             @Parameter(description = "ID of the provider") @PathVariable Long providerID,
             @Parameter(description = "ID of the product") @PathVariable Long productID

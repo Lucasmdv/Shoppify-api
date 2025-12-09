@@ -50,9 +50,32 @@ public record ProductRequest(
 
         @Schema(description = "Indicates if the product is inactive", example = "false")
         Boolean inactive
-) {
+    ) {
+
     public ProductRequest {
-        if (discountPercentage == null) discountPercentage = BigDecimal.ZERO;
-        if (categories == null) categories = Set.of();
+        if (discountPercentage == null)
+            discountPercentage = BigDecimal.ZERO;
+        if (categories == null)
+            categories = Set.of();
+        if (price == null)
+            price = BigDecimal.ZERO;
+        if (unitPrice == null)
+            unitPrice = BigDecimal.ZERO;
+        if (stock == null)
+            stock = 0L;
+        if (sku == null)
+            sku = "";
+        if (barcode == null)
+            barcode = "";
+        if (brand == null)
+            brand = "";
+        if (description == null)
+            description = "";
+        if (imgURL == null)
+            imgURL = "";
+        if (inactive == null)
+            inactive = false;
+        if (name == null)
+            name = "Unknown Product";
     }
 }

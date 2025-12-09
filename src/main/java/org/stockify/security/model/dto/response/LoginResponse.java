@@ -21,4 +21,7 @@ public class LoginResponse {
 
     @Schema(description = "Assigned permits (uppercase enum names, ordered, without duplicates)")
     private Set<String> permits;
+
+    @Schema(description = "Assigned roles (uppercase names, ordered, without duplicates)")
+    private Set<String> roles;
 }

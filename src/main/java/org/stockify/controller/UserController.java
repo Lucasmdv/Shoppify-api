@@ -16,6 +16,7 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.stockify.dto.request.user.UserFilterRequest;
 import org.stockify.dto.request.user.UserRequest;
@@ -38,6 +39,7 @@ public class UserController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Paged list of users retrieved successfully")
     })
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MANAGE_USERS')")
     @GetMapping
     public ResponseEntity<PagedModel<EntityModel<UserResponse>>> getAllUsers(
             @ParameterObject UserFilterRequest filterRequest,
@@ -56,6 +58,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "User found"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MANAGE_USERS') or #userID == authentication.principal.user.id")
     @GetMapping("/{userID}")
     public ResponseEntity<EntityModel<UserResponse>> getUserById(
             @Parameter(description = "ID of the user") @PathVariable Long userID) {
@@ -69,6 +72,7 @@ public class UserController {
             @ApiResponse(responseCode = "204", description = "User deleted successfully"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MANAGE_USERS')")
     @DeleteMapping("/{userID}")
     public ResponseEntity<Void> deleteUserById(
             @Parameter(description = "ID of the user") @PathVariable Long userID) {
@@ -82,6 +86,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "User updated successfully"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MANAGE_USERS') or #userID == authentication.principal.user.id")
     @PatchMapping("/{userID}")
     public ResponseEntity<EntityModel<UserResponse>> patchUser(
             @Parameter(description = "ID of the user") @PathVariable Long userID,
@@ -97,6 +102,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Validation error"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MANAGE_USERS') or #userID == authentication.principal.user.id")
     @PutMapping("/{userID}")
     public ResponseEntity<EntityModel<UserResponse>> putUser(
             @Parameter(description = "ID of the user") @PathVariable Long userID,

@@ -49,7 +49,7 @@ public class AuthController {
      * Constructor for AuthController
      *
      * @param authService Service for authentication operations
-     * @param jwtService Service for JWT token operations
+     * @param jwtService  Service for JWT token operations
      */
     public AuthController(AuthService authService, JwtService jwtService, UserMapper userMapper) {
         this.authService = authService;
@@ -66,18 +66,16 @@ public class AuthController {
     @Operation(
         summary = "Logout the current user",
         description = "Invalidates the current user's session and JWT token",
-        security = @SecurityRequirement(name = "bearerAuth")
-    )
+        security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Logout successful"),
-        @ApiResponse(responseCode = "401", description = "User not authenticated")
+            @ApiResponse(responseCode = "200", description = "Logout successful"),
+            @ApiResponse(responseCode = "401", description = "User not authenticated")
     })
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<String> logout() {
         authService.logout();
         return ResponseEntity.ok("Logout successful");
     }
-
 
     /**
      * Authenticates a user and generates a JWT token
@@ -88,12 +86,11 @@ public class AuthController {
     @PostMapping("/login")
     @Operation(
         summary = "Authenticate user and get token",
-        description = "Validates user credentials and returns a JWT token for authenticated requests"
-    )
+        description = "Validates user credentials and returns a JWT token for authenticated requests")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Authentication successful"),
-        @ApiResponse(responseCode = "401", description = "Invalid credentials"),
-        @ApiResponse(responseCode = "400", description = "Invalid request format")
+            @ApiResponse(responseCode = "200", description = "Authentication successful"),
+            @ApiResponse(responseCode = "401", description = "Invalid credentials"),
+            @ApiResponse(responseCode = "400", description = "Invalid request format")
     })
     public ResponseEntity<LoginResponse> login(
             @Parameter(description = "Authentication credentials") @RequestBody AuthRequest authRequest) {
@@ -114,20 +111,27 @@ public class AuthController {
                 .filter(java.util.Objects::nonNull)
                 .map(Enum::name)
                 .collect(java.util.stream.Collectors.toCollection(java.util.TreeSet::new));
+
+        java.util.Set<String> roles = cred.getRoles().stream()
+                .filter(java.util.Objects::nonNull)
+                .map(org.stockify.security.model.entity.RoleEntity::getName)
+                .filter(java.util.Objects::nonNull)
+                .map(String::toUpperCase)
+                .collect(java.util.stream.Collectors.toCollection(java.util.TreeSet::new));
+
         return ResponseEntity.ok(
                 LoginResponse.builder()
                         .token(token)
                         .user(profile)
                         .permits(permits)
-                        .build()
-        );
+                        .roles(roles)
+                        .build());
     }
 
     @PostMapping("/register")
     @Operation(
         summary = "Register user profile and credentials",
-        description = "Registers a new user profile and credentials in one step and assigns default USER role"
-    )
+        description = "Registers a new user profile and credentials in one step and assigns default USER role")
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
         System.out.println(request);
         org.stockify.security.model.entity.CredentialsEntity saved = authService.register(request);
@@ -143,21 +147,28 @@ public class AuthController {
                 .filter(java.util.Objects::nonNull)
                 .map(Enum::name)
                 .collect(java.util.stream.Collectors.toCollection(java.util.TreeSet::new));
+
+        java.util.Set<String> roles = saved.getRoles().stream()
+                .filter(java.util.Objects::nonNull)
+                .map(org.stockify.security.model.entity.RoleEntity::getName)
+                .filter(java.util.Objects::nonNull)
+                .map(String::toUpperCase)
+                .collect(java.util.stream.Collectors.toCollection(java.util.TreeSet::new));
+
         return ResponseEntity.status(201).body(
                 RegisterResponse.builder()
                         .token(token)
                         .user(profile)
                         .permits(permits)
-                        .build()
-        );
+                        .roles(roles)
+                        .build());
     }
 
     @PatchMapping("/update")
     @Operation(
-            summary = "Actualizar correo electrónico y/o contraseña",
-            description = "Permite al usuario autenticado modificar su correo o contraseña.",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
+        summary = "Actualizar correo electrónico y/o contraseña",
+        description = "Permite al usuario autenticado modificar su correo o contraseña.",
+        security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Datos actualizados correctamente"),
             @ApiResponse(responseCode = "400", description = "Solicitud inválida"),
@@ -172,8 +183,7 @@ public class AuthController {
                 AuthResponse.builder()
                         .token(newToken)
                         .message("Credenciales actualizadas correctamente")
-                        .build()
-        );
+                        .build());
     }
 
 }
