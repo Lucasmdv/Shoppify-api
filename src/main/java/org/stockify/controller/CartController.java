@@ -58,7 +58,7 @@ public class CartController {
                         @ApiResponse(responseCode = "404", description = "Cart or item not found")
         })
         @PreAuthorize("hasAuthority('ADMIN') or #userId == authentication.principal.user.id")
-        @PutMapping("/items/{itemId}")
+        @PatchMapping("/items/{itemId}")
         public ResponseEntity<CartResponse> updateItem(
                         @Parameter(description = "Identifier of the user who owns the cart", example = "12") @PathVariable("userId") Long userId,
                         @Parameter(description = "Identifier of the cart item", example = "7") @PathVariable Long itemId,
