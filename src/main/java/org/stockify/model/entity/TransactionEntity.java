@@ -47,6 +47,7 @@ public class TransactionEntity {
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
+    @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
 
 

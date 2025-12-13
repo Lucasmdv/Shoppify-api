@@ -69,12 +69,18 @@ public class MercadoPagoService {
                 .failure(FAILURE_URL)
                 .build();
 
-        PreferenceRequest preferenceRequest = PreferenceRequest.builder()
+        PreferenceRequest.PreferenceRequestBuilder preferenceRequestBuilder = PreferenceRequest.builder()
                 .items(items)
                 .backUrls(backUrls)
                 .autoReturn("approved")
-                .externalReference(String.valueOf(transactionId))
-                .build();
+                .externalReference(String.valueOf(transactionId));
+
+        String notificationUrl = System.getenv("NOTIFICATION_URL");
+        if (notificationUrl != null && !notificationUrl.isBlank()) {
+            preferenceRequestBuilder.notificationUrl(notificationUrl);
+        }
+
+        PreferenceRequest preferenceRequest = preferenceRequestBuilder.build();
 
         try {
             return new PreferenceClient().create(preferenceRequest);
@@ -94,7 +100,8 @@ public class MercadoPagoService {
 
         BigDecimal basePrice = product.getPrice();
         if (basePrice == null || basePrice.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product with id " + product.getId() + " has no valid price");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Product with id " + product.getId() + " has no valid price");
         }
 
         BigDecimal unitPrice = priceCalculator.calculateDiscountPrice(product);
@@ -118,7 +125,8 @@ public class MercadoPagoService {
     }
 
     public void processWebhookNotification(String topic, String id) {
-        if (!"payment".equals(topic)) return;
+        if (!"payment".equals(topic))
+            return;
 
         try {
             PaymentClient client = new PaymentClient();
@@ -174,7 +182,8 @@ public class MercadoPagoService {
     }
 
     private PaymentStatus mapStatus(String mpStatus) {
-        if (mpStatus == null) return PaymentStatus.PENDING;
+        if (mpStatus == null)
+            return PaymentStatus.PENDING;
 
         return switch (mpStatus) {
             case "approved" -> PaymentStatus.APPROVED;

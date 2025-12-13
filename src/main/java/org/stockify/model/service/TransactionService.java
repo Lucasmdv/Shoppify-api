@@ -76,6 +76,7 @@ public class TransactionService {
         transactionEntity.setTotal(total);
         transactionEntity.setDescription(request.getDescription());
         transactionEntity.setType(type);
+        transactionEntity.setPaymentStatus(PaymentStatus.PENDING);
 
         return transactionRepository.save(transactionEntity);
     }
