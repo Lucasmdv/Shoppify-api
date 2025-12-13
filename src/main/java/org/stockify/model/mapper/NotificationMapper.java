@@ -18,9 +18,11 @@ public interface NotificationMapper {
     NotificationEntity toEntity(NotificationRequest request);
 
     @Mapping(target = "read", constant = "false")
+    @Mapping(target = "hidden", constant = "false")
     NotificationResponse toResponse(NotificationEntity entity);
 
     @Mapping(target = "read", source = "read")
+    @Mapping(target = "hidden", source = "hidden")
     NotificationResponse toResponse(NotificationSummary summary);
 
     @Mapping(target = "id", ignore = true)

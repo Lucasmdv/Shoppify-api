@@ -11,6 +11,7 @@ public interface NotificationSummary {
     Instant getPublishAt();
     Instant getCreatedAt();
     Boolean getRead();
+    Boolean getHidden();
     String getIcon();
     Long getRelatedProductId();
 }

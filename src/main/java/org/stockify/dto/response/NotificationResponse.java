@@ -30,6 +30,9 @@ public record NotificationResponse(
         @Schema(description = "Creation timestamp", example = "2025-10-21T18:30:00Z")
         Instant createdAt,
 
+        @Schema(description = "Whether the user hid the notification", example = "false")
+        boolean hidden,
+
         @Schema(description = "Whether the user has read it", example = "false")
         boolean read
 ) {}

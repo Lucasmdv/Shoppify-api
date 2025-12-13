@@ -14,11 +14,13 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.stockify.dto.request.notifications.NotificationRequest;
 import org.stockify.dto.response.NotificationResponse;
 import org.stockify.model.entity.NotificationEntity;
+import org.stockify.model.entity.NotificationHidden;
 import org.stockify.model.entity.NotificationRead;
 import org.stockify.model.enums.NotificationStatus;
 import org.stockify.model.enums.NotificationType;
 import org.stockify.model.exception.NotFoundException;
 import org.stockify.model.mapper.NotificationMapper;
+import org.stockify.model.repository.NotificationHiddenRepository;
 import org.stockify.model.repository.NotificationReadRepository;
 import org.stockify.model.repository.NotificationRepository;
 import org.stockify.model.repository.ProductRepository;
@@ -33,6 +35,7 @@ public class NotificationService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final NotificationReadRepository notificationReadRepository;
+    private final NotificationHiddenRepository notificationHiddenRepository;
     private final Map<Long, SseEmitter> activeEmitters = new ConcurrentHashMap<>();
 
     // SSE
@@ -92,6 +95,18 @@ public class NotificationService {
         }
         NotificationResponse response = notificationMapper.toResponse(entity);
         return markResponseAsRead(response);
+    }
+
+    public NotificationResponse hide(Long userId, Long notificationId) {
+        NotificationEntity entity = resolveNotification(notificationId);
+        if (!notificationHiddenRepository.existsByUserIdAndNotificationId(userId, notificationId)) {
+            NotificationHidden hidden = new NotificationHidden();
+            hidden.setUserId(userId);
+            hidden.setNotificationId(notificationId);
+            notificationHiddenRepository.save(hidden);
+        }
+        NotificationResponse response = notificationMapper.toResponse(entity);
+        return markResponseAsHidden(response);
     }
 
     // Helpers
@@ -197,7 +212,23 @@ public class NotificationService {
                 response.relatedProductId(),
                 response.publishAt(),
                 response.createdAt(),
+                response.hidden(),
                 true
+        );
+    }
+
+    private NotificationResponse markResponseAsHidden(NotificationResponse response) {
+        return new NotificationResponse(
+                response.id(),
+                response.title(),
+                response.message(),
+                response.type(),
+                response.icon(),
+                response.relatedProductId(),
+                response.publishAt(),
+                response.createdAt(),
+                true,
+                response.read()
         );
     }
 }
