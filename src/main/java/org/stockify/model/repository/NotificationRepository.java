@@ -23,9 +23,11 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
             n.publishAt AS publishAt,
             n.createdAt AS createdAt,
             n.relatedProductId AS relatedProductId,
-            CASE WHEN nr.id IS NOT NULL THEN true ELSE false END AS read
+            CASE WHEN nr.id IS NOT NULL THEN true ELSE false END AS read,
+            CASE WHEN nh.id IS NOT NULL THEN true ELSE false END AS hidden
         FROM NotificationEntity n
         LEFT JOIN NotificationRead nr ON n.id = nr.notificationId AND nr.userId = :userId
+        LEFT JOIN NotificationHidden nh ON n.id = nh.notificationId AND nh.userId = :userId
         LEFT JOIN WishlistEntity w ON w.user.id = :userId
         LEFT JOIN w.wishlistProducts wp ON wp.product.id = n.relatedProductId
         WHERE
@@ -37,6 +39,7 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
             AND n.status = 'PUBLISHED'
             AND (n.publishAt IS NULL OR n.publishAt <= CURRENT_TIMESTAMP)
             AND (n.expiresAt IS NULL OR n.expiresAt > CURRENT_TIMESTAMP)
+            AND nh.id IS NULL
         ORDER BY n.createdAt DESC
     """)
     Page<NotificationSummary> findAllProjectedByUserId(@Param("userId") Long userId,

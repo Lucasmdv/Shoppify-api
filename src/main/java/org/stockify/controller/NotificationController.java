@@ -106,6 +106,20 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.markAsRead(userId, notificationId));
     }
 
+    @Operation(summary = "Hide a notification for a user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Notification hidden for the user"),
+            @ApiResponse(responseCode = "404", description = "Notification not found", content = @Content)
+    })
+    @PatchMapping("/user/{userId}/hide/{notificationId}")
+    public ResponseEntity<NotificationResponse> hide(
+            @Parameter(description = "User identifier", example = "12")
+            @PathVariable Long userId,
+            @Parameter(description = "Notification identifier", example = "100")
+            @PathVariable Long notificationId) {
+        return ResponseEntity.ok(notificationService.hide(userId, notificationId));
+    }
+
     @Operation(summary = "Open an SSE stream for real-time notifications")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "SSE stream opened"),
