@@ -43,7 +43,7 @@ public class MercadoPagoController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MercadoPagoPreferenceResponse> createPreference(@Valid @RequestBody SaleRequest request) {
         Preference preference = mercadoPagoService.createPreference(request);
-        
+
         MercadoPagoPreferenceResponse response = new MercadoPagoPreferenceResponse(
                 preference.getId(),
                 preference.getInitPoint(),
@@ -126,7 +126,7 @@ public class MercadoPagoController {
             }
 
             // Construct manifest string for HMAC verification
-            String manifest = String.format("id:%s;request-url:%s;ts:%s;params:%s",
+            String manifest = String.format("id:%s;request-id:%s;ts:%s;params:%s",
                     dataId,
                     requestId,
                     ts,
