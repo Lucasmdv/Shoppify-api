@@ -4,6 +4,7 @@ import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.preference.PreferenceBackUrlsRequest;
 import com.mercadopago.client.preference.PreferenceClient;
 import com.mercadopago.client.preference.PreferenceItemRequest;
+import com.mercadopago.client.preference.PreferencePayerRequest;
 import com.mercadopago.client.preference.PreferenceRequest;
 import com.mercadopago.exceptions.MPApiException;
 import com.mercadopago.exceptions.MPException;
@@ -59,6 +60,21 @@ public class MercadoPagoService {
         SaleResponse saleResponse = saleService.createSale(request);
         Long transactionId = saleResponse.getTransaction().getId();
 
+        // Intentar obtener el email del usuario desde el SecurityContext
+        String userEmail = null;
+        try {
+            var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null) {
+                if (auth.getPrincipal() instanceof org.springframework.security.core.userdetails.UserDetails ud) {
+                    userEmail = ud.getUsername();
+                } else if (auth.getName() != null && !auth.getName().isBlank()) {
+                    userEmail = auth.getName();
+                }
+            }
+        } catch (Exception e) {
+            log.debug("No se pudo obtener email del Contexto de Seguridad: {}", e.getMessage());
+        }
+
         List<PreferenceItemRequest> items = request.getTransaction().getDetailTransactions().stream()
                 .map(this::buildItem)
                 .toList();
@@ -74,6 +90,11 @@ public class MercadoPagoService {
                 .backUrls(backUrls)
                 .autoReturn("approved")
                 .externalReference(String.valueOf(transactionId));
+
+        // Si obtuvimos email, añadirlo como payer en la preference
+        if (userEmail != null && !userEmail.isBlank()) {
+            preferenceRequestBuilder.payer(PreferencePayerRequest.builder().email(userEmail).build());
+        }
 
         String notificationUrl = System.getenv("NOTIFICATION_URL");
         if (notificationUrl != null && !notificationUrl.isBlank()) {
