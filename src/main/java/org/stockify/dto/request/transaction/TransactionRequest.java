@@ -1,5 +1,7 @@
 package org.stockify.dto.request.transaction;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +19,7 @@ import java.util.List;
 public class TransactionRequest {
 
     @Schema(description = "Payment method used in the transaction", example = "CASH")
-    @NotNull(message = "Payment method is required")
+
     private PaymentMethod paymentMethod;
 
     @Schema(description = "List of transaction details")

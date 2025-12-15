@@ -60,6 +60,11 @@ public class NotificationService {
         return notificationMapper.toResponse(resolveNotification(id));
     }
 
+    public Page<NotificationResponse> findAll(Pageable pageable) {
+        return notificationRepository.findAllByTypeIs(NotificationType.GLOBAL, pageable)
+                .map(notificationMapper::toResponse);
+    }
+
     public NotificationResponse createNotification(NotificationRequest request) {
         checkRequestIntegrity(request);
         NotificationEntity entity = notificationMapper.toEntity(request);

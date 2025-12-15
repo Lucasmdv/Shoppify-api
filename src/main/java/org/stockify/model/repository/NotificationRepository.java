@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.stockify.model.entity.NotificationEntity;
 import org.stockify.model.enums.NotificationStatus;
+import org.stockify.model.enums.NotificationType;
+import org.stockify.model.mapper.WishlistProductMapper;
 import org.stockify.model.projections.NotificationSummary;
 
 public interface NotificationRepository extends JpaRepository<NotificationEntity, Long> {
@@ -48,4 +50,6 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
     List<NotificationEntity> findAllByStatusAndPublishAtBefore(NotificationStatus status, Instant publishAt);
 
     Page<NotificationEntity> findAllByTargetUserIdAndPublishAtBeforeOrderByPublishAtDesc(Long targetUserId, Instant publishAt, Pageable pageable);
+
+    Page<NotificationEntity> findAllByTypeIs(NotificationType type, Pageable pageable);
 }

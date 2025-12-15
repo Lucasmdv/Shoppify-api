@@ -40,11 +40,20 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
+    @GetMapping
+    public ResponseEntity<Page<NotificationResponse>> getAll(
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ){
+        return ResponseEntity.ok(notificationService.findAll(pageable));
+    }
+
+
     @Operation(summary = "Get notifications visible for a user")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Paged notifications returned successfully"),
             @ApiResponse(responseCode = "404", description = "No notifications found for the user", content = @Content)
     })
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<Page<NotificationResponse>> getByUser(
             @Parameter(description = "User identifier", example = "12")
