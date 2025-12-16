@@ -41,7 +41,8 @@ public class MercadoPagoController {
         MercadoPagoPreferenceResponse response = new MercadoPagoPreferenceResponse(
                 preference.getId(),
                 preference.getInitPoint(),
-                preference.getSandboxInitPoint());
+                preference.getSandboxInitPoint(),
+                Long.valueOf(preference.getExternalReference()));
         return ResponseEntity.ok(response);
     }
 

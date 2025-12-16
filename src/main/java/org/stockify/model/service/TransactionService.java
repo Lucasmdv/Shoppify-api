@@ -118,6 +118,12 @@ public class TransactionService {
         }
     }
 
+    public void cancelTransactionById(Long id, String reason) {
+        TransactionEntity transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Transaction not found with id: " + id));
+        cancelTransaction(transaction, reason);
+    }
+
     public void cancelTransaction(TransactionEntity transaction, String reason) {
         if (transaction.getPaymentStatus() != PaymentStatus.PENDING) {
             log.warn("Attempted to cancel transaction {} but status is {}", transaction.getId(), transaction.getPaymentStatus());

@@ -10,7 +10,6 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.stockify.model.enums.PaymentMethod;
 import org.stockify.model.enums.PaymentStatus;
-import org.stockify.model.enums.Status;
 import org.stockify.model.enums.TransactionType;
 
 import java.math.BigDecimal;
@@ -73,6 +72,7 @@ public class TransactionEntity {
     @PrePersist
     public void prePersist(){
         this.dateTime = LocalDateTime.now();
+        this.paymentMethod = this.paymentMethod == null ? PaymentMethod.CASH : this.paymentMethod;
     }
 
 }
