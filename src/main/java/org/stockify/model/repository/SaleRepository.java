@@ -8,13 +8,17 @@ import org.stockify.model.entity.SaleEntity;
 import org.stockify.model.enums.PaymentStatus;
 import org.stockify.model.enums.TransactionType;
 
+import org.springframework.data.jpa.domain.Specification;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Repository
 public interface SaleRepository extends JpaRepository<SaleEntity,Long>, JpaSpecificationExecutor<SaleEntity> {
 
     @EntityGraph(attributePaths = {
             "transaction",
+            "transaction.paymentDetail",
             "transaction.detailTransactions",
             "transaction.detailTransactions.product"
     })
@@ -23,4 +27,33 @@ public interface SaleRepository extends JpaRepository<SaleEntity,Long>, JpaSpeci
             PaymentStatus paymentStatus,
             TransactionType type
     );
+
+    @Override
+    @EntityGraph(attributePaths = {
+            "transaction",
+            "transaction.paymentDetail",
+            "transaction.detailTransactions",
+            "transaction.detailTransactions.product",
+            "user"
+    })
+    Page<SaleEntity> findAll(Pageable pageable);
+
+    @Override
+    @EntityGraph(attributePaths = {
+            "transaction",
+            "transaction.paymentDetail",
+            "transaction.detailTransactions",
+            "transaction.detailTransactions.product",
+            "user"
+    })
+    Optional<SaleEntity> findById(Long aLong);
+
+    @EntityGraph(attributePaths = {
+            "transaction",
+            "transaction.paymentDetail",
+            "transaction.detailTransactions",
+            "transaction.detailTransactions.product",
+            "user"
+    })
+    Page<SaleEntity> findAll(Specification<SaleEntity> spec, Pageable pageable);
 }

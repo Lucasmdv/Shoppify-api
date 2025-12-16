@@ -11,7 +11,7 @@ import org.stockify.dto.request.transaction.TransactionRequest;
 import org.stockify.dto.response.TransactionResponse;
 import org.stockify.model.entity.TransactionEntity;
 
-@Mapper(componentModel = "spring", uses = {ProviderMapper.class, DetailTransactionMapper.class})
+@Mapper(componentModel = "spring", uses = {ProviderMapper.class, DetailTransactionMapper.class, PaymentDetailMapper.class})
 public interface TransactionMapper {
     @Mapping(target = "type", ignore = true)
     @Mapping(target = "total", ignore = true)

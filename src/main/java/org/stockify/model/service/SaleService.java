@@ -166,5 +166,3 @@ public class SaleService {
         return saleMapper.toResponseDTO(updatedSale);
     }
 }
-
-

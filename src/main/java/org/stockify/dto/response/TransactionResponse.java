@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
+import org.stockify.dto.response.PaymentDetailResponse;
 
 @Value
 public class TransactionResponse {
@@ -30,6 +31,8 @@ public class TransactionResponse {
     @Schema(description = "Type of the transaction", example = "SALE")
     TransactionType type;
 
+    @Schema(description = "Detail of the payment received for this transaction")
+    PaymentDetailResponse paymentDetail;
 
     @Schema(description = "Name of the store where the transaction took place", example = "Downtown Store")
     String storeName;

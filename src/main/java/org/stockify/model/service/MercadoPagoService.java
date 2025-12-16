@@ -22,8 +22,10 @@ import org.stockify.dto.response.MercadoPagoPreferenceResponse;
 import org.stockify.dto.response.SaleResponse;
 import org.stockify.dto.request.transaction.DetailTransactionRequest;
 import org.stockify.model.entity.DetailTransactionEntity;
+import org.stockify.model.entity.PaymentDetailEntity;
 import org.stockify.model.entity.ProductEntity;
 import org.stockify.model.entity.TransactionEntity;
+import org.stockify.model.enums.PaymentMethod;
 import org.stockify.model.enums.PaymentStatus;
 import org.stockify.model.enums.TransactionType;
 import org.stockify.model.exception.NotFoundException;
@@ -34,6 +36,8 @@ import org.stockify.util.PriceCalculator;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -301,12 +305,18 @@ public class MercadoPagoService {
                 return;
             }
 
-            TransactionEntity transaction = transactionRepository.findById(transactionId)
-                    .orElseThrow(() -> new NotFoundException("Transaction not found for ID: " + transactionId));
+        TransactionEntity transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new NotFoundException("Transaction not found for ID: " + transactionId));
 
-            PaymentStatus newStatus = mapStatus(payment.getStatus());
-            transaction.setPaymentStatus(newStatus);
-            transactionRepository.save(transaction);
+        PaymentStatus newStatus = mapStatus(payment.getStatus());
+        transaction.setPaymentStatus(newStatus);
+        // Actualiza detalles del pago (no se almacena informacion sensible completa)
+        applyPaymentDetails(transaction, payment);
+        PaymentMethod mappedMethod = mapPaymentMethod(payment.getPaymentTypeId());
+        if (mappedMethod != null) {
+            transaction.setPaymentMethod(mappedMethod);
+        }
+        transactionRepository.save(transaction);
 
             log.info("Updated transaction {} status to {}", transactionId, newStatus);
 
@@ -335,6 +345,65 @@ public class MercadoPagoService {
         return status == PaymentStatus.CANCELLED ||
                 status == PaymentStatus.REJECTED ||
                 status == PaymentStatus.REFUNDED;
+    }
+
+    private void applyPaymentDetails(TransactionEntity transaction, Payment payment) {
+        PaymentDetailEntity detail = transaction.getPaymentDetail();
+        if (detail == null) {
+            detail = new PaymentDetailEntity();
+            detail.setTransaction(transaction);
+            transaction.setPaymentDetail(detail);
+        }
+
+        detail.setPaymentId(payment.getId() != null ? String.valueOf(payment.getId()) : null);
+        detail.setStatus(payment.getStatus());
+        detail.setStatusDetail(payment.getStatusDetail());
+        detail.setPaymentMethodId(payment.getPaymentMethodId());
+        detail.setPaymentTypeId(payment.getPaymentTypeId());
+        detail.setIssuerId(payment.getIssuerId() != null ? String.valueOf(payment.getIssuerId()) : null);
+        detail.setInstallments(payment.getInstallments());
+
+        if (payment.getCard() != null) {
+            detail.setCardLastFour(payment.getCard().getLastFourDigits());
+            if (payment.getCard().getCardholder() != null) {
+                detail.setCardholderName(payment.getCard().getCardholder().getName());
+            }
+        }
+
+        detail.setStatementDescriptor(payment.getStatementDescriptor());
+        detail.setTransactionAmount(payment.getTransactionAmount());
+
+        if (payment.getTransactionDetails() != null) {
+            detail.setNetReceivedAmount(payment.getTransactionDetails().getNetReceivedAmount());
+        }
+
+        if (payment.getPayer() != null) {
+            detail.setPayerEmail(payment.getPayer().getEmail());
+            detail.setPayerId(payment.getPayer().getId());
+        }
+
+        detail.setDateApproved(toLocalDateTime(payment.getDateApproved()));
+        detail.setDateCreated(toLocalDateTime(payment.getDateCreated()));
+    }
+
+    private PaymentMethod mapPaymentMethod(String paymentTypeId) {
+        if (paymentTypeId == null) return null;
+        return switch (paymentTypeId) {
+            case "credit_card" -> PaymentMethod.CREDIT;
+            case "debit_card" -> PaymentMethod.DEBIT;
+            case "account_money", "wallet" -> PaymentMethod.DIGITAL;
+            default -> null;
+        };
+    }
+
+    private LocalDateTime toLocalDateTime(java.util.Date date) {
+        if (date == null) return null;
+        return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+    }
+
+    private LocalDateTime toLocalDateTime(java.time.OffsetDateTime dateTime) {
+        if (dateTime == null) return null;
+        return dateTime.toLocalDateTime();
     }
 
     private PaymentStatus mapStatus(String mpStatus) {

@@ -11,6 +11,7 @@ import org.hibernate.envers.RelationTargetAuditMode;
 import org.stockify.model.enums.PaymentMethod;
 import org.stockify.model.enums.PaymentStatus;
 import org.stockify.model.enums.TransactionType;
+import org.stockify.model.entity.PaymentDetailEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -69,6 +70,10 @@ public class TransactionEntity {
     @OneToOne(mappedBy = "transaction", cascade = CascadeType.ALL)
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private PurchaseEntity purchase;
+
+    @OneToOne(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+    private PaymentDetailEntity paymentDetail;
 
     @OneToOne(mappedBy = "transaction", cascade = CascadeType.ALL)
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
