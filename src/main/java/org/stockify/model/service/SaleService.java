@@ -11,11 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.stockify.dto.request.sale.SaleFilterRequest;
 import org.stockify.dto.request.sale.SaleRequest;
-import org.stockify.dto.request.shipment.ShipmentRequest;
 import org.stockify.dto.request.transaction.DetailTransactionRequest;
 import org.stockify.dto.response.SaleResponse;
 import org.stockify.dto.response.TransactionResponse;
-import org.stockify.model.entity.ShipmentEntity;
 import org.stockify.model.entity.ProductEntity;
 import org.stockify.model.entity.SaleEntity;
 import org.stockify.model.entity.TransactionEntity;
@@ -25,7 +23,6 @@ import org.stockify.model.exception.InsufficientStockException;
 import org.stockify.model.exception.NotFoundException;
 import org.stockify.model.mapper.SaleMapper;
 import org.stockify.model.mapper.TransactionMapper;
-import org.stockify.model.repository.ShipmentRepository;
 import org.stockify.model.repository.ProductRepository;
 import org.stockify.model.repository.SaleRepository;
 import org.stockify.model.repository.UserRepository;
@@ -33,7 +30,6 @@ import org.stockify.model.specification.SaleSpecification;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -71,8 +67,7 @@ public class SaleService {
 
             if (currentStock < quantity) {
                 throw new InsufficientStockException(
-                        "Insufficient stock for product ID " + detail.getProductID()
-                );
+                        "Insufficient stock for product ID " + detail.getProductID());
             }
 
             long newStock = currentStock - quantity;
@@ -80,18 +75,15 @@ public class SaleService {
             product.setSoldQuantity(currentSold + quantity);
             productsToUpdate.add(product);
 
-
             eventPublisher.publishEvent(new ProductStockUpdatedEvent(
                     product.getId(),
                     product.getName(),
                     currentStock,
-                    newStock
-            ));
+                    newStock));
         }
 
         TransactionEntity transaction = transactionService.createTransaction(
-                request.getTransaction(), TransactionType.SALE, idempotencyKey
-        );
+                request.getTransaction(), TransactionType.SALE, idempotencyKey);
 
         SaleEntity sale = saleMapper.toEntity(request);
         sale.setTransaction(transaction);
@@ -127,7 +119,7 @@ public class SaleService {
                 .and(SaleSpecification.byEndDate(filterRequest.getEndDate()))
                 .and(SaleSpecification.byStartDate(filterRequest.getStartDate()))
                 .and(SaleSpecification.byPaymentMethod(filterRequest.getPaymentMethod()))
-                .and(SaleSpecification.byTotalRange(filterRequest.getMinPrice(),  filterRequest.getMaxPrice()));
+                .and(SaleSpecification.byTotalRange(filterRequest.getMinPrice(), filterRequest.getMaxPrice()));
 
         Page<SaleEntity> saleEntities = saleRepository.findAll(specification, pageable);
         return saleEntities.map(saleMapper::toResponseDTO);
@@ -145,6 +137,12 @@ public class SaleService {
 
         TransactionEntity transactionEntity = saleEntity.getTransaction();
         return transactionMapper.toDto(transactionEntity);
+    }
+
+    public SaleResponse findByIdAndUserId(Long id, Long userId) {
+        SaleEntity saleEntity = saleRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new NotFoundException("Sale with ID " + id + " not found for the user"));
+        return saleMapper.toResponseDTO(saleEntity);
     }
 
     public SaleResponse updateSalePartial(Long id, SaleRequest saleRequest) {

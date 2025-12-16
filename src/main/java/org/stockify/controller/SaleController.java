@@ -27,6 +27,7 @@ import org.stockify.dto.request.sale.SaleRequest;
 import org.stockify.dto.response.SaleResponse;
 import org.stockify.model.assembler.SaleModelAssembler;
 import org.stockify.model.service.SaleService;
+import org.stockify.security.model.entity.CredentialsEntity;
 
 @RestController
 @RequestMapping("/sales")
@@ -46,10 +47,28 @@ public class SaleController {
                         @ApiResponse(responseCode = "200", description = "Paged list of sales retrieved", content = @Content(schema = @Schema(implementation = PagedModel.class)))
         })
         @GetMapping
-        @PreAuthorize("isAuthenticated()")
+        @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('GENERATE_REPORTS')")
         public ResponseEntity<PagedModel<EntityModel<SaleResponse>>> getAll(
-                        @Parameter(description = "Filter request object")
-                        @ParameterObject SaleFilterRequest filterRequest,
+                        @Parameter(description = "Filter request object") @ParameterObject SaleFilterRequest filterRequest,
+
+                        @Parameter(description = "Page number (0..N)", example = "0") @RequestParam(required = false, defaultValue = "0") int page,
+
+                        @Parameter(description = "Page size", example = "20") @RequestParam(required = false, defaultValue = "20") int size,
+                        PagedResourcesAssembler<SaleResponse> assembler) {
+
+                Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+                Page<SaleResponse> saleResponsePage = saleService.findAll(filterRequest, pageable);
+
+                return ResponseEntity.ok(assembler.toModel(saleResponsePage, saleModelAssembler));
+        }
+
+        @Operation(summary = "Get my sales", description = "Returns a paginated list of sales for the authenticated user", responses = {
+                        @ApiResponse(responseCode = "200", description = "Paged list of sales retrieved", content = @Content(schema = @Schema(implementation = PagedModel.class)))
+        })
+        @GetMapping("/mySales")
+        @PreAuthorize("isAuthenticated()")
+        public ResponseEntity<PagedModel<EntityModel<SaleResponse>>> getSalesByUser(
+                        @Parameter(description = "Filter request object") @ParameterObject SaleFilterRequest filterRequest,
                         org.springframework.security.core.Authentication authentication,
 
                         @Parameter(description = "Page number (0..N)", example = "0")
@@ -59,20 +78,33 @@ public class SaleController {
                         @RequestParam(required = false, defaultValue = "20") int size,
                         PagedResourcesAssembler<SaleResponse> assembler) {
 
-                boolean isAdminOrReporter = authentication.getAuthorities().stream()
-                                .anyMatch(a -> a.getAuthority().equals("ADMIN")
-                                                || a.getAuthority().equals("GENERATE_REPORTS"));
-
-                if (!isAdminOrReporter) {
-                        org.stockify.security.model.entity.CredentialsEntity credentials = (org.stockify.security.model.entity.CredentialsEntity) authentication
-                                        .getPrincipal();
-                        filterRequest.setUserId(credentials.getUser().getId());
-                }
+                CredentialsEntity credentials = (CredentialsEntity) authentication.getPrincipal();
+                filterRequest.setUserId(credentials.getUser().getId());
 
                 Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
                 Page<SaleResponse> saleResponsePage = saleService.findAll(filterRequest, pageable);
 
                 return ResponseEntity.ok(assembler.toModel(saleResponsePage, saleModelAssembler));
+        }
+
+        @Operation(
+                summary = "Get my sale by ID",
+                description = "Returns a single sale by its ID if it belongs to the authenticated user",
+                responses = {
+                        @ApiResponse(responseCode = "200", description = "Sale found", content = @Content(schema = @Schema(implementation = SaleResponse.class))),
+                        @ApiResponse(responseCode = "404", description = "Sale not found", content = @Content)})
+        @GetMapping("/mySales/{saleID}")
+        @PreAuthorize("isAuthenticated()")
+        public ResponseEntity<EntityModel<SaleResponse>> getSaleByUser(
+                        @Parameter(description = "Sale ID", required = true, example = "1")
+                        @PathVariable Long saleID,
+                        org.springframework.security.core.Authentication authentication) {
+
+                CredentialsEntity credentials = (CredentialsEntity) authentication.getPrincipal();
+                Long userId = credentials.getUser().getId();
+
+                SaleResponse saleResponse = saleService.findByIdAndUserId(saleID, userId);
+                return ResponseEntity.ok(saleModelAssembler.toModel(saleResponse));
         }
 
         @Operation(

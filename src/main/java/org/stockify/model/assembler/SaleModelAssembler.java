@@ -16,7 +16,7 @@ public class SaleModelAssembler implements RepresentationModelAssembler<SaleResp
     public EntityModel<SaleResponse> toModel(SaleResponse saleResponse) {
         return EntityModel.of(saleResponse,
                 linkTo(methodOn(SaleController.class).getSaleById(saleResponse.getId())).withSelfRel(),
-                linkTo(methodOn(SaleController.class).getAll(new SaleFilterRequest(), null, 0, 20, null)).withRel("users"),
+                linkTo(methodOn(SaleController.class).getAll(new SaleFilterRequest(), 0, 20, null)).withRel("users"),
                 linkTo(methodOn(SaleController.class).deleteSaleById(saleResponse.getId())).withRel("delete"),
                 linkTo(methodOn(SaleController.class).putSale(saleResponse.getId(), null)).withRel("update"),
                 linkTo(methodOn(SaleController.class).patchSale(saleResponse.getId(), null)).withRel("partial-update"));

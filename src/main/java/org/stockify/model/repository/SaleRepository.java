@@ -14,46 +14,54 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 @Repository
-public interface SaleRepository extends JpaRepository<SaleEntity,Long>, JpaSpecificationExecutor<SaleEntity> {
+public interface SaleRepository extends JpaRepository<SaleEntity, Long>, JpaSpecificationExecutor<SaleEntity> {
 
-    @EntityGraph(attributePaths = {
-            "transaction",
-            "transaction.paymentDetail",
-            "transaction.detailTransactions",
-            "transaction.detailTransactions.product"
-    })
-    Optional<SaleEntity> findFirstByUser_IdAndTransaction_PaymentStatusAndTransaction_TypeOrderByTransaction_DateTimeDesc(
-            Long userId,
-            PaymentStatus paymentStatus,
-            TransactionType type
-    );
+        @EntityGraph(attributePaths = {
+                        "transaction",
+                        "transaction.paymentDetail",
+                        "transaction.detailTransactions",
+                        "transaction.detailTransactions.product"
+        })
+        Optional<SaleEntity> findFirstByUser_IdAndTransaction_PaymentStatusAndTransaction_TypeOrderByTransaction_DateTimeDesc(
+                        Long userId,
+                        PaymentStatus paymentStatus,
+                        TransactionType type);
 
-    @Override
-    @EntityGraph(attributePaths = {
-            "transaction",
-            "transaction.paymentDetail",
-            "transaction.detailTransactions",
-            "transaction.detailTransactions.product",
-            "user"
-    })
-    Page<SaleEntity> findAll(Pageable pageable);
+        @Override
+        @EntityGraph(attributePaths = {
+                        "transaction",
+                        "transaction.paymentDetail",
+                        "transaction.detailTransactions",
+                        "transaction.detailTransactions.product",
+                        "user"
+        })
+        Page<SaleEntity> findAll(Pageable pageable);
 
-    @Override
-    @EntityGraph(attributePaths = {
-            "transaction",
-            "transaction.paymentDetail",
-            "transaction.detailTransactions",
-            "transaction.detailTransactions.product",
-            "user"
-    })
-    Optional<SaleEntity> findById(Long aLong);
+        @Override
+        @EntityGraph(attributePaths = {
+                        "transaction",
+                        "transaction.paymentDetail",
+                        "transaction.detailTransactions",
+                        "transaction.detailTransactions.product",
+                        "user"
+        })
+        Optional<SaleEntity> findById(Long aLong);
 
-    @EntityGraph(attributePaths = {
-            "transaction",
-            "transaction.paymentDetail",
-            "transaction.detailTransactions",
-            "transaction.detailTransactions.product",
-            "user"
-    })
-    Page<SaleEntity> findAll(Specification<SaleEntity> spec, Pageable pageable);
+        @EntityGraph(attributePaths = {
+                        "transaction",
+                        "transaction.paymentDetail",
+                        "transaction.detailTransactions",
+                        "transaction.detailTransactions.product",
+                        "user"
+        })
+        Page<SaleEntity> findAll(Specification<SaleEntity> spec, Pageable pageable);
+
+        @EntityGraph(attributePaths = {
+                        "transaction",
+                        "transaction.paymentDetail",
+                        "transaction.detailTransactions",
+                        "transaction.detailTransactions.product",
+                        "user"
+        })
+        Optional<SaleEntity> findByIdAndUserId(Long id, Long userId);
 }
