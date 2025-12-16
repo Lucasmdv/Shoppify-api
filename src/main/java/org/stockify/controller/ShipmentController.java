@@ -54,7 +54,7 @@ public class ShipmentController {
             }
     )
     @GetMapping
-    @PreAuthorize("hasAuthority('READ')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER') or hasAuthority('READ')")
     public ResponseEntity<PagedModel<EntityModel<ShipmentResponse>>> getAll(
             @Parameter(description = "Filter request object")
             @ParameterObject ShipmentFilterRequest filterRequest,
@@ -85,7 +85,7 @@ public class ShipmentController {
             }
     )
     @GetMapping("/{shipmentID}")
-    @PreAuthorize("hasAuthority('READ')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER') or hasAuthority('READ')")
     public ResponseEntity<EntityModel<ShipmentResponse>> getOrderById(
             @Parameter(description = "Order ID", required = true, example = "1")
             @PathVariable Long shipmentID) {
