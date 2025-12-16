@@ -47,6 +47,8 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**", "/credentials/**", "/swagger-ui/**", "/swagger-ui.html",
                                 "/v3/api-docs/**", "/user/register")
                         .permitAll()
+                        .requestMatchers(HttpMethod.POST, "/mercadopago/webhook", "/api/mercadopago/webhook").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/products/**", "/categories/**", "/stores/**").permitAll()
                         .anyRequest().authenticated())
                 .cors(Customizer.withDefaults())

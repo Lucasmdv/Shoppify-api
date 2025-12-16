@@ -13,6 +13,7 @@ import com.mercadopago.resources.preference.Preference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.stockify.dto.request.sale.SaleRequest;
@@ -28,6 +29,7 @@ import org.stockify.util.PriceCalculator;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -145,6 +147,59 @@ public class MercadoPagoService {
                 .build();
     }
 
+    public ResponseEntity<String> handleWebhook(Map<String, String> params,
+            Map<String, Object> body,
+            String xSignature,
+            String xRequestId) {
+
+        String dataId = params.get("data.id");
+        String action = params.get("action");
+        String topic = params.get("type");
+
+        if (body != null) {
+            if (dataId == null) {
+                dataId = extractDataId(body);
+            }
+            if (action == null) {
+                action = (String) body.get("action");
+            }
+            if (topic == null) {
+                topic = (String) body.get("type");
+            }
+        }
+
+        if (topic == null && action != null && action.startsWith("payment")) {
+            topic = "payment";
+        }
+
+        try {
+            String paymentId = dataId;
+
+            log.info("Notificacion recibida - Tipo: {}, ID de pago: {}", topic, paymentId);
+            if (paymentId != null) {
+                try {
+                    processWebhookNotification(topic, paymentId);
+                    return ResponseEntity.ok("Notificacion recibida correctamente");
+                } catch (RuntimeException e) {
+                    String msg = e.getMessage();
+                    if (msg != null && (msg.contains("No se pudo encontrar el pago")
+                            || msg.contains("Payment not found"))) {
+                        log.warn("Pago no encontrado o invalido, deteniendo reintentos: {}", msg);
+                        return ResponseEntity.ok("Notificacion procesada (Pago no encontrado)");
+                    }
+                    log.warn("Error de negocio al procesar webhook: {}", msg);
+                    return ResponseEntity.ok("Notificacion recibida (Error de negocio)");
+                }
+            }
+
+            log.warn("ID de pago no proporcionado en webhook. Se responde 200 para cortar reintentos.");
+            return ResponseEntity.ok("Notificacion recibida sin ID de pago");
+        } catch (Exception e) {
+            log.error("Error al procesar notificacion de webhook", e);
+            return ResponseEntity.ok("Notificacion recibida (error interno)");
+        }
+    }
+
     public void processWebhookNotification(String topic, String id) {
         if (!"payment".equals(topic))
             return;
@@ -188,8 +243,14 @@ public class MercadoPagoService {
             }
 
         } catch (MPApiException e) {
-            log.error("MercadoPago API Error: {}", e.getApiResponse().getContent());
-            throw new RuntimeException("Error fetching payment from MercadoPago", e);
+            int status = e.getStatusCode();
+            String content = e.getApiResponse() != null ? e.getApiResponse().getContent() : e.getMessage();
+            if (status == 404 || (content != null && content.contains("Payment not found"))) {
+                log.warn("Payment not found for ID {}. Ignoring webhook to avoid retries. Response: {}", id, content);
+                return;
+            }
+            log.error("MercadoPago API Error: {}", content);
+            throw new RuntimeException("Error fetching payment from MercadoPago: " + content, e);
         } catch (MPException e) {
             log.error("MercadoPago Error: {}", e.getMessage());
             throw new RuntimeException("Error processing webhook", e);
@@ -213,5 +274,18 @@ public class MercadoPagoService {
             case "refunded", "charged_back" -> PaymentStatus.REFUNDED;
             default -> PaymentStatus.PENDING;
         };
+    }
+
+    private String extractDataId(Map<String, Object> body) {
+        Object dataObj = body.get("data");
+        if (dataObj instanceof Map<?, ?> dataMap) {
+            Object idObj = dataMap.get("id");
+            if (idObj instanceof String) {
+                return (String) idObj;
+            } else if (idObj != null) {
+                return String.valueOf(idObj);
+            }
+        }
+        return null;
     }
 }
