@@ -23,7 +23,10 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "transactions")
+@Table(name = "transactions",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"idempotency_key", "payment_status"})
+        })
 @Audited
 public class TransactionEntity {
     @Id
@@ -50,6 +53,8 @@ public class TransactionEntity {
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
 
+    @Column(name = "idempotency_key", length = 128)
+    private String idempotencyKey;
 
 
 

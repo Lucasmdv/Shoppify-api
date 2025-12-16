@@ -50,6 +50,10 @@ public class SaleService {
     private final ApplicationEventPublisher eventPublisher;
 
     public SaleResponse createSale(SaleRequest request) {
+        return createSale(request, null);
+    }
+
+    public SaleResponse createSale(SaleRequest request, String idempotencyKey) {
         if (request.getTransaction() == null || request.getTransaction().getDetailTransactions() == null
                 || request.getTransaction().getDetailTransactions().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sale requires at least one product detail");
@@ -86,7 +90,7 @@ public class SaleService {
         }
 
         TransactionEntity transaction = transactionService.createTransaction(
-                request.getTransaction(), TransactionType.SALE
+                request.getTransaction(), TransactionType.SALE, idempotencyKey
         );
 
         SaleEntity sale = saleMapper.toEntity(request);
@@ -162,6 +166,5 @@ public class SaleService {
         return saleMapper.toResponseDTO(updatedSale);
     }
 }
-
 
 

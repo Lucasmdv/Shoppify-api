@@ -15,13 +15,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.server.ResponseStatusException;
 import org.stockify.dto.request.sale.SaleRequest;
+import org.stockify.dto.response.MercadoPagoPreferenceResponse;
 import org.stockify.dto.response.SaleResponse;
 import org.stockify.dto.request.transaction.DetailTransactionRequest;
+import org.stockify.model.entity.DetailTransactionEntity;
 import org.stockify.model.entity.ProductEntity;
 import org.stockify.model.entity.TransactionEntity;
 import org.stockify.model.enums.PaymentStatus;
+import org.stockify.model.enums.TransactionType;
 import org.stockify.model.exception.NotFoundException;
 import org.stockify.model.repository.ProductRepository;
 import org.stockify.model.repository.TransactionRepository;
@@ -30,6 +34,10 @@ import org.stockify.util.PriceCalculator;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Comparator;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +59,7 @@ public class MercadoPagoService {
     private final TransactionService transactionService;
     private final PriceCalculator priceCalculator;
 
-    public Preference createPreference(SaleRequest request) {
+    public MercadoPagoPreferenceResponse createPreference(SaleRequest request) {
         if (request == null || request.getTransaction() == null ||
                 request.getTransaction().getDetailTransactions() == null ||
                 request.getTransaction().getDetailTransactions().isEmpty()) {
@@ -59,8 +67,24 @@ public class MercadoPagoService {
                     "Transaction with products is required to create a Mercado Pago preference");
         }
 
-        SaleResponse saleResponse = saleService.createSale(request);
-        Long transactionId = saleResponse.getTransaction().getId();
+        String idempotencyKey = generateIdempotencyKey(request);
+        Long transactionId;
+        TransactionEntity transactionToUse = null;
+        try {
+            SaleResponse saleResponse = saleService.createSale(request, idempotencyKey);
+            transactionId = saleResponse.getTransaction().getId();
+        } catch (DataIntegrityViolationException e) {
+            // Ya existe una transaccion PENDING con la misma key: reutilizarla
+            transactionToUse = transactionRepository
+                    .findFirstByIdempotencyKeyAndPaymentStatusAndType(
+                            idempotencyKey,
+                            PaymentStatus.PENDING,
+                            TransactionType.SALE)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT,
+                            "Existing pending transaction not found for idempotency key"));
+            transactionId = transactionToUse.getId();
+            log.info("Reusing pending transaction {} with idempotencyKey {}", transactionId, idempotencyKey);
+        }
 
         // Intentar obtener el email del usuario desde el SecurityContext
         String userEmail = null;
@@ -77,9 +101,11 @@ public class MercadoPagoService {
             log.debug("No se pudo obtener email del Contexto de Seguridad: {}", e.getMessage());
         }
 
-        List<PreferenceItemRequest> items = request.getTransaction().getDetailTransactions().stream()
-                .map(this::buildItem)
-                .toList();
+        List<PreferenceItemRequest> items = transactionToUse != null
+                ? buildItemsFromTransaction(transactionToUse)
+                : request.getTransaction().getDetailTransactions().stream()
+                        .map(this::buildItem)
+                        .toList();
 
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
                 .success(SUCCESS_URL)
@@ -93,7 +119,6 @@ public class MercadoPagoService {
                 .autoReturn("approved")
                 .externalReference(String.valueOf(transactionId));
 
-        // Si obtuvimos email, añadirlo como payer en la preference
         if (userEmail != null && !userEmail.isBlank()) {
             preferenceRequestBuilder.payer(PreferencePayerRequest.builder().email(userEmail).build());
         }
@@ -106,7 +131,13 @@ public class MercadoPagoService {
         PreferenceRequest preferenceRequest = preferenceRequestBuilder.build();
 
         try {
-            return new PreferenceClient().create(preferenceRequest);
+            Preference preference = new PreferenceClient().create(preferenceRequest);
+            return new MercadoPagoPreferenceResponse(
+                    preference.getId(),
+                    preference.getInitPoint(),
+                    preference.getSandboxInitPoint(),
+                    transactionId
+            );
         } catch (MPApiException e) {
             String apiMessage = e.getApiResponse() != null ? e.getApiResponse().getContent() : e.getMessage();
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
@@ -115,6 +146,39 @@ public class MercadoPagoService {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
                     "Error creating Mercado Pago preference: " + e.getMessage(), e);
         }
+    }
+
+    private String generateIdempotencyKey(SaleRequest request) {
+        String userPart = request.getUserId() != null ? String.valueOf(request.getUserId()) : "anon";
+
+        String itemsPart = request.getTransaction().getDetailTransactions().stream()
+                .sorted(Comparator.comparing(DetailTransactionRequest::getProductID))
+                .map(d -> d.getProductID() + ":" + (d.getQuantity() == null ? 1 : d.getQuantity()))
+                .collect(java.util.stream.Collectors.joining("|"));
+
+        String canonical = userPart + "|" + itemsPart;
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(canonical.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder();
+            for (byte b : hash) {
+                hex.append(String.format("%02x", b));
+            }
+            return hex.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 not available", e);
+        }
+    }
+
+    private List<PreferenceItemRequest> buildItemsFromTransaction(TransactionEntity transaction) {
+        if (transaction.getDetailTransactions() == null || transaction.getDetailTransactions().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Existing transaction has no details to build a preference");
+        }
+
+        return transaction.getDetailTransactions().stream()
+                .map(this::buildItem)
+                .toList();
     }
 
     private PreferenceItemRequest buildItem(DetailTransactionRequest detail) {
@@ -145,6 +209,16 @@ public class MercadoPagoService {
                 .currencyId(DEFAULT_CURRENCY)
                 .unitPrice(unitPrice)
                 .build();
+    }
+
+    private PreferenceItemRequest buildItem(DetailTransactionEntity detail) {
+        ProductEntity product = detail.getProduct();
+        if (product == null || product.getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Product information missing in existing transaction detail");
+        }
+        DetailTransactionRequest request = new DetailTransactionRequest(product.getId(), detail.getQuantity());
+        return buildItem(request);
     }
 
     public ResponseEntity<String> handleWebhook(Map<String, String> params,

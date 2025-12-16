@@ -50,6 +50,10 @@ public class TransactionService {
     }
 
     public TransactionEntity createTransaction(TransactionRequest request, TransactionType type) {
+        return createTransaction(request, type, null);
+    }
+
+    public TransactionEntity createTransaction(TransactionRequest request, TransactionType type, String idempotencyKey) {
 
         TransactionEntity transactionEntity = transactionMapper.toEntity(request);
         transactionEntity.setStore(resolveDefaultStore());
@@ -77,6 +81,7 @@ public class TransactionService {
         transactionEntity.setDescription(request.getDescription());
         transactionEntity.setType(type);
         transactionEntity.setPaymentStatus(PaymentStatus.PENDING);
+        transactionEntity.setIdempotencyKey(idempotencyKey);
 
         return transactionRepository.save(transactionEntity);
     }

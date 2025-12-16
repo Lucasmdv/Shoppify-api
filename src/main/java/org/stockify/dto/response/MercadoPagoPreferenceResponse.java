@@ -20,4 +20,7 @@ public class MercadoPagoPreferenceResponse {
 
     @Schema(description = "Sandbox init point URL")
     private String sandboxInitPoint;
+
+    @Schema(description = "Internal transaction identifier")
+    private Long transactionId;
 }

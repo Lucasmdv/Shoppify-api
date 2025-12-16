@@ -1,6 +1,5 @@
 package org.stockify.controller.payment;
 
-import com.mercadopago.resources.preference.Preference;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,12 +35,7 @@ public class MercadoPagoController {
     @PostMapping("/preferences")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MercadoPagoPreferenceResponse> createPreference(@Valid @RequestBody SaleRequest request) {
-        Preference preference = mercadoPagoService.createPreference(request);
-
-        MercadoPagoPreferenceResponse response = new MercadoPagoPreferenceResponse(
-                preference.getId(),
-                preference.getInitPoint(),
-                preference.getSandboxInitPoint());
+        MercadoPagoPreferenceResponse response = mercadoPagoService.createPreference(request);
         return ResponseEntity.ok(response);
     }
 
