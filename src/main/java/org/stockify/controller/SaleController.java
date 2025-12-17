@@ -88,26 +88,6 @@ public class SaleController {
         }
 
         @Operation(
-                summary = "Get my sale by ID",
-                description = "Returns a single sale by its ID if it belongs to the authenticated user",
-                responses = {
-                        @ApiResponse(responseCode = "200", description = "Sale found", content = @Content(schema = @Schema(implementation = SaleResponse.class))),
-                        @ApiResponse(responseCode = "404", description = "Sale not found", content = @Content)})
-        @GetMapping("/mySales/{saleID}")
-        @PreAuthorize("isAuthenticated()")
-        public ResponseEntity<EntityModel<SaleResponse>> getSaleByUser(
-                        @Parameter(description = "Sale ID", required = true, example = "1")
-                        @PathVariable Long saleID,
-                        org.springframework.security.core.Authentication authentication) {
-
-                CredentialsEntity credentials = (CredentialsEntity) authentication.getPrincipal();
-                Long userId = credentials.getUser().getId();
-
-                SaleResponse saleResponse = saleService.findByIdAndUserId(saleID, userId);
-                return ResponseEntity.ok(saleModelAssembler.toModel(saleResponse));
-        }
-
-        @Operation(
                 summary = "Get sale by ID",
                 description = "Returns a single sale by its ID",
                 responses = {
@@ -115,7 +95,7 @@ public class SaleController {
                         @ApiResponse(responseCode = "404", description = "Sale not found", content = @Content)
         })
         @GetMapping("/{saleID}")
-        @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('GENERATE_REPORTS')")
+        @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('GENERATE_REPORTS') or @securityRules.isSaleOwner(authentication, #saleID)")
         public ResponseEntity<EntityModel<SaleResponse>> getSaleById(
                         @Parameter(description = "Sale ID", required = true, example = "1")
                         @PathVariable Long saleID) {

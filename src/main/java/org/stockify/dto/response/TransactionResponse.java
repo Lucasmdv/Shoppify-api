@@ -2,6 +2,7 @@ package org.stockify.dto.response;
 
 import lombok.Value;
 import org.stockify.model.enums.PaymentMethod;
+import org.stockify.model.enums.PaymentStatus;
 import org.stockify.model.enums.TransactionType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -33,6 +34,8 @@ public class TransactionResponse {
 
     @Schema(description = "Detail of the payment received for this transaction")
     PaymentDetailResponse paymentDetail;
+
+    PaymentStatus paymentStatus;
 
     @Schema(description = "Name of the store where the transaction took place", example = "Downtown Store")
     String storeName;
