@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.UUID;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -53,8 +54,8 @@ public class MercadoPagoService {
 
     private static final String FRONTEND_BASE = System.getenv().getOrDefault("FRONTEND_URL", "localhost:4200");
     private static final String DEFAULT_CURRENCY = "ARS";
-    private static final String SUCCESS_URL = FRONTEND_BASE + "/auth/checkout/success";
-    private static final String PENDING_URL = FRONTEND_BASE + "/auth/checkout/pending";
+    private static final String SUCCESS_URL = FRONTEND_BASE + "/purchase/";
+    private static final String PENDING_URL = FRONTEND_BASE + "/cart/checkout";
     // DEFAULT
     // private static final String FAILURE_URL = FRONTEND_BASE +
     // "/auth/checkout/failure";
@@ -78,10 +79,41 @@ public class MercadoPagoService {
 
         String idempotencyKey = generateIdempotencyKey(request);
         Long transactionId;
-        TransactionEntity transactionToUse = null;
+        TransactionEntity transactionToUse = transactionRepository
+                .findFirstByIdempotencyKeyAndPaymentStatusAndType(
+                        idempotencyKey,
+                        PaymentStatus.PENDING,
+                        TransactionType.SALE)
+                .orElse(null);
+
+        boolean keyUsedByClosedTransaction = transactionRepository
+                .existsByIdempotencyKeyAndTypeAndPaymentStatusIn(
+                        idempotencyKey,
+                        TransactionType.SALE,
+                        List.of(
+                                PaymentStatus.APPROVED,
+                                PaymentStatus.CANCELLED,
+                                PaymentStatus.REJECTED,
+                                PaymentStatus.REFUNDED
+                        ));
+
+        if (transactionToUse != null && keyUsedByClosedTransaction) {
+            log.info("Found PENDING transaction with key {} but there is already a closed transaction with same key. Creating a new transaction with a fresh key.", idempotencyKey);
+            transactionToUse = null;
+            idempotencyKey = idempotencyKey + ":" + UUID.randomUUID();
+        }
         try {
-            SaleResponse saleResponse = saleService.createSale(request, idempotencyKey);
-            transactionId = saleResponse.getTransaction().getId();
+            if (transactionToUse != null) {
+                transactionId = transactionToUse.getId();
+                log.info("Reusing pending transaction {} with idempotencyKey {}", transactionId, idempotencyKey);
+            } else {
+                if (keyUsedByClosedTransaction) {
+                    idempotencyKey = idempotencyKey + ":" + UUID.randomUUID();
+                    log.info("Idempotency key already used by a closed transaction, generating new key {}", idempotencyKey);
+                }
+                SaleResponse saleResponse = saleService.createSale(request, idempotencyKey);
+                transactionId = saleResponse.getTransaction().getId();
+            }
         } catch (DataIntegrityViolationException e) {
             // Ya existe una transaccion PENDING con la misma key: reutilizarla
             transactionToUse = transactionRepository
@@ -323,6 +355,24 @@ public class MercadoPagoService {
         if (mappedMethod != null) {
             transaction.setPaymentMethod(mappedMethod);
         }
+        boolean statusChanged = oldStatus != newStatus;
+        if (statusChanged && newStatus != null && transaction.getType() != null) {
+            boolean sameStatusSameKeyExists = transactionRepository
+                    .existsByIdempotencyKeyAndPaymentStatusAndTypeAndIdNot(
+                            transaction.getIdempotencyKey(),
+                            newStatus,
+                            transaction.getType(),
+                            transaction.getId());
+            if (sameStatusSameKeyExists) {
+                String originalKey = transaction.getIdempotencyKey();
+                String newKey = originalKey + ":" + UUID.randomUUID();
+                transaction.setIdempotencyKey(newKey);
+                log.warn("Idempotency key {} already used by another transaction in status {}. " +
+                                "Assigning new key {} to avoid constraint violation.",
+                        originalKey, newStatus, newKey);
+            }
+        }
+
         transactionRepository.save(transaction);
 
             log.info("Updated transaction {} status to {}", transactionId, newStatus);

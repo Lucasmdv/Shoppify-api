@@ -7,6 +7,7 @@ import org.stockify.model.entity.TransactionEntity;
 import org.stockify.model.enums.PaymentStatus;
 import org.stockify.model.enums.TransactionType;
 
+import java.util.Collection;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -23,5 +24,18 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             String idempotencyKey,
             PaymentStatus paymentStatus,
             TransactionType type
+    );
+
+    boolean existsByIdempotencyKeyAndTypeAndPaymentStatusIn(
+            String idempotencyKey,
+            TransactionType type,
+            Collection<PaymentStatus> statuses
+    );
+
+    boolean existsByIdempotencyKeyAndPaymentStatusAndTypeAndIdNot(
+            String idempotencyKey,
+            PaymentStatus paymentStatus,
+            TransactionType type,
+            Long id
     );
 }
