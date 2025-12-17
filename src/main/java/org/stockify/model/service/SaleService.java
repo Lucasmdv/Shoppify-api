@@ -15,10 +15,7 @@ import org.stockify.dto.request.shipment.ShipmentRequest;
 import org.stockify.dto.request.transaction.DetailTransactionRequest;
 import org.stockify.dto.response.SaleResponse;
 import org.stockify.dto.response.TransactionResponse;
-import org.stockify.model.entity.ShipmentEntity;
-import org.stockify.model.entity.ProductEntity;
-import org.stockify.model.entity.SaleEntity;
-import org.stockify.model.entity.TransactionEntity;
+import org.stockify.model.entity.*;
 import org.stockify.model.enums.TransactionType;
 import org.stockify.model.event.ProductStockUpdatedEvent;
 import org.stockify.model.exception.InsufficientStockException;
@@ -46,7 +43,6 @@ public class SaleService {
     private final SaleRepository saleRepository;
     private final TransactionMapper transactionMapper;
     private final ProductRepository productRepository;
-    private final ShipmentService shipmentService;
     private final ApplicationEventPublisher eventPublisher;
 
     public SaleResponse createSale(SaleRequest request) {
@@ -101,10 +97,26 @@ public class SaleService {
                     .orElseThrow(() -> new NotFoundException("User not found with ID " + request.getUserId())));
         }
 
-        productRepository.saveAll(productsToUpdate);
-
-        sale.setShipment(shipmentService.mapShipment(request.getShipment(), sale));
         productRepository.saveAll(productsToUpdate); // Se guardan todos los cambios de stock
+
+        if (request.getShipment() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Shipping information is required");
+        }
+
+        if (Boolean.FALSE.equals(request.getShipment().getPickup())
+                && (request.getShipment().getAdress() == null
+                || request.getShipment().getAdress().isBlank())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Address is required when pickup is false"
+            );
+        }
+        ShippingInfoEntity info = new ShippingInfoEntity();
+        info.setPickup(request.getShipment().getPickup());
+        info.setAdress(request.getShipment().getAdress());
+        info.setSale(sale);
+        sale.setShippingInfo(info);
+
         SaleEntity saved = saleRepository.save(sale);
 
         SaleResponse saleResponse = saleMapper.toResponseDTO(saved);

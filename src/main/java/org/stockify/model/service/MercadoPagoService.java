@@ -10,6 +10,7 @@ import com.mercadopago.exceptions.MPApiException;
 import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.payment.Payment;
 import com.mercadopago.resources.preference.Preference;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,10 +22,8 @@ import org.stockify.dto.request.sale.SaleRequest;
 import org.stockify.dto.response.MercadoPagoPreferenceResponse;
 import org.stockify.dto.response.SaleResponse;
 import org.stockify.dto.request.transaction.DetailTransactionRequest;
-import org.stockify.model.entity.DetailTransactionEntity;
-import org.stockify.model.entity.PaymentDetailEntity;
-import org.stockify.model.entity.ProductEntity;
-import org.stockify.model.entity.TransactionEntity;
+import org.stockify.model.entity.*;
+import org.stockify.model.enums.OrderStatus;
 import org.stockify.model.enums.PaymentMethod;
 import org.stockify.model.enums.PaymentStatus;
 import org.stockify.model.enums.TransactionType;
@@ -34,6 +33,7 @@ import org.stockify.model.repository.TransactionRepository;
 import org.stockify.util.PriceCalculator;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.time.LocalDateTime;
@@ -62,6 +62,7 @@ public class MercadoPagoService {
     private final SaleService saleService;
     private final TransactionService transactionService;
     private final PriceCalculator priceCalculator;
+    private final ShipmentService shipmentService;
 
     public MercadoPagoPreferenceResponse createPreference(SaleRequest request) {
         if (request == null || request.getTransaction() == null ||
@@ -324,8 +325,9 @@ public class MercadoPagoService {
             if (isFailureStatus(newStatus)) {
                 log.info("Payment failed for transaction {}. Restoring stock...", transactionId);
                 transactionService.restoreStock(transaction);
+            }else {
+                shipmentService.createShipmentIfNeeded(transaction);
             }
-
         } catch (MPApiException e) {
             int status = e.getStatusCode();
             String content = e.getApiResponse() != null ? e.getApiResponse().getContent() : e.getMessage();

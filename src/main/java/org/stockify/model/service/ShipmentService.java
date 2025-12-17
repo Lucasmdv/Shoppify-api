@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.stockify.dto.request.product.ProductRequest;
+import org.stockify.dto.request.sale.SaleRequest;
 import org.stockify.dto.request.shipment.ShipmentFilterRequest;
 import org.stockify.dto.request.shipment.ShipmentRequest;
 import org.stockify.dto.request.shipment.UpdateShipmentRequest;
@@ -32,8 +33,20 @@ public class ShipmentService {
     private final ShipmentMapper shipmentMapper;
     private final ApplicationEventPublisher eventPublisher;
 
-    public ShipmentEntity mapShipment(ShipmentRequest request, SaleEntity sale) {
-        return shipmentMapper.toEntity(request, sale);
+    @Transactional
+    public void createShipmentIfNeeded(TransactionEntity transaction) {
+        SaleEntity sale = transaction.getSale();
+        if (sale == null || sale.getShipment() != null) {
+            return;
+        }
+
+        ShipmentEntity shipment = new ShipmentEntity();
+        shipment.setSale(sale);
+        shipment.setStatus(OrderStatus.PROCESSING);
+        shipment.setStartDate(LocalDate.now());
+        shipment.setPickup(transaction.getSale().getShippingInfo().getPickup());
+        shipment.setAdress(transaction.getSale().getShippingInfo().getAdress());
+        sale.setShipment(shipment);
     }
 
     public void delete(Long id) {

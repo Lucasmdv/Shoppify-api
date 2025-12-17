@@ -25,6 +25,9 @@ public class SaleEntity {
     @OneToOne(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
     private ShipmentEntity shipment;
 
+    @OneToOne(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ShippingInfoEntity shippingInfo;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)

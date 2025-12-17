@@ -140,8 +140,7 @@ public class ShipmentController {
             }
     )
     @PatchMapping("/{shipmentID}")
-    @PreAuthorize("(hasRole('ROLE_ADMIN') and hasAuthority('WRITE') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('WRITE'))")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<EntityModel<ShipmentResponse>> patchOrder(
             @Parameter(description = "Shipment ID", required = true, example = "1")
             @PathVariable Long shipmentID,
