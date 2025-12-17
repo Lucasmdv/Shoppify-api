@@ -24,6 +24,9 @@ public record NotificationResponse(
         @Schema(description = "Related product id when applies", example = "150")
         Long relatedProductId,
 
+        @Schema(description = "Related sale id when applies", example = "1001")
+        Long relatedSaleId,
+
         @Schema(description = "When the notification becomes visible (UTC)", example = "2025-12-31T12:00:00Z")
         Instant publishAt,
 

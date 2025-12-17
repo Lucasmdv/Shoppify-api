@@ -14,4 +14,5 @@ public interface NotificationSummary {
     Boolean getHidden();
     String getIcon();
     Long getRelatedProductId();
+    Long getRelatedSaleId();
 }

@@ -35,6 +35,9 @@ public record NotificationRequest(
         @Schema(description = "Product id related to the notification", example = "150")
         Long relatedProductId,
 
+        @Schema(description = "Sale id related to the notification", example = "451")
+        Long relatedSaleId,
+
         @Schema(description = "When the notification should be published (UTC)", example = "2025-12-31T12:00:00Z")
         @FutureOrPresent(message = "Publish date must be now or in the future")
         Instant publishAt,

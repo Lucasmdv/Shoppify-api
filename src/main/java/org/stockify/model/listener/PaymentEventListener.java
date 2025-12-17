@@ -34,6 +34,7 @@ public class PaymentEventListener {
                 .message(buildMessage(event.newStatus()))
                 .icon(resolveIcon(event.newStatus()))
                 .targetUserId(userId)
+                .relatedSaleId(event.saleId())
                 .build();
 
         notificationService.createNotification(request);

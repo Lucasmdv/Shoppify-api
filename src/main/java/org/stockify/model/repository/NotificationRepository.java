@@ -25,6 +25,7 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
             n.publishAt AS publishAt,
             n.createdAt AS createdAt,
             n.relatedProductId AS relatedProductId,
+            n.relatedSaleId AS relatedSaleId,
             CASE WHEN nr.id IS NOT NULL THEN true ELSE false END AS read,
             CASE WHEN nh.id IS NOT NULL THEN true ELSE false END AS hidden
         FROM NotificationEntity n

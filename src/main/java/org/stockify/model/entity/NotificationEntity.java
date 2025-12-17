@@ -42,4 +42,5 @@ public class NotificationEntity {
     private String icon;
     private Long targetUserId;
     private Long relatedProductId;
+    private Long relatedSaleId;
 }
