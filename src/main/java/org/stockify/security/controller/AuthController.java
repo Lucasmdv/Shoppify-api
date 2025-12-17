@@ -23,6 +23,7 @@ import org.stockify.model.mapper.UserMapper;
 import org.stockify.security.model.entity.CredentialsEntity;
 import org.stockify.security.service.AuthService;
 import org.stockify.security.service.JwtService;
+import org.stockify.model.service.EnvioPackService;
 
 /**
  * REST controller for authentication operations.
@@ -34,156 +35,160 @@ import org.stockify.security.service.JwtService;
 @Tag(name = "Authentication", description = "Operations for user authentication")
 public class AuthController {
 
-    /**
-     * Service for authentication operations
-     */
-    private final AuthService authService;
+        /**
+         * Service for authentication operations
+         */
+        private final AuthService authService;
 
-    /**
-     * Service for JWT token operations
-     */
-    private final JwtService jwtService;
-    private final UserMapper userMapper;
+        /**
+         * Service for JWT token operations
+         */
+        private final JwtService jwtService;
+        private final UserMapper userMapper;
+        private final EnvioPackService envioPackService;
 
-    /**
-     * Constructor for AuthController
-     *
-     * @param authService Service for authentication operations
-     * @param jwtService  Service for JWT token operations
-     */
-    public AuthController(AuthService authService, JwtService jwtService, UserMapper userMapper) {
-        this.authService = authService;
-        this.jwtService = jwtService;
-        this.userMapper = userMapper;
-    }
+        /**
+         * Constructor for AuthController
+         *
+         * @param authService Service for authentication operations
+         * @param jwtService  Service for JWT token operations
+         */
+        public AuthController(AuthService authService, JwtService jwtService, UserMapper userMapper,
+                        EnvioPackService envioPackService) {
+                this.authService = authService;
+                this.jwtService = jwtService;
+                this.userMapper = userMapper;
+                this.envioPackService = envioPackService;
+        }
 
-    /**
-     * Logs out the currently authenticated user
-     *
-     * @return A success message
-     */
-    @PostMapping("/logout")
+        /**
+         * Logs out the currently authenticated user
+         *
+         * @return A success message
+         */
+        @PostMapping("/logout")
     @Operation(
         summary = "Logout the current user",
         description = "Invalidates the current user's session and JWT token",
         security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Logout successful"),
-            @ApiResponse(responseCode = "401", description = "User not authenticated")
-    })
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> logout() {
-        authService.logout();
-        return ResponseEntity.ok("Logout successful");
-    }
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Logout successful"),
+                        @ApiResponse(responseCode = "401", description = "User not authenticated")
+        })
+        @PreAuthorize("isAuthenticated()")
+        public ResponseEntity<String> logout() {
+                authService.logout();
+                return ResponseEntity.ok("Logout successful");
+        }
 
-    /**
-     * Authenticates a user and generates a JWT token
-     *
-     * @param authRequest Request containing username and password
-     * @return Response containing the JWT token
-     */
-    @PostMapping("/login")
+        /**
+         * Authenticates a user and generates a JWT token
+         *
+         * @param authRequest Request containing username and password
+         * @return Response containing the JWT token
+         */
+        @PostMapping("/login")
     @Operation(
         summary = "Authenticate user and get token",
         description = "Validates user credentials and returns a JWT token for authenticated requests")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Authentication successful"),
-            @ApiResponse(responseCode = "401", description = "Invalid credentials"),
-            @ApiResponse(responseCode = "400", description = "Invalid request format")
-    })
-    public ResponseEntity<LoginResponse> login(
-            @Parameter(description = "Authentication credentials") @RequestBody AuthRequest authRequest) {
-        UserDetails userDetails = authService.authenticate(authRequest);
-        String token = jwtService.generateToken(userDetails);
-        org.stockify.security.model.entity.CredentialsEntity cred = (org.stockify.security.model.entity.CredentialsEntity) userDetails;
-        org.stockify.dto.response.UserResponse profile = userMapper.toDto(cred.getUser());
-        // Sanitize potentially sensitive fields for login payload
-        profile.setDni(null);
-        profile.setPhone(null);
-        java.util.Set<String> permits = cred.getRoles().stream()
-                .filter(java.util.Objects::nonNull)
-                .map(org.stockify.security.model.entity.RoleEntity::getPermits)
-                .filter(java.util.Objects::nonNull)
-                .flatMap(java.util.Set::stream)
-                .filter(java.util.Objects::nonNull)
-                .map(p -> p.getPermit())
-                .filter(java.util.Objects::nonNull)
-                .map(Enum::name)
-                .collect(java.util.stream.Collectors.toCollection(java.util.TreeSet::new));
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Authentication successful"),
+                        @ApiResponse(responseCode = "401", description = "Invalid credentials"),
+                        @ApiResponse(responseCode = "400", description = "Invalid request format")
+        })
+        public ResponseEntity<LoginResponse> login(
+                        @Parameter(description = "Authentication credentials") @RequestBody AuthRequest authRequest) {
+                UserDetails userDetails = authService.authenticate(authRequest);
+                String token = jwtService.generateToken(userDetails);
+                org.stockify.security.model.entity.CredentialsEntity cred = (org.stockify.security.model.entity.CredentialsEntity) userDetails;
+                org.stockify.dto.response.UserResponse profile = userMapper.toDto(cred.getUser());
+                // Sanitize potentially sensitive fields for login payload
+                profile.setDni(null);
+                profile.setPhone(null);
+                java.util.Set<String> permits = cred.getRoles().stream()
+                                .filter(java.util.Objects::nonNull)
+                                .map(org.stockify.security.model.entity.RoleEntity::getPermits)
+                                .filter(java.util.Objects::nonNull)
+                                .flatMap(java.util.Set::stream)
+                                .filter(java.util.Objects::nonNull)
+                                .map(p -> p.getPermit())
+                                .filter(java.util.Objects::nonNull)
+                                .map(Enum::name)
+                                .collect(java.util.stream.Collectors.toCollection(java.util.TreeSet::new));
 
-        java.util.Set<String> roles = cred.getRoles().stream()
-                .filter(java.util.Objects::nonNull)
-                .map(org.stockify.security.model.entity.RoleEntity::getName)
-                .filter(java.util.Objects::nonNull)
-                .map(String::toUpperCase)
-                .collect(java.util.stream.Collectors.toCollection(java.util.TreeSet::new));
+                java.util.Set<String> roles = cred.getRoles().stream()
+                                .filter(java.util.Objects::nonNull)
+                                .map(org.stockify.security.model.entity.RoleEntity::getName)
+                                .filter(java.util.Objects::nonNull)
+                                .map(String::toUpperCase)
+                                .collect(java.util.stream.Collectors.toCollection(java.util.TreeSet::new));
 
-        return ResponseEntity.ok(
-                LoginResponse.builder()
-                        .token(token)
-                        .user(profile)
-                        .permits(permits)
-                        .roles(roles)
-                        .build());
-    }
+                return ResponseEntity.ok(
+                                LoginResponse.builder()
+                                                .token(token)
+                                                .user(profile)
+                                                .permits(permits)
+                                                .roles(roles)
+                                                .envioPackToken(envioPackService.getAccessToken())
+                                                .build());
+        }
 
-    @PostMapping("/register")
+        @PostMapping("/register")
     @Operation(
         summary = "Register user profile and credentials",
         description = "Registers a new user profile and credentials in one step and assigns default USER role")
-    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
-        System.out.println(request);
-        org.stockify.security.model.entity.CredentialsEntity saved = authService.register(request);
-        String token = jwtService.generateToken(saved);
-        UserResponse profile = userMapper.toDto(saved.getUser());
-        java.util.Set<String> permits = saved.getRoles().stream()
-                .filter(java.util.Objects::nonNull)
-                .map(org.stockify.security.model.entity.RoleEntity::getPermits)
-                .filter(java.util.Objects::nonNull)
-                .flatMap(java.util.Set::stream)
-                .filter(java.util.Objects::nonNull)
-                .map(p -> p.getPermit())
-                .filter(java.util.Objects::nonNull)
-                .map(Enum::name)
-                .collect(java.util.stream.Collectors.toCollection(java.util.TreeSet::new));
+        public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
+                System.out.println(request);
+                org.stockify.security.model.entity.CredentialsEntity saved = authService.register(request);
+                String token = jwtService.generateToken(saved);
+                UserResponse profile = userMapper.toDto(saved.getUser());
+                java.util.Set<String> permits = saved.getRoles().stream()
+                                .filter(java.util.Objects::nonNull)
+                                .map(org.stockify.security.model.entity.RoleEntity::getPermits)
+                                .filter(java.util.Objects::nonNull)
+                                .flatMap(java.util.Set::stream)
+                                .filter(java.util.Objects::nonNull)
+                                .map(p -> p.getPermit())
+                                .filter(java.util.Objects::nonNull)
+                                .map(Enum::name)
+                                .collect(java.util.stream.Collectors.toCollection(java.util.TreeSet::new));
 
-        java.util.Set<String> roles = saved.getRoles().stream()
-                .filter(java.util.Objects::nonNull)
-                .map(org.stockify.security.model.entity.RoleEntity::getName)
-                .filter(java.util.Objects::nonNull)
-                .map(String::toUpperCase)
-                .collect(java.util.stream.Collectors.toCollection(java.util.TreeSet::new));
+                java.util.Set<String> roles = saved.getRoles().stream()
+                                .filter(java.util.Objects::nonNull)
+                                .map(org.stockify.security.model.entity.RoleEntity::getName)
+                                .filter(java.util.Objects::nonNull)
+                                .map(String::toUpperCase)
+                                .collect(java.util.stream.Collectors.toCollection(java.util.TreeSet::new));
 
-        return ResponseEntity.status(201).body(
-                RegisterResponse.builder()
-                        .token(token)
-                        .user(profile)
-                        .permits(permits)
-                        .roles(roles)
-                        .build());
-    }
+                return ResponseEntity.status(201).body(
+                                RegisterResponse.builder()
+                                                .token(token)
+                                                .user(profile)
+                                                .permits(permits)
+                                                .roles(roles)
+                                                .build());
+        }
 
-    @PatchMapping("/update")
+        @PatchMapping("/update")
     @Operation(
         summary = "Actualizar correo electrónico y/o contraseña",
         description = "Permite al usuario autenticado modificar su correo o contraseña.",
         security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Datos actualizados correctamente"),
-            @ApiResponse(responseCode = "400", description = "Solicitud inválida"),
-            @ApiResponse(responseCode = "401", description = "Usuario no autenticado")
-    })
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> updateCredentials(@Valid @RequestBody UpdateCredentialsRequest request) {
-        CredentialsEntity currentUser = authService.getAuthenticatedUser();
-        CredentialsEntity updated = authService.updateCredentials(currentUser.getEmail(), request);
-        String newToken = jwtService.generateToken(updated);
-        return ResponseEntity.ok(
-                AuthResponse.builder()
-                        .token(newToken)
-                        .message("Credenciales actualizadas correctamente")
-                        .build());
-    }
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Datos actualizados correctamente"),
+                        @ApiResponse(responseCode = "400", description = "Solicitud inválida"),
+                        @ApiResponse(responseCode = "401", description = "Usuario no autenticado")
+        })
+        @PreAuthorize("isAuthenticated()")
+        public ResponseEntity<?> updateCredentials(@Valid @RequestBody UpdateCredentialsRequest request) {
+                CredentialsEntity currentUser = authService.getAuthenticatedUser();
+                CredentialsEntity updated = authService.updateCredentials(currentUser.getEmail(), request);
+                String newToken = jwtService.generateToken(updated);
+                return ResponseEntity.ok(
+                                AuthResponse.builder()
+                                                .token(newToken)
+                                                .message("Credenciales actualizadas correctamente")
+                                                .build());
+        }
 
 }

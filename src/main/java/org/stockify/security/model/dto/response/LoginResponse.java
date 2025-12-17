@@ -24,4 +24,7 @@ public class LoginResponse {
 
     @Schema(description = "Assigned roles (uppercase names, ordered, without duplicates)")
     private Set<String> roles;
+
+    @Schema(description = "Enviopack access token")
+    private String envioPackToken;
 }

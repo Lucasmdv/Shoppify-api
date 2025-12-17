@@ -20,5 +20,7 @@ public final class AppEnvConfig {
         System.setProperty("EMAIL_PASSWORD", Objects.requireNonNull(dotenv.get("EMAIL_PASSWORD")));
         System.setProperty("TEST_ACCESS_TOKEN", Objects.requireNonNull(dotenv.get("TEST_ACCESS_TOKEN")));
         System.setProperty("MERCADOPAGO_WEBHOOK_SECRET", Objects.requireNonNull(dotenv.get("MERCADOPAGO_WEBHOOK_SECRET")));
+        System.setProperty("ENVIOPACK_AK", Objects.requireNonNull(dotenv.get("ENVIOPACK_AK")));
+        System.setProperty("ENVIOPACK_SK", Objects.requireNonNull(dotenv.get("ENVIOPACK_SK")));
     }
 }
