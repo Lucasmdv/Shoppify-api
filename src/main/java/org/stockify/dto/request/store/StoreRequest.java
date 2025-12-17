@@ -22,10 +22,13 @@ public record StoreRequest(
         @Size(max = 100, message = "City must be less than 100 characters")
         String city,
 
-
         @Schema(description = "Phone of the store", example = "223-4817825")
         @NotBlank(message = "Phone is required.")
         String phone,
+
+        @Schema(description = "Postal Code", example = "1900")
+        @Size(max = 20, message = "Postal code must be less than 20 characters")
+        String postalCode,
 
         @Schema(description = "Facebook page URL", example = "https://facebook.com/shoppify")
         @Size(max = 255, message = "Facebook URL must be less than 255 characters")

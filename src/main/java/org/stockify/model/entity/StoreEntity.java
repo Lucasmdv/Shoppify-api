@@ -41,6 +41,10 @@ public class StoreEntity {
     @Column(name = "phone", nullable = false, length = 100)
     private String phone;
 
+    @Size(max = 20)
+    @Column(name = "postal_code", length = 20)
+    private String postalCode;
+
     @Size(max = 255)
     @Column(name = "facebook", length = 255)
     private String facebook;
@@ -58,7 +62,5 @@ public class StoreEntity {
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CarouselItem> homeCarousel = new ArrayList<>();
-
-
 
 }
