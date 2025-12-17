@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
-import jakarta.validation.constraints.FutureOrPresent;
 import lombok.Builder;
 import org.stockify.model.enums.NotificationType;
 
@@ -39,7 +38,6 @@ public record NotificationRequest(
         Long relatedSaleId,
 
         @Schema(description = "When the notification should be published (UTC)", example = "2025-12-31T12:00:00Z")
-        @FutureOrPresent(message = "Publish date must be now or in the future")
         Instant publishAt,
 
         @Schema(description = "Expiration timestamp (UTC)", example = "2025-12-31T23:59:59Z")

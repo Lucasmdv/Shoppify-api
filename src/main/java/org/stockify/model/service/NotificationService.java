@@ -2,12 +2,16 @@ package org.stockify.model.service;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -25,6 +29,7 @@ import org.stockify.model.repository.NotificationReadRepository;
 import org.stockify.model.repository.NotificationRepository;
 import org.stockify.model.repository.ProductRepository;
 import org.stockify.model.repository.UserRepository;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -65,6 +70,7 @@ public class NotificationService {
                 .map(notificationMapper::toResponse);
     }
 
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public NotificationResponse createNotification(NotificationRequest request) {
         checkRequestIntegrity(request);
         NotificationEntity entity = notificationMapper.toEntity(request);
@@ -119,7 +125,8 @@ public class NotificationService {
     @Scheduled(fixedRate = 60000)
     public void publishScheduledNotifications() {
         Instant now = Instant.now();
-        List<NotificationEntity> pending = notificationRepository.findAllByStatusAndPublishAtBefore(NotificationStatus.PENDING, now);
+        List<NotificationEntity> pending = notificationRepository
+                .findAllByStatusAndPublishAtBefore(NotificationStatus.PENDING, now);
         pending.forEach(entity -> {
             if (entity.getExpiresAt() != null && !entity.getExpiresAt().isAfter(now)) {
                 return;
@@ -146,7 +153,7 @@ public class NotificationService {
         if (entity.getStatus() == NotificationStatus.PENDING && isReadyToPublish(entity.getPublishAt())) {
             entity.setStatus(NotificationStatus.PUBLISHED);
         }
-        NotificationEntity saved = notificationRepository.save(entity);
+        NotificationEntity saved = notificationRepository.saveAndFlush(entity);
         NotificationResponse response = notificationMapper.toResponse(saved);
         if (saved.getStatus() == NotificationStatus.PUBLISHED) {
             dispatchToTargets(response, saved.getTargetUserId(), saved.getType());
@@ -170,7 +177,8 @@ public class NotificationService {
 
     private void sendToUser(Long userId, NotificationResponse notification) {
         SseEmitter emitter = activeEmitters.get(userId);
-        if (emitter == null) return;
+        if (emitter == null)
+            return;
 
         try {
             emitter.send(SseEmitter.event()
@@ -188,6 +196,7 @@ public class NotificationService {
         if (request.targetUserId() != null) {
             resolveUser(request.targetUserId());
         }
+        validatePublishDate(request.publishAt());
     }
 
     private void resolveProduct(Long productId) {
@@ -217,10 +226,10 @@ public class NotificationService {
                 response.relatedProductId(),
                 response.relatedSaleId(),
                 response.publishAt(),
+                response.expiresAt(),
                 response.createdAt(),
                 response.hidden(),
-                true
-        );
+                true);
     }
 
     private NotificationResponse markResponseAsHidden(NotificationResponse response) {
@@ -233,9 +242,22 @@ public class NotificationService {
                 response.relatedProductId(),
                 response.relatedSaleId(),
                 response.publishAt(),
+                response.expiresAt(),
                 response.createdAt(),
                 true,
-                response.read()
-        );
+                response.read());
+    }
+
+    private void validatePublishDate(Instant publishAt) {
+        if (publishAt == null)
+            return;
+
+        LocalDate publishDate = publishAt.atZone(ZoneOffset.UTC).toLocalDate();
+        LocalDate today = Instant.now().atZone(ZoneOffset.UTC).toLocalDate();
+
+        if (publishDate.isBefore(today)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Publish date must be today or a future day");
+        }
     }
 }
