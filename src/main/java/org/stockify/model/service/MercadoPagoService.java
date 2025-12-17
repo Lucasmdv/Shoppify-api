@@ -12,6 +12,7 @@ import com.mercadopago.resources.payment.Payment;
 import com.mercadopago.resources.preference.Preference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,9 @@ import org.stockify.model.enums.PaymentMethod;
 import org.stockify.model.enums.PaymentStatus;
 import org.stockify.model.enums.TransactionType;
 import org.stockify.model.exception.NotFoundException;
+import org.stockify.model.event.PaymentStatusUpdatedEvent;
 import org.stockify.model.repository.ProductRepository;
+import org.stockify.model.repository.SaleRepository;
 import org.stockify.model.repository.TransactionRepository;
 import org.stockify.util.PriceCalculator;
 
@@ -58,9 +61,11 @@ public class MercadoPagoService {
     private static final String FAILURE_URL = FRONTEND_BASE + "/cart";
 
     private final ProductRepository productRepository;
+    private final SaleRepository saleRepository;
     private final TransactionRepository transactionRepository;
     private final SaleService saleService;
     private final TransactionService transactionService;
+    private final ApplicationEventPublisher eventPublisher;
     private final PriceCalculator priceCalculator;
 
     public MercadoPagoPreferenceResponse createPreference(SaleRequest request) {
@@ -308,6 +313,8 @@ public class MercadoPagoService {
         TransactionEntity transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new NotFoundException("Transaction not found for ID: " + transactionId));
 
+        PaymentStatus oldStatus = transaction.getPaymentStatus();
+
         PaymentStatus newStatus = mapStatus(payment.getStatus());
         transaction.setPaymentStatus(newStatus);
         // Actualiza detalles del pago (no se almacena informacion sensible completa)
@@ -319,6 +326,17 @@ public class MercadoPagoService {
         transactionRepository.save(transaction);
 
             log.info("Updated transaction {} status to {}", transactionId, newStatus);
+
+            if (oldStatus != newStatus) {
+                Long saleId = saleRepository.findSaleIdByTransactionId(transactionId).orElse(null);
+                Long userId = saleRepository.findUserIdByTransactionId(transactionId).orElse(null);
+                eventPublisher.publishEvent(new PaymentStatusUpdatedEvent(
+                        saleId,
+                        oldStatus,
+                        newStatus,
+                        userId
+                ));
+            }
 
             // Logic to restore stock using TransactionService if payment failed
             if (isFailureStatus(newStatus)) {
