@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -99,6 +100,19 @@ public class NotificationController {
             @PathVariable Long id,
             @Valid @RequestBody NotificationRequest request) {
         return ResponseEntity.ok(notificationService.patchNotification(id, request));
+    }
+
+    @Operation(summary = "Delete a notification")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Notification deleted"),
+            @ApiResponse(responseCode = "404", description = "Notification not found", content = @Content)
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(
+            @Parameter(description = "Notification identifier", example = "100")
+            @PathVariable Long id) {
+        notificationService.deleteNotification(id);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Mark a notification as read for a user")

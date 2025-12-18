@@ -15,4 +15,5 @@ public interface NotificationSummary {
     String getIcon();
     Long getRelatedProductId();
     Long getRelatedSaleId();
+    Instant getExpiresAt();
 }

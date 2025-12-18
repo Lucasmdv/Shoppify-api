@@ -23,6 +23,7 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
             n.type AS type,
             n.icon AS icon,
             n.publishAt AS publishAt,
+            n.expiresAt AS expiresAt,
             n.createdAt AS createdAt,
             n.relatedProductId AS relatedProductId,
             n.relatedSaleId AS relatedSaleId,

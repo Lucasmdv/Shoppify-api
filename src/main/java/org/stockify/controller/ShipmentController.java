@@ -114,8 +114,7 @@ public class ShipmentController {
             }
     )
     @DeleteMapping("/{shipmentID}")
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('DELETE') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('DELETE')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('DELETE') or hasAuthority('WRITE')")
     public ResponseEntity<Void> deleteOrderById(
             @Parameter(description = "Order ID", required = true, example = "1")
             @PathVariable Long shipmentID) {
@@ -140,8 +139,7 @@ public class ShipmentController {
             }
     )
     @PatchMapping("/{shipmentID}")
-    @PreAuthorize("(hasRole('ROLE_ADMIN') and hasAuthority('WRITE') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('WRITE'))")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('WRITE')")
     public ResponseEntity<EntityModel<ShipmentResponse>> patchOrder(
             @Parameter(description = "Shipment ID", required = true, example = "1")
             @PathVariable Long shipmentID,

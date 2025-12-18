@@ -30,6 +30,9 @@ public record NotificationResponse(
         @Schema(description = "When the notification becomes visible (UTC)", example = "2025-12-31T12:00:00Z")
         Instant publishAt,
 
+        @Schema(description = "When the notification expires (UTC)", example = "2025-12-31T23:59:59Z")
+        Instant expiresAt,
+
         @Schema(description = "Creation timestamp", example = "2025-10-21T18:30:00Z")
         Instant createdAt,
 

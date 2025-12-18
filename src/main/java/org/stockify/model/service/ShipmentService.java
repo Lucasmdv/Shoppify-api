@@ -77,8 +77,8 @@ public class ShipmentService {
     public ShipmentResponse updateOrderPartial(Long id, UpdateShipmentRequest request) {
         ShipmentEntity existingShipment = shipmentRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order with ID " + id + " not found"));
-        shipmentMapper.partialUpdateOrderEntity(request, existingShipment);
         OrderStatus oldStatus = existingShipment.getStatus();
+        shipmentMapper.partialUpdateOrderEntity(request, existingShipment);
 
         switch(request.getStatus()) {
             case "DELIVERED", "CANCELLED", "RETURNED"
@@ -99,10 +99,16 @@ public class ShipmentService {
     private void statusTrigger(UpdateShipmentRequest request, ShipmentEntity savedEntity, OrderStatus oldStatus){
         if (request.getStatus() == null) return;
         if (savedEntity.getStatus() != oldStatus) {
+            Long saleId = savedEntity.getSale() != null ? savedEntity.getSale().getId() : null;
+            Long userId = savedEntity.getSale() != null && savedEntity.getSale().getUser() != null
+                    ? savedEntity.getSale().getUser().getId()
+                    : null;
             eventPublisher.publishEvent(new ShipmentStateUpdatedEvent(
                     savedEntity.getId(),
                     oldStatus,
-                    savedEntity.getStatus()
+                    savedEntity.getStatus(),
+                    saleId,
+                    userId
             ));
         }
     }
