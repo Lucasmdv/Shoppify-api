@@ -20,4 +20,7 @@ public class ShipmentRequest {
     @NotNull(message = "Adress is required")
     @Schema(description = "Adress were the shipment will be delivered")
     private String adress;
+
+    @Schema(description = "Postal code")
+    private String postalCode;
 }

@@ -31,9 +31,36 @@ public class ShipmentService {
     private final ShipmentRepository shipmentRepository;
     private final ShipmentMapper shipmentMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final org.stockify.model.repository.StoreRepository storeRepository;
 
     public ShipmentEntity mapShipment(ShipmentRequest request, SaleEntity sale) {
-        return shipmentMapper.toEntity(request, sale);
+        ShipmentEntity shipment = shipmentMapper.toEntity(request, sale);
+
+        long quantity = sale.getTransaction() == null ? 0
+                : sale.getTransaction().getDetailTransactions().stream()
+                        .mapToLong(org.stockify.model.entity.DetailTransactionEntity::getQuantity)
+                        .sum();
+
+        java.math.BigDecimal shippingCost = calculateShippingCost(quantity);
+
+        if (shippingCost != null) {
+            shipment.setShipmentCost(shippingCost);
+        }
+
+        return shipment;
+    }
+
+    public java.math.BigDecimal calculateShippingCost(long quantity) {
+        StoreEntity store = storeRepository.findById(1L)
+                .orElseThrow(() -> new NotFoundException("Store not found"));
+
+        if (quantity <= 4) {
+            return store.getShippingCostSmall();
+        } else if (quantity <= 6) {
+            return store.getShippingCostMedium();
+        } else {
+            return store.getShippingCostLarge();
+        }
     }
 
     public void delete(Long id) {

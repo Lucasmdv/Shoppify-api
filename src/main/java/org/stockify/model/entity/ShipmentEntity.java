@@ -40,4 +40,9 @@ public class ShipmentEntity {
 
     @Column(name = "adress")
     private String adress;
+    @Column(name = "postal_code", length = 20)
+    private String postalCode;
+
+    @Column(name = "shipment_cost", precision = 10, scale = 2)
+    private java.math.BigDecimal shipmentCost;
 }

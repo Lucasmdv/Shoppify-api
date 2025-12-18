@@ -17,6 +17,7 @@ public interface ShipmentMapper {
     @Mapping(target = "status", constant = "PROCESSING")
     @Mapping(target = "startDate", expression = "java(java.time.LocalDate.now())")
     @Mapping(target = "sale", source = "sale")
+    @Mapping(target = "shipmentCost", ignore = true)
     ShipmentEntity toEntity(ShipmentRequest dto, SaleEntity sale);
 
     @Mapping(target = "saleId", source = "sale.id")

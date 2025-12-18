@@ -68,6 +68,7 @@ public class MercadoPagoService {
     private final TransactionService transactionService;
     private final ApplicationEventPublisher eventPublisher;
     private final PriceCalculator priceCalculator;
+    private final ShipmentService shipmentService;
 
     public MercadoPagoPreferenceResponse createPreference(SaleRequest request) {
         if (request == null || request.getTransaction() == null ||
@@ -94,11 +95,12 @@ public class MercadoPagoService {
                                 PaymentStatus.APPROVED,
                                 PaymentStatus.CANCELLED,
                                 PaymentStatus.REJECTED,
-                                PaymentStatus.REFUNDED
-                        ));
+                                PaymentStatus.REFUNDED));
 
         if (transactionToUse != null && keyUsedByClosedTransaction) {
-            log.info("Found PENDING transaction with key {} but there is already a closed transaction with same key. Creating a new transaction with a fresh key.", idempotencyKey);
+            log.info(
+                    "Found PENDING transaction with key {} but there is already a closed transaction with same key. Creating a new transaction with a fresh key.",
+                    idempotencyKey);
             transactionToUse = null;
             idempotencyKey = idempotencyKey + ":" + UUID.randomUUID();
         }
@@ -109,7 +111,8 @@ public class MercadoPagoService {
             } else {
                 if (keyUsedByClosedTransaction) {
                     idempotencyKey = idempotencyKey + ":" + UUID.randomUUID();
-                    log.info("Idempotency key already used by a closed transaction, generating new key {}", idempotencyKey);
+                    log.info("Idempotency key already used by a closed transaction, generating new key {}",
+                            idempotencyKey);
                 }
                 SaleResponse saleResponse = saleService.createSale(request, idempotencyKey);
                 transactionId = saleResponse.getTransaction().getId();
@@ -142,11 +145,23 @@ public class MercadoPagoService {
             log.debug("No se pudo obtener email del Contexto de Seguridad: {}", e.getMessage());
         }
 
-        List<PreferenceItemRequest> items = transactionToUse != null
+        List<PreferenceItemRequest> items = new java.util.ArrayList<>(transactionToUse != null
                 ? buildItemsFromTransaction(transactionToUse)
                 : request.getTransaction().getDetailTransactions().stream()
                         .map(this::buildItem)
-                        .toList();
+                        .toList());
+
+        long totalQuantity = items.stream().mapToLong(i -> i.getQuantity()).sum();
+        java.math.BigDecimal shippingCost = shipmentService.calculateShippingCost(totalQuantity);
+
+        if (shippingCost != null && shippingCost.compareTo(java.math.BigDecimal.ZERO) > 0) {
+            items.add(PreferenceItemRequest.builder()
+                    .title("Costo de envio")
+                    .quantity(1)
+                    .unitPrice(shippingCost)
+                    .currencyId(DEFAULT_CURRENCY)
+                    .build());
+        }
 
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
                 .success(SUCCESS_URL)
@@ -177,8 +192,7 @@ public class MercadoPagoService {
                     preference.getId(),
                     preference.getInitPoint(),
                     preference.getSandboxInitPoint(),
-                    transactionId
-            );
+                    transactionId);
         } catch (MPApiException e) {
             String apiMessage = e.getApiResponse() != null ? e.getApiResponse().getContent() : e.getMessage();
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
@@ -342,38 +356,38 @@ public class MercadoPagoService {
                 return;
             }
 
-        TransactionEntity transaction = transactionRepository.findById(transactionId)
-                .orElseThrow(() -> new NotFoundException("Transaction not found for ID: " + transactionId));
+            TransactionEntity transaction = transactionRepository.findById(transactionId)
+                    .orElseThrow(() -> new NotFoundException("Transaction not found for ID: " + transactionId));
 
-        PaymentStatus oldStatus = transaction.getPaymentStatus();
+            PaymentStatus oldStatus = transaction.getPaymentStatus();
 
-        PaymentStatus newStatus = mapStatus(payment.getStatus());
-        transaction.setPaymentStatus(newStatus);
-        // Actualiza detalles del pago (no se almacena informacion sensible completa)
-        applyPaymentDetails(transaction, payment);
-        PaymentMethod mappedMethod = mapPaymentMethod(payment.getPaymentTypeId());
-        if (mappedMethod != null) {
-            transaction.setPaymentMethod(mappedMethod);
-        }
-        boolean statusChanged = oldStatus != newStatus;
-        if (statusChanged && newStatus != null && transaction.getType() != null) {
-            boolean sameStatusSameKeyExists = transactionRepository
-                    .existsByIdempotencyKeyAndPaymentStatusAndTypeAndIdNot(
-                            transaction.getIdempotencyKey(),
-                            newStatus,
-                            transaction.getType(),
-                            transaction.getId());
-            if (sameStatusSameKeyExists) {
-                String originalKey = transaction.getIdempotencyKey();
-                String newKey = originalKey + ":" + UUID.randomUUID();
-                transaction.setIdempotencyKey(newKey);
-                log.warn("Idempotency key {} already used by another transaction in status {}. " +
-                                "Assigning new key {} to avoid constraint violation.",
-                        originalKey, newStatus, newKey);
+            PaymentStatus newStatus = mapStatus(payment.getStatus());
+            transaction.setPaymentStatus(newStatus);
+            // Actualiza detalles del pago (no se almacena informacion sensible completa)
+            applyPaymentDetails(transaction, payment);
+            PaymentMethod mappedMethod = mapPaymentMethod(payment.getPaymentTypeId());
+            if (mappedMethod != null) {
+                transaction.setPaymentMethod(mappedMethod);
             }
-        }
+            boolean statusChanged = oldStatus != newStatus;
+            if (statusChanged && newStatus != null && transaction.getType() != null) {
+                boolean sameStatusSameKeyExists = transactionRepository
+                        .existsByIdempotencyKeyAndPaymentStatusAndTypeAndIdNot(
+                                transaction.getIdempotencyKey(),
+                                newStatus,
+                                transaction.getType(),
+                                transaction.getId());
+                if (sameStatusSameKeyExists) {
+                    String originalKey = transaction.getIdempotencyKey();
+                    String newKey = originalKey + ":" + UUID.randomUUID();
+                    transaction.setIdempotencyKey(newKey);
+                    log.warn("Idempotency key {} already used by another transaction in status {}. " +
+                            "Assigning new key {} to avoid constraint violation.",
+                            originalKey, newStatus, newKey);
+                }
+            }
 
-        transactionRepository.save(transaction);
+            transactionRepository.save(transaction);
 
             log.info("Updated transaction {} status to {}", transactionId, newStatus);
 
@@ -384,8 +398,7 @@ public class MercadoPagoService {
                         saleId,
                         oldStatus,
                         newStatus,
-                        userId
-                ));
+                        userId));
             }
 
             // Logic to restore stock using TransactionService if payment failed
@@ -455,7 +468,8 @@ public class MercadoPagoService {
     }
 
     private PaymentMethod mapPaymentMethod(String paymentTypeId) {
-        if (paymentTypeId == null) return null;
+        if (paymentTypeId == null)
+            return null;
         return switch (paymentTypeId) {
             case "credit_card" -> PaymentMethod.CREDIT;
             case "debit_card" -> PaymentMethod.DEBIT;
@@ -465,12 +479,14 @@ public class MercadoPagoService {
     }
 
     private LocalDateTime toLocalDateTime(java.util.Date date) {
-        if (date == null) return null;
+        if (date == null)
+            return null;
         return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
     }
 
     private LocalDateTime toLocalDateTime(java.time.OffsetDateTime dateTime) {
-        if (dateTime == null) return null;
+        if (dateTime == null)
+            return null;
         return dateTime.toLocalDateTime();
     }
 

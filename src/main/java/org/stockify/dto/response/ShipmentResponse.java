@@ -33,4 +33,10 @@ public class ShipmentResponse {
 
     @Schema(description = "Adress were the shipment will be delivered")
     private String adress;
+
+    @Schema(description = "Postal code")
+    private String postalCode;
+
+    @Schema(description = "Cost of the shipment")
+    private Double shipmentCost;
 }

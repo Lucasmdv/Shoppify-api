@@ -63,4 +63,12 @@ public class StoreEntity {
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CarouselItem> homeCarousel = new ArrayList<>();
 
+    @Column(name = "shipping_cost_small", precision = 10, scale = 2)
+    private java.math.BigDecimal shippingCostSmall;
+
+    @Column(name = "shipping_cost_medium", precision = 10, scale = 2)
+    private java.math.BigDecimal shippingCostMedium;
+
+    @Column(name = "shipping_cost_large", precision = 10, scale = 2)
+    private java.math.BigDecimal shippingCostLarge;
 }
