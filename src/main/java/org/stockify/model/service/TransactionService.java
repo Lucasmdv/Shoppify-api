@@ -139,6 +139,7 @@ public class TransactionService {
         }
 
         transaction.setPaymentStatus(PaymentStatus.CANCELLED); // Or REJECTED (?
+        transaction.setPaymentLink(null);
         transactionRepository.save(transaction);
 
         restoreStock(transaction);
