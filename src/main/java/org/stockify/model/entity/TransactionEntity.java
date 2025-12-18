@@ -23,10 +23,9 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "transactions",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"idempotency_key", "payment_status"})
-        })
+@Table(name = "transactions", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "idempotency_key", "payment_status" })
+})
 @Audited
 public class TransactionEntity {
     @Id
@@ -56,14 +55,15 @@ public class TransactionEntity {
     @Column(name = "idempotency_key", length = 128)
     private String idempotencyKey;
 
-
+    @Column(name = "payment_link")
+    private String paymentLink;
 
     @ManyToOne
     @JoinColumn(name = "store_id")
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private StoreEntity store;
 
-    @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private Set<DetailTransactionEntity> detailTransactions;
 
@@ -80,7 +80,7 @@ public class TransactionEntity {
     private SaleEntity sale;
 
     @PrePersist
-    public void prePersist(){
+    public void prePersist() {
         this.dateTime = LocalDateTime.now();
         this.paymentMethod = this.paymentMethod == null ? PaymentMethod.CASH : this.paymentMethod;
     }

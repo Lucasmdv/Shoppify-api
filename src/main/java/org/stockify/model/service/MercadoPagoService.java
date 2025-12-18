@@ -52,14 +52,7 @@ import java.util.Comparator;
 @Slf4j
 public class MercadoPagoService {
 
-    private static final String FRONTEND_BASE = System.getenv().getOrDefault("FRONTEND_URL", "localhost:4200");
     private static final String DEFAULT_CURRENCY = "ARS";
-    private static final String SUCCESS_URL = FRONTEND_BASE + "/purchase/";
-    private static final String PENDING_URL = FRONTEND_BASE + "/cart/checkout";
-    // DEFAULT
-    // private static final String FAILURE_URL = FRONTEND_BASE +
-    // "/auth/checkout/failure";
-    private static final String FAILURE_URL = FRONTEND_BASE + "/cart";
 
     private final ProductRepository productRepository;
     private final SaleRepository saleRepository;
@@ -69,6 +62,7 @@ public class MercadoPagoService {
     private final ApplicationEventPublisher eventPublisher;
     private final PriceCalculator priceCalculator;
     private final ShipmentService shipmentService;
+    private final org.stockify.config.MercadoPagoIntegrationConfig mercadoPagoConfig;
 
     public MercadoPagoPreferenceResponse createPreference(SaleRequest request) {
         if (request == null || request.getTransaction() == null ||
@@ -166,9 +160,9 @@ public class MercadoPagoService {
         }
 
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
-                .success(SUCCESS_URL)
-                .pending(PENDING_URL)
-                .failure(FAILURE_URL)
+                .success(mercadoPagoConfig.getSuccessUrl())
+                .pending(mercadoPagoConfig.getPendingUrl())
+                .failure(mercadoPagoConfig.getFailureUrl())
                 .build();
 
         PreferenceRequest.PreferenceRequestBuilder preferenceRequestBuilder = PreferenceRequest.builder()
@@ -181,15 +175,25 @@ public class MercadoPagoService {
             preferenceRequestBuilder.payer(PreferencePayerRequest.builder().email(userEmail).build());
         }
 
-        String notificationUrl = System.getenv("NOTIFICATION_URL");
+        String notificationUrl = mercadoPagoConfig.getNotificationUrl();
+        System.out.println("DEBUG: La URL de notificación enviada a MP es: " + notificationUrl);
+
         if (notificationUrl != null && !notificationUrl.isBlank()) {
             preferenceRequestBuilder.notificationUrl(notificationUrl);
+        } else {
+            System.out.println("ERROR: La URL de notificación es NULL o está vacía!");
         }
 
         PreferenceRequest preferenceRequest = preferenceRequestBuilder.build();
 
         try {
             Preference preference = new PreferenceClient().create(preferenceRequest);
+
+            TransactionEntity transaction = transactionRepository.findById(transactionId)
+                    .orElseThrow(() -> new NotFoundException("Transaction not found"));
+            transaction.setPaymentLink(preference.getInitPoint());
+            transactionRepository.save(transaction);
+
             return new MercadoPagoPreferenceResponse(
                     preference.getId(),
                     preference.getInitPoint(),
