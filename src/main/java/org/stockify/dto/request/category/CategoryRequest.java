@@ -12,16 +12,16 @@ import lombok.Data;
 public class CategoryRequest {
 
     @NotNull
-    @Size(min = 1, max = 60)
+    @Size(min = 2, max = 50)
     @Schema(
             description = "Name of the category",
             example = "Electronics",
-            minLength = 1,
-            maxLength = 60,
+            minLength = 2,
+            maxLength = 50,
             required = true
     )
     private String name;
 
-
+    @Size(max = 200, message = "Image URL must be at most 200 characters")
     private String imgUrl;
 }
