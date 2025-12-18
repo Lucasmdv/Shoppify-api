@@ -1,6 +1,7 @@
 package org.stockify.config;
 
 import com.mercadopago.MercadoPagoConfig;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,12 +14,17 @@ public class MercadoPagoIntegrationConfig implements InitializingBean {
     @Value("${TEST_ACCESS_TOKEN}")
     private String accessToken;
 
+    @Getter
     @Value("${MERCADOPAGO_WEBHOOK_SECRET}")
     private String webhookSecret;
 
-    public String getWebhookSecret() {
-        return webhookSecret;
-    }
+    @Getter
+    @Value("${mp.frontend-base.url}")
+    private String frontendBase;
+
+    @Getter
+    @Value("${mp.notification.url}")
+    private String notificationUrl;
 
     @Override
     public void afterPropertiesSet() {
@@ -28,5 +34,17 @@ public class MercadoPagoIntegrationConfig implements InitializingBean {
         }
         MercadoPagoConfig.setAccessToken(accessToken);
         log.info("Mercado Pago SDK initialized successfully.");
+    }
+
+    public String getSuccessUrl() {
+        return frontendBase + "/purchases";
+    }
+
+    public String getPendingUrl() {
+        return frontendBase + "/purchases";
+    }
+
+    public String getFailureUrl() {
+        return frontendBase + "/purchases";
     }
 }

@@ -7,15 +7,14 @@ import org.stockify.dto.request.transaction.DetailTransactionRequest;
 import org.stockify.dto.request.transaction.TransactionCreatedRequest;
 import org.stockify.dto.request.transaction.TransactionRequest;
 import org.stockify.dto.response.TransactionResponse;
-import org.stockify.model.entity.DetailTransactionEntity;
-import org.stockify.model.entity.ProductEntity;
-import org.stockify.model.entity.StoreEntity;
-import org.stockify.model.entity.TransactionEntity;
+import org.stockify.model.entity.*;
+import org.stockify.model.enums.OrderStatus;
 import org.stockify.model.enums.PaymentStatus;
 import org.stockify.model.enums.TransactionType;
 import org.stockify.model.exception.NotFoundException;
 import org.stockify.model.mapper.TransactionMapper;
 import org.stockify.model.repository.ProductRepository;
+import org.stockify.model.repository.ShipmentRepository;
 import org.stockify.model.repository.StoreRepository;
 import org.stockify.model.repository.TransactionRepository;
 import org.stockify.util.PriceCalculator;
@@ -39,6 +38,7 @@ public class TransactionService {
     private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
     private final PriceCalculator priceCalculator;
+    private final ShipmentRepository shipmentRepository;
 
     public TransactionResponse saveTransaction(TransactionCreatedRequest request, TransactionType type) {
         TransactionEntity transactionEntity = transactionMapper.toEntity(request);
@@ -117,6 +117,9 @@ public class TransactionService {
         for (TransactionEntity transaction : expiredTransactions) {
             try {
                 cancelTransaction(transaction, "EXPIRED");
+                ShipmentEntity shipment = transaction.getSale().getShipment();
+                shipment.setStatus(OrderStatus.CANCELLED);
+                shipmentRepository.save(shipment);
             } catch (Exception e) {
                 log.error("Error cancelling expired transaction ID: {}", transaction.getId(), e);
             }
@@ -136,6 +139,7 @@ public class TransactionService {
         }
 
         transaction.setPaymentStatus(PaymentStatus.CANCELLED); // Or REJECTED (?
+        transaction.setPaymentLink(null);
         transactionRepository.save(transaction);
 
         restoreStock(transaction);

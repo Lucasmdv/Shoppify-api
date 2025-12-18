@@ -1,6 +1,7 @@
 package org.stockify.model.enums;
 
 public enum OrderStatus {
+    PENDING("Pendiente"),
     PROCESSING("Procesando"),
     SHIPPED("Enviado"),
     DELIVERED("Entregado"),

@@ -84,8 +84,8 @@ public class CartService {
 
     public CartResponse clearCart(Long userId){
        CartEntity cart =  resolveCart(userId);
-       cart.getProducts().clear();
-       return cartMapper.toResponse(cartRepository.save(cart));
+        cart.getProducts().clear();
+        return cartMapper.toResponse(cartRepository.save(cart));
     }
 
     public CartResponse updateItem(Long itemId, Long userId, Long quantity){
@@ -109,6 +109,13 @@ public class CartService {
         return cartMapper.toResponse(cartRepository.save(cart));
     }
 
+    public CartResponse removeProductsFromCart(Long userId, java.util.List<Long> productIds) {
+        CartEntity cart = resolveCart(userId);
+        if (cart.getProducts() != null) {
+            cart.getProducts().removeIf(item -> productIds.contains(item.getProduct().getId()));
+        }
+        return cartMapper.toResponse(cartRepository.save(cart));
+    }
 
     //Helpers
     private boolean hasCart(Long userId) {
@@ -134,13 +141,5 @@ public class CartService {
         return cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new NotFoundException("Cart for user id " + userId + " not found"));
     }
-
-
-
-
-
-
-
-
 
 }

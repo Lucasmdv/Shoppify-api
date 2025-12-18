@@ -14,7 +14,7 @@ public class TransactionCleanupScheduler {
 
     private final TransactionService transactionService;
 
-    @Value("${transaction.cleanup.timeout-minutes:15}") // Default to 15 minutes if not specified in application.properties
+    @Value("${transaction.cleanup.timeout-minutes:3}") // Default to 15 minutes if not specified in application.properties
     private int timeoutMinutes;
 
     @Scheduled(cron = "0 * * * * *") // Runs every minute

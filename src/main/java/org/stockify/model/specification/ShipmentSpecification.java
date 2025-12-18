@@ -57,8 +57,8 @@ public class ShipmentSpecification {
                 pickup == null ? null : cb.equal(root.get("pickup"), pickup)));
     }
 
-    public static Specification<ShipmentEntity> byAdress(String adress) {
+    public static Specification<ShipmentEntity> byCity(String city) {
         return (((root, query, cb) ->
-                adress == null ? null : cb.like(cb.lower(root.get("adress")), "%" + adress.toLowerCase() + "%")));
+                city == null ? null : cb.like(cb.lower(root.get("city")), "%" + city.toLowerCase() + "%")));
     }
 }

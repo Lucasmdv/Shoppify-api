@@ -22,10 +22,8 @@ import org.stockify.dto.request.sale.SaleRequest;
 import org.stockify.dto.response.MercadoPagoPreferenceResponse;
 import org.stockify.dto.response.SaleResponse;
 import org.stockify.dto.request.transaction.DetailTransactionRequest;
-import org.stockify.model.entity.DetailTransactionEntity;
-import org.stockify.model.entity.PaymentDetailEntity;
-import org.stockify.model.entity.ProductEntity;
-import org.stockify.model.entity.TransactionEntity;
+import org.stockify.model.entity.*;
+import org.stockify.model.enums.OrderStatus;
 import org.stockify.model.enums.PaymentMethod;
 import org.stockify.model.enums.PaymentStatus;
 import org.stockify.model.enums.TransactionType;
@@ -33,6 +31,7 @@ import org.stockify.model.exception.NotFoundException;
 import org.stockify.model.event.PaymentStatusUpdatedEvent;
 import org.stockify.model.repository.ProductRepository;
 import org.stockify.model.repository.SaleRepository;
+import org.stockify.model.repository.ShipmentRepository;
 import org.stockify.model.repository.TransactionRepository;
 import org.stockify.util.PriceCalculator;
 
@@ -52,14 +51,7 @@ import java.util.Comparator;
 @Slf4j
 public class MercadoPagoService {
 
-    private static final String FRONTEND_BASE = System.getenv().getOrDefault("FRONTEND_URL", "localhost:4200");
     private static final String DEFAULT_CURRENCY = "ARS";
-    private static final String SUCCESS_URL = FRONTEND_BASE + "/purchase/";
-    private static final String PENDING_URL = FRONTEND_BASE + "/cart/checkout";
-    // DEFAULT
-    // private static final String FAILURE_URL = FRONTEND_BASE +
-    // "/auth/checkout/failure";
-    private static final String FAILURE_URL = FRONTEND_BASE + "/cart";
 
     private final ProductRepository productRepository;
     private final SaleRepository saleRepository;
@@ -68,7 +60,10 @@ public class MercadoPagoService {
     private final TransactionService transactionService;
     private final ApplicationEventPublisher eventPublisher;
     private final PriceCalculator priceCalculator;
+    private final ShipmentRepository shipmentRepository;
     private final ShipmentService shipmentService;
+    private final CartService cartService;
+    private final org.stockify.config.MercadoPagoIntegrationConfig mercadoPagoConfig;
 
     public MercadoPagoPreferenceResponse createPreference(SaleRequest request) {
         if (request == null || request.getTransaction() == null ||
@@ -166,9 +161,9 @@ public class MercadoPagoService {
         }
 
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
-                .success(SUCCESS_URL)
-                .pending(PENDING_URL)
-                .failure(FAILURE_URL)
+                .success(mercadoPagoConfig.getSuccessUrl())
+                .pending(mercadoPagoConfig.getPendingUrl())
+                .failure(mercadoPagoConfig.getFailureUrl())
                 .build();
 
         PreferenceRequest.PreferenceRequestBuilder preferenceRequestBuilder = PreferenceRequest.builder()
@@ -181,15 +176,36 @@ public class MercadoPagoService {
             preferenceRequestBuilder.payer(PreferencePayerRequest.builder().email(userEmail).build());
         }
 
-        String notificationUrl = System.getenv("NOTIFICATION_URL");
+        String notificationUrl = mercadoPagoConfig.getNotificationUrl();
+        System.out.println("DEBUG: La URL de notificación enviada a MP es: " + notificationUrl);
+
         if (notificationUrl != null && !notificationUrl.isBlank()) {
             preferenceRequestBuilder.notificationUrl(notificationUrl);
+        } else {
+            System.out.println("ERROR: La URL de notificación es NULL o está vacía!");
         }
 
         PreferenceRequest preferenceRequest = preferenceRequestBuilder.build();
 
         try {
             Preference preference = new PreferenceClient().create(preferenceRequest);
+
+            TransactionEntity transaction = transactionRepository.findById(transactionId)
+                    .orElseThrow(() -> new NotFoundException("Transaction not found"));
+            transaction.setPaymentLink(preference.getInitPoint());
+            transactionRepository.save(transaction);
+
+            if (request.getUserId() != null) {
+                try {
+                    java.util.List<Long> productIds = transaction.getDetailTransactions().stream()
+                            .map(dt -> dt.getProduct().getId())
+                            .toList();
+                    cartService.removeProductsFromCart(request.getUserId(), productIds);
+                } catch (Exception e) {
+                    log.error("Error clearing cart for user {}: {}", request.getUserId(), e.getMessage());
+                }
+            }
+
             return new MercadoPagoPreferenceResponse(
                     preference.getId(),
                     preference.getInitPoint(),
@@ -407,6 +423,14 @@ public class MercadoPagoService {
             if (isFailureStatus(newStatus)) {
                 log.info("Payment failed for transaction {}. Restoring stock...", transactionId);
                 transactionService.restoreStock(transaction);
+            }
+
+            if (oldStatus != newStatus && newStatus == PaymentStatus.APPROVED) {
+                ShipmentEntity shipment = transaction.getSale().getShipment();
+                shipment.setStatus(OrderStatus.PROCESSING);
+                shipmentRepository.save(shipment);
+
+                log.info("Shipment updated to PROCESSING for transaction {}", transactionId);
             }
 
         } catch (MPApiException e) {

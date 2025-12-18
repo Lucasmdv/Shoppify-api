@@ -17,10 +17,18 @@ public class ShipmentRequest {
     @Schema(description = "Boolean for pickup in store or not")
     private Boolean pickup;
 
-    @NotNull(message = "Adress is required")
-    @Schema(description = "Adress were the shipment will be delivered")
-    private String adress;
+    @Schema(description = "Street were the shipment will be delivered")
+    private String street;
 
-    @Schema(description = "Postal code")
-    private String postalCode;
+    @Schema(description = "Number of street were the shipment will be delivered")
+    private Integer number;
+
+    @Schema(description = "City were the shipment will be delivered")
+    private String city;
+
+    @Schema(description = "Postal Code were the shipment will be delivered")
+    private Integer zip;
+
+    @Schema(description = "Notes of the shipment")
+    private String notes;
 }

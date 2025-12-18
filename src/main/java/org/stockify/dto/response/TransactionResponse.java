@@ -40,6 +40,9 @@ public class TransactionResponse {
     @Schema(description = "Name of the store where the transaction took place", example = "Downtown Store")
     String storeName;
 
+    @Schema(description = "Payment URL for pending transactions")
+    String paymentLink;
+
     @Schema(description = "Set of detailed transactions")
     Set<DetailTransactionResponse> detailTransactions;
 }
