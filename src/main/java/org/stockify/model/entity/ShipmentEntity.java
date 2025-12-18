@@ -38,6 +38,18 @@ public class ShipmentEntity {
     @Column(name = "pickup")
     private Boolean pickup;
 
-    @Column(name = "adress")
-    private String adress;
+    @Column(name = "street")
+    private String street;
+
+    @Column(name = "number")
+    private Integer number;
+
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "zip")
+    private Integer zip;
+
+    @Column(name = "notes")
+    private String notes;
 }

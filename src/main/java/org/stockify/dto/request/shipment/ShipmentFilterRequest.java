@@ -34,6 +34,6 @@ public class ShipmentFilterRequest {
     @Schema(description = "Filter by pickup in store or not")
     private Boolean pickup;
 
-    @Schema(description = "Filter by adress")
-    private String adress;
+    @Schema(description = "Filter by city")
+    private String city;
 }

@@ -16,6 +16,7 @@ public interface ShipmentMapper {
     @Mapping(target = "endDate", ignore = true)
     @Mapping(target = "status", constant = "PENDING")
     @Mapping(target = "startDate", expression = "java(java.time.LocalDate.now())")
+    @Mapping(target = "notes", source = "dto.notes")
     @Mapping(target = "sale", source = "sale")
     ShipmentEntity toEntity(ShipmentRequest dto, SaleEntity sale);
 
