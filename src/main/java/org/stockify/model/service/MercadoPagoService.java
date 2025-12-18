@@ -62,6 +62,7 @@ public class MercadoPagoService {
     private final PriceCalculator priceCalculator;
     private final ShipmentRepository shipmentRepository;
     private final ShipmentService shipmentService;
+    private final CartService cartService;
     private final org.stockify.config.MercadoPagoIntegrationConfig mercadoPagoConfig;
 
     public MercadoPagoPreferenceResponse createPreference(SaleRequest request) {
@@ -193,6 +194,17 @@ public class MercadoPagoService {
                     .orElseThrow(() -> new NotFoundException("Transaction not found"));
             transaction.setPaymentLink(preference.getInitPoint());
             transactionRepository.save(transaction);
+
+            if (request.getUserId() != null) {
+                try {
+                    java.util.List<Long> productIds = transaction.getDetailTransactions().stream()
+                            .map(dt -> dt.getProduct().getId())
+                            .toList();
+                    cartService.removeProductsFromCart(request.getUserId(), productIds);
+                } catch (Exception e) {
+                    log.error("Error clearing cart for user {}: {}", request.getUserId(), e.getMessage());
+                }
+            }
 
             return new MercadoPagoPreferenceResponse(
                     preference.getId(),
@@ -420,8 +432,6 @@ public class MercadoPagoService {
 
                 log.info("Shipment updated to PROCESSING for transaction {}", transactionId);
             }
-
-
 
         } catch (MPApiException e) {
             int status = e.getStatusCode();
