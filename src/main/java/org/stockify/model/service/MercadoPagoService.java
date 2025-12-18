@@ -152,13 +152,15 @@ public class MercadoPagoService {
                         .toList());
 
         long totalQuantity = items.stream().mapToLong(i -> i.getQuantity()).sum();
-        java.math.BigDecimal shippingCost = shipmentService.calculateShippingCost(totalQuantity);
+        Double shippingCostValue = shipmentService.calculateShippingCost(totalQuantity);
+        Double shippingCost = shippingCostValue != null ? Double.valueOf(shippingCostValue)
+                : Double.valueOf(0);
 
-        if (shippingCost != null && shippingCost.compareTo(java.math.BigDecimal.ZERO) > 0) {
+        if (shippingCost > 0) {
             items.add(PreferenceItemRequest.builder()
                     .title("Costo de envio")
                     .quantity(1)
-                    .unitPrice(shippingCost)
+                    .unitPrice(BigDecimal.valueOf(shippingCost))
                     .currencyId(DEFAULT_CURRENCY)
                     .build());
         }

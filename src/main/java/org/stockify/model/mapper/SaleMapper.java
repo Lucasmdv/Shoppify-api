@@ -5,7 +5,7 @@ import org.stockify.dto.request.sale.SaleRequest;
 import org.stockify.dto.response.SaleResponse;
 import org.stockify.model.entity.SaleEntity;
 
-@Mapper(componentModel = "spring", uses = {TransactionMapper.class})
+@Mapper(componentModel = "spring", uses = { TransactionMapper.class, ShipmentMapper.class })
 public interface SaleMapper {
 
     @Mapping(target = "user", ignore = true)
@@ -16,8 +16,8 @@ public interface SaleMapper {
     @Mapping(target = "userDni", source = "user.dni")
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "transaction", source = "transaction")
-    @Mapping(target = "shipmentId", source = "shipment.id")
-    SaleResponse toResponseDTO (SaleEntity entity);
+    @Mapping(target = "shipment", source = "shipment")
+    SaleResponse toResponseDTO(SaleEntity entity);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "user", ignore = true)
