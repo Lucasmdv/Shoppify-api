@@ -22,10 +22,8 @@ import org.stockify.dto.request.sale.SaleRequest;
 import org.stockify.dto.response.MercadoPagoPreferenceResponse;
 import org.stockify.dto.response.SaleResponse;
 import org.stockify.dto.request.transaction.DetailTransactionRequest;
-import org.stockify.model.entity.DetailTransactionEntity;
-import org.stockify.model.entity.PaymentDetailEntity;
-import org.stockify.model.entity.ProductEntity;
-import org.stockify.model.entity.TransactionEntity;
+import org.stockify.model.entity.*;
+import org.stockify.model.enums.OrderStatus;
 import org.stockify.model.enums.PaymentMethod;
 import org.stockify.model.enums.PaymentStatus;
 import org.stockify.model.enums.TransactionType;
@@ -33,6 +31,7 @@ import org.stockify.model.exception.NotFoundException;
 import org.stockify.model.event.PaymentStatusUpdatedEvent;
 import org.stockify.model.repository.ProductRepository;
 import org.stockify.model.repository.SaleRepository;
+import org.stockify.model.repository.ShipmentRepository;
 import org.stockify.model.repository.TransactionRepository;
 import org.stockify.util.PriceCalculator;
 
@@ -68,6 +67,7 @@ public class MercadoPagoService {
     private final TransactionService transactionService;
     private final ApplicationEventPublisher eventPublisher;
     private final PriceCalculator priceCalculator;
+    private final ShipmentRepository shipmentRepository;
 
     public MercadoPagoPreferenceResponse createPreference(SaleRequest request) {
         if (request == null || request.getTransaction() == null ||
@@ -393,6 +393,16 @@ public class MercadoPagoService {
                 log.info("Payment failed for transaction {}. Restoring stock...", transactionId);
                 transactionService.restoreStock(transaction);
             }
+
+            if (oldStatus != newStatus && newStatus == PaymentStatus.APPROVED) {
+                ShipmentEntity shipment = transaction.getSale().getShipment();
+                shipment.setStatus(OrderStatus.PROCESSING);
+                shipmentRepository.save(shipment);
+
+                log.info("Shipment updated to PROCESSING for transaction {}", transactionId);
+            }
+
+
 
         } catch (MPApiException e) {
             int status = e.getStatusCode();

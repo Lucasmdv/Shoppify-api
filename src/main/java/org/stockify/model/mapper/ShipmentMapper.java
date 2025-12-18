@@ -14,7 +14,7 @@ import java.time.LocalDate;
 public interface ShipmentMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "endDate", ignore = true)
-    @Mapping(target = "status", constant = "PROCESSING")
+    @Mapping(target = "status", constant = "PENDING")
     @Mapping(target = "startDate", expression = "java(java.time.LocalDate.now())")
     @Mapping(target = "sale", source = "sale")
     ShipmentEntity toEntity(ShipmentRequest dto, SaleEntity sale);
