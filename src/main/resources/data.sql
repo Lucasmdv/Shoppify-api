@@ -156,9 +156,11 @@ WHERE u.user_dni = '41689718'
 /* ================================
    STORE (singleton ID=1)
    ================================ */
-INSERT INTO stores (id, store_name, address, city,phone, facebook, instagram, twitter)
+INSERT INTO stores (id, store_name, address, city, phone, facebook, instagram, twitter,
+                    shipping_cost_small, shipping_cost_medium, shipping_cost_large)
 SELECT 1, 'Shoppify', 'Talcahuano 5123', 'Mar del Plata', '2236057991',
-       'https://facebook.com/shoppify', 'https://instagram.com/shoppify', 'https://x.com/shoppify'
+       'https://facebook.com/shoppify', 'https://instagram.com/shoppify', 'https://x.com/shoppify',
+       1200.00, 1800.00, 2500.00
 WHERE NOT EXISTS (SELECT 1 FROM stores WHERE id = 1);
 
 /* ================================
