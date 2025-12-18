@@ -19,7 +19,9 @@ import org.stockify.model.event.ProductStockUpdatedEvent;
 import org.stockify.model.event.ShipmentStateUpdatedEvent;
 import org.stockify.model.exception.NotFoundException;
 import org.stockify.model.mapper.ShipmentMapper;
+import org.stockify.model.repository.SaleRepository;
 import org.stockify.model.repository.ShipmentRepository;
+import org.stockify.model.repository.TransactionRepository;
 import org.stockify.model.specification.ShipmentSpecification;
 
 import java.time.LocalDate;
@@ -32,9 +34,14 @@ public class ShipmentService {
     private final ShipmentRepository shipmentRepository;
     private final ShipmentMapper shipmentMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final TransactionRepository transactionRepository;
 
     @Transactional
-    public void createShipmentIfNeeded(TransactionEntity transaction) {
+    public void createShipmentIfNeeded(Long transactionId) {
+        TransactionEntity transaction = transactionRepository
+                .findByIdWithSaleAndShippingInfo(transactionId)
+                .orElseThrow();
+
         SaleEntity sale = transaction.getSale();
         if (sale == null || sale.getShipment() != null) {
             return;
@@ -46,6 +53,8 @@ public class ShipmentService {
         shipment.setStartDate(LocalDate.now());
         shipment.setPickup(transaction.getSale().getShippingInfo().getPickup());
         shipment.setAdress(transaction.getSale().getShippingInfo().getAdress());
+
+        shipmentRepository.save(shipment);
         sale.setShipment(shipment);
     }
 

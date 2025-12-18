@@ -10,7 +10,6 @@ import org.stockify.config.AppEnvConfig;
 public class StockifyApplication {
     public static void main(String[] args) {
         AppEnvConfig.loadEnv();
-
         SpringApplication.run(StockifyApplication.class, args);
     }
 }

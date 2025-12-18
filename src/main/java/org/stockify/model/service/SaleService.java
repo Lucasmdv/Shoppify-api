@@ -99,23 +99,23 @@ public class SaleService {
 
         productRepository.saveAll(productsToUpdate); // Se guardan todos los cambios de stock
 
-        if (request.getShipment() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Shipping information is required");
-        }
-
-        if (Boolean.FALSE.equals(request.getShipment().getPickup())
-                && (request.getShipment().getAdress() == null
-                || request.getShipment().getAdress().isBlank())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Address is required when pickup is false"
-            );
-        }
-        ShippingInfoEntity info = new ShippingInfoEntity();
-        info.setPickup(request.getShipment().getPickup());
-        info.setAdress(request.getShipment().getAdress());
-        info.setSale(sale);
-        sale.setShippingInfo(info);
+//        if (request.getShipment() == null) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Shipping information is required");
+//        }
+//
+//        if (Boolean.FALSE.equals(request.getShipment().getPickup())
+//                && (request.getShipment().getAdress() == null
+//                || request.getShipment().getAdress().isBlank())) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.BAD_REQUEST,
+//                    "Address is required when pickup is false"
+//            );
+//        }
+//        ShippingInfoEntity info = new ShippingInfoEntity();
+//        info.setPickup(request.getShipment().getPickup());
+//        info.setAdress(request.getShipment().getAdress());
+//        info.setSale(sale);
+//        sale.setShippingInfo(info);
 
         SaleEntity saved = saleRepository.save(sale);
 

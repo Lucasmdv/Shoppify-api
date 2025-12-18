@@ -2,6 +2,7 @@ package org.stockify.model.repository;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.stockify.model.entity.TransactionEntity;
 import org.stockify.model.enums.PaymentStatus;
@@ -24,4 +25,13 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             PaymentStatus paymentStatus,
             TransactionType type
     );
+
+    @Query("""
+        SELECT t from TransactionEntity t
+        JOIN FETCH t.sale s
+        JOIN FETCH s.shippingInfo
+        LEFT JOIN FETCH s.shipment
+        WHERE t.id = :id
+    """)
+    Optional<TransactionEntity> findByIdWithSaleAndShippingInfo(Long id);
 }

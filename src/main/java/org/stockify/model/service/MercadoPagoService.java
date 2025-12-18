@@ -326,7 +326,7 @@ public class MercadoPagoService {
                 log.info("Payment failed for transaction {}. Restoring stock...", transactionId);
                 transactionService.restoreStock(transaction);
             }else {
-                shipmentService.createShipmentIfNeeded(transaction);
+                shipmentService.createShipmentIfNeeded(transaction.getId());
             }
         } catch (MPApiException e) {
             int status = e.getStatusCode();
