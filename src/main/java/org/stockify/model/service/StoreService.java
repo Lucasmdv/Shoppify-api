@@ -129,6 +129,7 @@ public class StoreService {
             entity.setStoreName("");
             entity.setAddress("");
             entity.setCity("");
+            entity.setPostalCode("");
             storeRepository.save(entity);
         }
     }

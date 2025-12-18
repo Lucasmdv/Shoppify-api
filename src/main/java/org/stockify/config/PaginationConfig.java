@@ -16,7 +16,8 @@ import java.util.List;
 @Configuration
 public class PaginationConfig implements WebMvcConfigurer {
 
-    private static final List<Integer> ALLOWED_SIZES = List.of(1, 2, 3, 4, 5, 8, 12, 16, 20);
+    private static final int MIN_SIZE = 1;
+    private static final int MAX_SIZE = 20;
     private static final int DEFAULT_SIZE = 12;
 
     @Override
@@ -36,7 +37,8 @@ public class PaginationConfig implements WebMvcConfigurer {
                         if (pageable == null) {
                             return PageRequest.of(0, DEFAULT_SIZE);
                         }
-                        int sanitizedSize = ALLOWED_SIZES.contains(pageable.getPageSize()) ? pageable.getPageSize() : DEFAULT_SIZE;
+                        int requestedSize = pageable.getPageSize();
+                        int sanitizedSize = Math.min(Math.max(requestedSize, MIN_SIZE), MAX_SIZE);
 
                         int sanitizedPage = pageable.getPageNumber() >= 0 ? pageable.getPageNumber() : 0;
                         return PageRequest.of(sanitizedPage, sanitizedSize, pageable.getSort());
@@ -44,7 +46,7 @@ public class PaginationConfig implements WebMvcConfigurer {
                 };
 
         resolver.setFallbackPageable(PageRequest.of(0, DEFAULT_SIZE));
-        resolver.setMaxPageSize(ALLOWED_SIZES.stream().max(Integer::compareTo).orElse(DEFAULT_SIZE));
+        resolver.setMaxPageSize(MAX_SIZE);
 
         resolvers.add(resolver);
     }

@@ -23,6 +23,9 @@ public record StoreResponse(
         @Schema(description = "Phone of the store", example = "223-4817825")
         String phone,
 
+        @Schema(description = "Postal Code", example = "1900")
+        String postalCode,
+
         @Schema(description = "Facebook page URL", example = "https://facebook.com/shoppify")
         String facebook,
 
@@ -33,5 +36,14 @@ public record StoreResponse(
         String twitter,
 
         @Schema(description = "Home page carousel items")
-        List<HomeCarouselItem> homeCarousel
-) {}
+        List<HomeCarouselItem> homeCarousel,
+
+        @Schema(description = "Shipping cost for small packages")
+        Double shippingCostSmall,
+
+        @Schema(description = "Shipping cost for medium packages")
+        Double shippingCostMedium,
+
+        @Schema(description = "Shipping cost for large packages")
+        Double shippingCostLarge) {
+}

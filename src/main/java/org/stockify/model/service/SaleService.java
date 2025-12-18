@@ -96,7 +96,7 @@ public class SaleService {
         productRepository.saveAll(productsToUpdate);
 
         sale.setShipment(shipmentService.mapShipment(request.getShipment(), sale));
-        productRepository.saveAll(productsToUpdate); // Se guardan todos los cambios de stock
+
         SaleEntity saved = saleRepository.save(sale);
 
         SaleResponse saleResponse = saleMapper.toResponseDTO(saved);

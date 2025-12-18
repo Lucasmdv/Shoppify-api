@@ -18,6 +18,7 @@ public interface ShipmentMapper {
     @Mapping(target = "startDate", expression = "java(java.time.LocalDate.now())")
     @Mapping(target = "notes", source = "dto.notes")
     @Mapping(target = "sale", source = "sale")
+    @Mapping(target = "shipmentCost", ignore = true)
     ShipmentEntity toEntity(ShipmentRequest dto, SaleEntity sale);
 
     @Mapping(target = "saleId", source = "sale.id")

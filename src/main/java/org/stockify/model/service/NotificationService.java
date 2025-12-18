@@ -72,21 +72,21 @@ public class NotificationService {
 
     @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public NotificationResponse createNotification(NotificationRequest request) {
-        checkRequestIntegrity(request);
+        checkRequestIntegrity(request, null);
         NotificationEntity entity = notificationMapper.toEntity(request);
         return getNotificationResponse(entity);
     }
 
     public NotificationResponse patchNotification(Long id, NotificationRequest request) {
         NotificationEntity entity = resolveNotification(id);
-        checkRequestIntegrity(request);
+        checkRequestIntegrity(request, entity);
         notificationMapper.patchEntityFromRequest(request, entity);
         return saveAndMaybeDispatch(entity);
     }
 
     public NotificationResponse updateNotification(Long id, NotificationRequest request) {
         NotificationEntity entity = resolveNotification(id);
-        checkRequestIntegrity(request);
+        checkRequestIntegrity(request, entity);
         notificationMapper.updateEntityFromRequest(request, entity);
         return saveAndMaybeDispatch(entity);
     }
@@ -189,7 +189,7 @@ public class NotificationService {
         }
     }
 
-    private void checkRequestIntegrity(NotificationRequest request) {
+    private void checkRequestIntegrity(NotificationRequest request, NotificationEntity existing) {
         if (request.relatedProductId() != null) {
             resolveProduct(request.relatedProductId());
         }
@@ -197,6 +197,7 @@ public class NotificationService {
             resolveUser(request.targetUserId());
         }
         validatePublishDate(request.publishAt());
+        validateExpirationDate(request.publishAt(), request.expiresAt(), existing);
     }
 
     private void resolveProduct(Long productId) {
@@ -258,6 +259,28 @@ public class NotificationService {
         if (publishDate.isBefore(today)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Publish date must be today or a future day");
+        }
+    }
+
+    private void validateExpirationDate(Instant publishAt, Instant expiresAt, NotificationEntity existing) {
+        boolean publishProvided = publishAt != null;
+        boolean expiresProvided = expiresAt != null;
+
+        if (!publishProvided && !expiresProvided) {
+            return;
+        }
+
+        Instant effectivePublishAt = publishProvided
+                ? publishAt
+                : existing != null ? existing.getPublishAt() : null;
+
+        Instant effectiveExpiresAt = expiresProvided
+                ? expiresAt
+                : existing != null ? existing.getExpiresAt() : null;
+
+        if (effectivePublishAt != null && effectiveExpiresAt != null && effectiveExpiresAt.isBefore(effectivePublishAt)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Expiration date cannot be before publish date");
         }
     }
 }
