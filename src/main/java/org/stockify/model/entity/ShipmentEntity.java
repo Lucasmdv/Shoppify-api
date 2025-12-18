@@ -52,4 +52,7 @@ public class ShipmentEntity {
 
     @Column(name = "notes")
     private String notes;
+
+    @Column(name = "shipment_cost")
+    private Double shipmentCost;
 }

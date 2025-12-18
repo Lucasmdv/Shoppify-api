@@ -45,4 +45,7 @@ public class ShipmentResponse {
 
     @Schema(description = "Notes of the shipment")
     private String notes;
+
+    @Schema(description = "Cost of the shipment")
+    private Double shipmentCost;
 }

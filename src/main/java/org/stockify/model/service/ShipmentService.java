@@ -19,6 +19,7 @@ import org.stockify.model.event.ShipmentStateUpdatedEvent;
 import org.stockify.model.exception.NotFoundException;
 import org.stockify.model.mapper.ShipmentMapper;
 import org.stockify.model.repository.ShipmentRepository;
+import org.stockify.model.repository.StoreRepository;
 import org.stockify.model.specification.ShipmentSpecification;
 
 import java.time.LocalDate;
@@ -31,15 +32,15 @@ public class ShipmentService {
     private final ShipmentRepository shipmentRepository;
     private final ShipmentMapper shipmentMapper;
     private final ApplicationEventPublisher eventPublisher;
-    private final org.stockify.model.repository.StoreRepository storeRepository;
+    private final StoreRepository storeRepository;
 
     public ShipmentEntity mapShipment(ShipmentRequest request, SaleEntity sale) {
         ShipmentEntity shipment = shipmentMapper.toEntity(request, sale);
 
         long quantity = sale.getTransaction() == null ? 0
                 : sale.getTransaction().getDetailTransactions().stream()
-                        .mapToLong(org.stockify.model.entity.DetailTransactionEntity::getQuantity)
-                        .sum();
+                .mapToLong(org.stockify.model.entity.DetailTransactionEntity::getQuantity)
+                .sum();
 
         Double shippingCost = calculateShippingCost(quantity);
 
@@ -77,7 +78,7 @@ public class ShipmentService {
                 .and(ShipmentSpecification.byStatus(mapStatus(filterRequest.getStatus())))
                 .and(ShipmentSpecification.byEndDate(filterRequest.getEndDate()))
                 .and(ShipmentSpecification.byStartDate(filterRequest.getStartDate()))
-                .and(ShipmentSpecification.byTotalRange(filterRequest.getMinPrice(), filterRequest.getMaxPrice()))
+                .and(ShipmentSpecification.byTotalRange(filterRequest.getMinPrice(),  filterRequest.getMaxPrice()))
                 .and(ShipmentSpecification.byPickup(filterRequest.getPickup()))
                 .and(ShipmentSpecification.byCity(filterRequest.getCity()));
 
@@ -107,8 +108,9 @@ public class ShipmentService {
         OrderStatus oldStatus = existingShipment.getStatus();
         shipmentMapper.partialUpdateOrderEntity(request, existingShipment);
 
-        switch (request.getStatus()) {
-            case "DELIVERED", "CANCELLED", "RETURNED" -> existingShipment.setEndDate(LocalDate.now());
+        switch(request.getStatus()) {
+            case "DELIVERED", "CANCELLED", "RETURNED"
+                    -> existingShipment.setEndDate(LocalDate.now());
         }
 
         ShipmentEntity updatedShipment = shipmentRepository.save(existingShipment);
@@ -118,14 +120,12 @@ public class ShipmentService {
     }
 
     private OrderStatus mapStatus(String status) {
-        if (status == null || status.isBlank())
-            return null;
+        if (status == null || status.isBlank()) return null;
         return OrderStatus.valueOf(status);
     }
 
-    private void statusTrigger(UpdateShipmentRequest request, ShipmentEntity savedEntity, OrderStatus oldStatus) {
-        if (request.getStatus() == null)
-            return;
+    private void statusTrigger(UpdateShipmentRequest request, ShipmentEntity savedEntity, OrderStatus oldStatus){
+        if (request.getStatus() == null) return;
         if (savedEntity.getStatus() != oldStatus) {
             Long saleId = savedEntity.getSale() != null ? savedEntity.getSale().getId() : null;
             Long userId = savedEntity.getSale() != null && savedEntity.getSale().getUser() != null
@@ -136,7 +136,8 @@ public class ShipmentService {
                     oldStatus,
                     savedEntity.getStatus(),
                     saleId,
-                    userId));
+                    userId
+            ));
         }
     }
 }

@@ -68,6 +68,7 @@ public class MercadoPagoService {
     private final ApplicationEventPublisher eventPublisher;
     private final PriceCalculator priceCalculator;
     private final ShipmentRepository shipmentRepository;
+    private final ShipmentService shipmentService;
 
     public MercadoPagoPreferenceResponse createPreference(SaleRequest request) {
         if (request == null || request.getTransaction() == null ||
