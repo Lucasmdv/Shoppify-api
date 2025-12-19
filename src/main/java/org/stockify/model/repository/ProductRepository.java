@@ -22,4 +22,10 @@ public interface ProductRepository extends JpaRepository<ProductEntity,Long>, Jp
     Optional<ProductEntity> findByName(String name);
 
     Optional<ProductEntity> findByBarcode(String barcode);
+
+    boolean existsByName(String name);
+
+    boolean existsBySku(String sku);
+
+    boolean existsByBarcode(String barcode);
 }

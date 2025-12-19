@@ -41,6 +41,7 @@ import org.stockify.util.StringNormalizer;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,6 +50,9 @@ import org.apache.poi.ss.usermodel.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
+import org.stockify.dto.response.ProductPreviewResponse;
 
 /**
  * Service class for managing products in the system.
@@ -69,6 +73,7 @@ public class ProductService {
     private final CategoryMapper categoryMapper;
     private final ProviderRepository providerRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final Validator validator;
 
     /**
      * Finds a product by its ID.
@@ -191,17 +196,41 @@ public class ProductService {
     public BulkProductResponse importProductsCsv(MultipartFile file) throws Exception {
         InputStreamReader reader = new InputStreamReader(file.getInputStream());
 
-        List<ProductCSVRequest> csvDtos = new CsvToBeanBuilder<ProductCSVRequest>(reader)
+        com.opencsv.bean.CsvToBean<ProductCSVRequest> csvToBean = new CsvToBeanBuilder<ProductCSVRequest>(reader)
                 .withType(ProductCSVRequest.class)
                 .withIgnoreLeadingWhiteSpace(true)
-                .build()
-                .parse();
+                .withThrowExceptions(false)
+                .build();
+
+        List<ProductCSVRequest> csvDtos = csvToBean.parse();
+        List<com.opencsv.exceptions.CsvException> exceptions = csvToBean.getCapturedExceptions();
 
         List<ProductRequest> requests = csvDtos.stream()
                 .map(productMapper::toRequest)
                 .collect(Collectors.toList());
 
-        return saveAll(requests);
+        BulkProductResponse response = saveAll(requests);
+
+        // Process parsing errors
+        for (com.opencsv.exceptions.CsvException e : exceptions) {
+            String errorMessage = "Error parsing line " + e.getLineNumber() + ": " + e.getMessage();
+            response.getResults().add(new BulkItemResponse(
+                    "Row " + e.getLineNumber(),
+                    "ERROR",
+                    errorMessage));
+        }
+
+        // Reconstruct response with updated error count
+        if (!exceptions.isEmpty()) {
+            return new BulkProductResponse(
+                    response.getTotalRequested() + exceptions.size(),
+                    response.getTotalCreated(),
+                    response.getTotalSkipped(),
+                    response.getTotalError() + exceptions.size(),
+                    response.getResults());
+        }
+
+        return response;
     }
 
     private BulkProductResponse importProductsExcel(MultipartFile file) throws Exception {
@@ -246,7 +275,7 @@ public class ProductService {
      * @return a list of maps representing the preview data
      * @throws Exception if an error occurs while processing the file
      */
-    public List<Map<String, String>> previewProducts(MultipartFile file) throws Exception {
+    public List<ProductPreviewResponse> previewProducts(MultipartFile file) throws Exception {
         String filename = file.getOriginalFilename();
         if (filename != null && (filename.endsWith(".xls") || filename.endsWith(".xlsx"))) {
             return previewProductsExcel(file);
@@ -254,7 +283,7 @@ public class ProductService {
         return previewProductsCsv(file);
     }
 
-    private List<Map<String, String>> previewProductsCsv(MultipartFile file) throws Exception {
+    private List<ProductPreviewResponse> previewProductsCsv(MultipartFile file) throws Exception {
         InputStreamReader reader = new InputStreamReader(file.getInputStream());
         List<ProductCSVRequest> csvDtos = new CsvToBeanBuilder<ProductCSVRequest>(reader)
                 .withType(ProductCSVRequest.class)
@@ -262,7 +291,11 @@ public class ProductService {
                 .build()
                 .parse();
 
-        List<Map<String, String>> previewData = new ArrayList<>();
+        List<ProductPreviewResponse> previewData = new ArrayList<>();
+        Set<String> seenNames = new HashSet<>();
+        Set<String> seenSkus = new HashSet<>();
+        Set<String> seenBarcodes = new HashSet<>();
+
         int count = 0;
         for (ProductCSVRequest dto : csvDtos) {
             if (count >= 10)
@@ -278,14 +311,75 @@ public class ProductService {
             row.put("brand", dto.getBrand());
             row.put("img_url", dto.getImgURL());
             row.put("categories", dto.getCategories());
-            previewData.add(row);
+
+            Map<String, String> errors = new HashMap<>();
+            validatePreviewItem(dto, errors, seenNames, seenSkus, seenBarcodes);
+
+            previewData.add(new ProductPreviewResponse(row, errors));
             count++;
         }
         return previewData;
     }
 
-    private List<Map<String, String>> previewProductsExcel(MultipartFile file) throws Exception {
-        List<Map<String, String>> previewData = new ArrayList<>();
+    private void validatePreviewItem(ProductCSVRequest dto, Map<String, String> errors, Set<String> seenNames,
+            Set<String> seenSkus, Set<String> seenBarcodes) {
+        // Required fields check
+        if (dto.getName() == null || dto.getName().isBlank()) {
+            errors.put("name", "Name is required");
+        } else {
+            String normalizedName = StringNormalizer.normalize(dto.getName());
+            if (seenNames.contains(normalizedName)) {
+                errors.put("name", "Duplicate in file");
+            } else if (productRepository.existsByName(dto.getName())) {
+                errors.put("name", "Already exists in database");
+            }
+            seenNames.add(normalizedName);
+        }
+
+        if (dto.getPrice() == null) {
+            errors.put("price", "Price is required");
+        }
+        if (dto.getStock() == null) {
+            errors.put("stock", "Stock is required");
+        }
+
+        if (dto.getSku() == null || dto.getSku().isBlank()) {
+            errors.put("sku", "SKU is required");
+        } else {
+            if (seenSkus.contains(dto.getSku())) {
+                errors.put("sku", "Duplicate in file");
+            } else if (productRepository.existsBySku(dto.getSku())) {
+                errors.put("sku", "Already exists in database");
+            }
+            seenSkus.add(dto.getSku());
+        }
+
+        if (dto.getBarcode() == null || dto.getBarcode().isBlank()) {
+            errors.put("barcode", "Barcode is required");
+        } else {
+            if (seenBarcodes.contains(dto.getBarcode())) {
+                errors.put("barcode", "Duplicate in file");
+            } else if (productRepository.existsByBarcode(dto.getBarcode())) {
+                errors.put("barcode", "Already exists in database");
+            }
+            seenBarcodes.add(dto.getBarcode());
+        }
+
+        ProductRequest request = productMapper.toRequest(dto);
+        Set<ConstraintViolation<ProductRequest>> violations = validator.validate(request);
+        for (ConstraintViolation<ProductRequest> v : violations) {
+            if (!errors.containsKey(v.getPropertyPath().toString())) {
+                errors.put(v.getPropertyPath().toString(), v.getMessage());
+            }
+        }
+    }
+
+    private List<ProductPreviewResponse> previewProductsExcel(MultipartFile file) throws Exception {
+        List<ProductPreviewResponse> previewData = new ArrayList<>();
+        Set<String> seenNames = new HashSet<>();
+        Set<String> seenSkus = new HashSet<>();
+        Set<String> seenBarcodes = new HashSet<>();
+
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = sheet.iterator();
@@ -310,7 +404,24 @@ public class ProductService {
                 for (String header : headers) {
                     rowData.put(header, getCellValueAsString(row, headerMap.get(header)));
                 }
-                previewData.add(rowData);
+
+                // Construct ProductCSVRequest for validation consistency
+                ProductCSVRequest csvRequest = new ProductCSVRequest();
+                csvRequest.setName(getCellValueAsString(row, headerMap.get("name")));
+                csvRequest.setDescription(getCellValueAsString(row, headerMap.get("description")));
+                csvRequest.setPrice(getCellValueAsBigDecimal(row, headerMap.get("price")));
+                csvRequest.setUnitPrice(getCellValueAsBigDecimal(row, headerMap.get("unit_price")));
+                csvRequest.setStock(getCellValueAsLong(row, headerMap.get("stock")));
+                csvRequest.setSku(getCellValueAsString(row, headerMap.get("sku")));
+                csvRequest.setBarcode(getCellValueAsString(row, headerMap.get("barcode")));
+                csvRequest.setBrand(getCellValueAsString(row, headerMap.get("brand")));
+                csvRequest.setImgURL(getCellValueAsString(row, headerMap.get("img_url")));
+                csvRequest.setCategories(getCellValueAsString(row, headerMap.get("categories")));
+
+                Map<String, String> errors = new HashMap<>();
+                validatePreviewItem(csvRequest, errors, seenNames, seenSkus, seenBarcodes);
+
+                previewData.add(new ProductPreviewResponse(rowData, errors));
                 count++;
             }
         }

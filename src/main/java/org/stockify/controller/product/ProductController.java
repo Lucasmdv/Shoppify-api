@@ -31,7 +31,7 @@ import org.stockify.model.assembler.ProductModelAssembler;
 import org.stockify.model.service.ProductService;
 
 import java.util.List;
-import java.util.Map;
+import org.stockify.dto.response.ProductPreviewResponse;
 
 @RestController
 @RequestMapping("/products")
@@ -92,11 +92,11 @@ public class ProductController {
         @Operation(summary = "Preview products from CSV or Excel file")
         @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('WRITE')")
         @ApiResponse(responseCode = "200", description = "Successful preview")
-        public ResponseEntity<List<Map<String, String>>> previewProducts(
+        public ResponseEntity<List<ProductPreviewResponse>> previewProducts(
                         @Parameter(description = "File to preview", required = true, content = @Content(mediaType = "multipart/form-data", schema = @Schema(type = "string", format = "binary"))) @RequestParam("file") MultipartFile archivo) {
 
                 try {
-                        List<Map<String, String>> response = productService.previewProducts(archivo);
+                        List<ProductPreviewResponse> response = productService.previewProducts(archivo);
                         return ResponseEntity.ok(response);
                 } catch (Exception e) {
                         return ResponseEntity.badRequest().build();
