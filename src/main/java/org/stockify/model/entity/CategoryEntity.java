@@ -23,11 +23,11 @@ public class CategoryEntity {
     private Integer id;
 
 
-    @Column(name = "name",unique = true, nullable = false)
+    @Column(name = "name", unique = true, nullable = false, length = 50)
     private String name;
 
 
-    @Column(name = "img_url")
+    @Column(name = "img_url", length = 200)
     private String imgUrl;
 
     @ManyToMany(mappedBy = "categories")

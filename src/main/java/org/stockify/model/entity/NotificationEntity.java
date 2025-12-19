@@ -23,6 +23,7 @@ public class NotificationEntity {
     private Long id;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private NotificationType type;
 
     @Enumerated(EnumType.STRING)
@@ -37,8 +38,11 @@ public class NotificationEntity {
 
     private Instant expiresAt;
 
+    @Column(length = 120, nullable = false)
     private String title;
+    @Column(length = 500, nullable = false)
     private String message;
+    @Column(length = 120)
     private String icon;
     private Long targetUserId;
     private Long relatedProductId;

@@ -221,9 +221,12 @@ public class AuthService {
         CredentialsEntity user = credentialsRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        if (request.getCurrentPassword() != null &&
-                !passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("La contraseña actual no es correcta");
+        if (request.getCurrentPassword() == null || request.getCurrentPassword().isBlank()) {
+            throw new IllegalArgumentException("Current password is required");
+        }
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect");
         }
 
         if (request.getNewEmail() != null && !request.getNewEmail().isBlank()) {

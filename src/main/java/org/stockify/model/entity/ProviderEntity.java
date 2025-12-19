@@ -21,24 +21,24 @@ public class ProviderEntity {
     @Column(name = "provider_id", nullable = false ,unique = true)
     private Long id;
 
-    @Column(name = "business_name", nullable = false ,unique = true)
+    @Column(name = "business_name", nullable = false, unique = true, length = 255)
     private String businessName;
 
 
     @Column(nullable = false, length = 100 , unique = true)
     private String taxId;
 
-    @Column(name = "tax_address", nullable = false)
+    @Column(name = "tax_address", nullable = false, length = 255)
     private String taxAddress;
 
 
-    @Column(unique = true)
+    @Column(unique = true, length = 255)
     private String phone;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    @Column(name = "contact_name", nullable = false)
+    @Column(name = "contact_name", nullable = false, length = 100)
     private String name;
 
 

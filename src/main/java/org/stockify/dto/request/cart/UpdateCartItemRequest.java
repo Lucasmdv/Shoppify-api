@@ -14,7 +14,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UpdateCartItemRequest {
 
-    @Schema(description = "New quantity for the cart item", example = "3")
+    @Schema(description = "New quantity for the cart item", example = "3", minimum = "1")
     @NotNull(message = "Quantity is required")
     @Min(value = 1, message = "Quantity must be at least 1")
     private Long quantity;

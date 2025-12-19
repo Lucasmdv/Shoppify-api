@@ -12,7 +12,7 @@ import lombok.*;
  */
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "password")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -25,14 +25,15 @@ public class CredentialRequest {
     @Pattern(regexp = "^[A-Za-z0-9._-]+$", message = "Username must contain only letters, numbers, dots, hyphens or underscores")
     private String username;
 
-    @Schema(description = "User password (must be encrypted before storing).", example = "P@ssw0rd123", minLength = 8)
+    @Schema(description = "User password (must be encrypted before storing).", example = "P@ssw0rd123", minLength = 8, maxLength = 100)
     @NotBlank(message = "Password is required")
     @Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
     private String password;
 
-    @Schema(description = "User email address used for communication or account recovery.", example = "john@example.com")
+    @Schema(description = "User email address used for communication or account recovery.", example = "john@example.com", maxLength = 255)
     @NotBlank(message = "Email is required")
     @Email(message = "Email must be valid")
+    @Size(max = 255, message = "Email cannot exceed 255 characters")
     private String email;
 
     // Roles and permits are managed separately; not part of basic credential input

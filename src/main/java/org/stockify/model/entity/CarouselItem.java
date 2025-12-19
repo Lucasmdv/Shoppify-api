@@ -36,7 +36,7 @@ public class CarouselItem {
     @Column(name = "url", length = 512)
     private String url;
 
-    @Column(name = "title", length = 255)
+    @Column(name = "title", length = 80)
     private String title;
 
     @Column(name = "href", length = 512)

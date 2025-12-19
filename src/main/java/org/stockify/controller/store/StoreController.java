@@ -75,7 +75,7 @@ public class StoreController {
         @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('WRITE')")
         public ResponseEntity<EntityModel<StoreResponse>> replaceCarousel(
                         @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "List of carousel items to set (url, title)")
-                        @RequestBody java.util.List<HomeCarouselItem> items) {
+                        @Valid @RequestBody java.util.List<@Valid HomeCarouselItem> items) {
                 StoreResponse store = homeCarouselService.replaceCarousel(STORE_ID, items);
                 return ResponseEntity.ok(storeModelAssembler.toModel(store));
         }
@@ -112,7 +112,7 @@ public class StoreController {
         @PostMapping("/carousel")
         @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('WRITE')")
         public ResponseEntity<HomeCarouselItem> createCarouselItem(
-                        @RequestBody HomeCarouselItem item) {
+                        @Valid @RequestBody HomeCarouselItem item) {
                 HomeCarouselItem created = homeCarouselService.createCarouselItem(STORE_ID, item);
                 URI location = URI.create("/stores/carousel/" + created.id());
                 return ResponseEntity.created(location).body(created);
@@ -127,7 +127,7 @@ public class StoreController {
         @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('WRITE')")
         public ResponseEntity<HomeCarouselItem> updateCarouselItem(
                         @Parameter(description = "Carousel identifier") @PathVariable Long itemId,
-                        @RequestBody HomeCarouselItem item) {
+                        @Valid @RequestBody HomeCarouselItem item) {
                 return ResponseEntity.ok(homeCarouselService.updateCarouselItem(STORE_ID, itemId, item));
         }
 

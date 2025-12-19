@@ -22,5 +22,6 @@ public class SaleRequest {
     TransactionRequest transaction;
 
     @Schema(description = "Details of the shipment")
+    @Valid
     ShipmentRequest shipment;
 }

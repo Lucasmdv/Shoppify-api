@@ -14,17 +14,17 @@ public record NotificationRequest(
         @NotNull(message = "Notification type is required")
         NotificationType type,
 
-        @Schema(description = "Short title to display", example = "Price drop!")
+        @Schema(description = "Short title to display", example = "Price drop!", minLength = 4, maxLength = 120)
         @NotBlank(message = "Title is required")
-        @Size(max = 120, message = "Title cannot exceed 120 characters")
+        @Size(min = 4, max = 120, message = "Title must be between 4 and 120 characters")
         String title,
 
-        @Schema(description = "Notification message to show the user", example = "The product is back in stock")
+        @Schema(description = "Notification message to show the user", example = "The product is back in stock", minLength = 4, maxLength = 500)
         @NotBlank(message = "Message is required")
-        @Size(max = 500, message = "Message cannot exceed 500 characters")
+        @Size(min = 4, max = 500, message = "Message must be between 4 and 500 characters")
         String message,
 
-        @Schema(description = "Icon identifier or URL", example = "bell")
+        @Schema(description = "Icon identifier or URL", example = "bell", maxLength = 120)
         @Size(max = 120, message = "Icon cannot exceed 120 characters")
         String icon,
 
