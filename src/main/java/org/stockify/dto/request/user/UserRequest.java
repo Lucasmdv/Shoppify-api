@@ -18,13 +18,13 @@ public class UserRequest {
     private String img;
 
     @NotBlank
-    @Size(min = 2, max = 20, message = "First name must be between 2 and 20 characters")
+    @Size(max = 20, message = "Max length for first name is 20 characters")
     @Pattern(regexp = "^[\\p{L}\\s]+$", message = "First name must contain only letters")
     @Schema(description = "User's first name", example = "María", maxLength = 20)
     private String firstName;
 
     @NotBlank
-    @Size(min = 2, max = 20, message = "Last name must be between 2 and 20 characters")
+    @Size(max = 20, message = "Max length for last name is 20 characters")
     @Pattern(regexp = "^[\\p{L}\\s]+$", message = "Last name must contain only letters")
     @Schema(description = "User's last name", example = "Rodríguez", maxLength = 20)
     private String lastName;
