@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -41,16 +42,25 @@ public class NotificationService {
     private final UserRepository userRepository;
     private final NotificationReadRepository notificationReadRepository;
     private final NotificationHiddenRepository notificationHiddenRepository;
-    private final Map<Long, SseEmitter> activeEmitters = new ConcurrentHashMap<>();
+    private final Map<Long, Set<SseEmitter>> activeEmitters = new ConcurrentHashMap<>();
 
     // SSE
     public SseEmitter subscribe(Long userId) {
         SseEmitter emitter = new SseEmitter(3600000L);
-        activeEmitters.put(userId, emitter);
+        activeEmitters.computeIfAbsent(userId, key -> ConcurrentHashMap.newKeySet())
+                .add(emitter);
 
-        emitter.onCompletion(() -> activeEmitters.remove(userId));
-        emitter.onTimeout(() -> activeEmitters.remove(userId));
-        emitter.onError(e -> activeEmitters.remove(userId));
+        emitter.onCompletion(() -> removeEmitter(userId, emitter));
+        emitter.onTimeout(() -> removeEmitter(userId, emitter));
+        emitter.onError(e -> removeEmitter(userId, emitter));
+
+        try {
+            emitter.send(SseEmitter.event()
+                    .name("keepalive")
+                    .data("keepalive"));
+        } catch (IOException e) {
+            removeEmitter(userId, emitter);
+        }
 
         return emitter;
     }
@@ -175,16 +185,44 @@ public class NotificationService {
         });
     }
 
-    private void sendToUser(Long userId, NotificationResponse notification) {
-        SseEmitter emitter = activeEmitters.get(userId);
-        if (emitter == null)
+    private void sendToUser(Long userId, NotificationResponse notification) {   
+        Set<SseEmitter> emitters = activeEmitters.get(userId);
+        if (emitters == null || emitters.isEmpty())
             return;
 
-        try {
-            emitter.send(SseEmitter.event()
-                    .name("notification")
-                    .data(notification));
-        } catch (IOException e) {
+        emitters.forEach(emitter -> {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("notification")
+                        .data(notification));
+            } catch (IOException e) {
+                removeEmitter(userId, emitter);
+            }
+        });
+    }
+
+    @Scheduled(fixedRate = 25000)
+    public void sendKeepAlive() {
+        activeEmitters.forEach((userId, emitters) -> {
+            emitters.forEach(emitter -> {
+                try {
+                    emitter.send(SseEmitter.event()
+                            .name("keepalive")
+                            .data("keepalive"));
+                } catch (IOException e) {
+                    removeEmitter(userId, emitter);
+                }
+            });
+        });
+    }
+
+    private void removeEmitter(Long userId, SseEmitter emitter) {
+        Set<SseEmitter> emitters = activeEmitters.get(userId);
+        if (emitters == null) {
+            return;
+        }
+        emitters.remove(emitter);
+        if (emitters.isEmpty()) {
             activeEmitters.remove(userId);
         }
     }
