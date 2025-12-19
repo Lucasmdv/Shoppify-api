@@ -19,11 +19,11 @@ public class MercadoPagoIntegrationConfig implements InitializingBean {
     private String webhookSecret;
 
     @Getter
-    @Value("${mp.frontend-base.url}")
+    @Value("${FRONTEND_BASE}")
     private String frontendBase;
 
     @Getter
-    @Value("${mp.notification.url}")
+    @Value("${NOTIFICATION_URL}")
     private String notificationUrl;
 
     @Override
@@ -34,17 +34,5 @@ public class MercadoPagoIntegrationConfig implements InitializingBean {
         }
         MercadoPagoConfig.setAccessToken(accessToken);
         log.info("Mercado Pago SDK initialized successfully.");
-    }
-
-    public String getSuccessUrl() {
-        return frontendBase + "/purchases";
-    }
-
-    public String getPendingUrl() {
-        return frontendBase + "/purchases";
-    }
-
-    public String getFailureUrl() {
-        return frontendBase + "/purchases";
     }
 }

@@ -161,9 +161,9 @@ public class MercadoPagoService {
         }
 
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
-                .success(mercadoPagoConfig.getSuccessUrl())
-                .pending(mercadoPagoConfig.getPendingUrl())
-                .failure(mercadoPagoConfig.getFailureUrl())
+                .success(mercadoPagoConfig.getFrontendBase()+"/purchase/"+transactionId)
+                .pending(mercadoPagoConfig.getFrontendBase()+"/purchase/"+transactionId)
+                .failure(mercadoPagoConfig.getFrontendBase()+"/purchase/"+transactionId)
                 .build();
 
         PreferenceRequest.PreferenceRequestBuilder preferenceRequestBuilder = PreferenceRequest.builder()

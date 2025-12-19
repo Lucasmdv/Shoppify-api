@@ -31,7 +31,7 @@ public class UserEntity {
     private String lastName;
 
 
-    @Column(name = "user_dni", nullable = false, length = 8)
+    @Column(name = "user_dni", nullable = false, length = 8, unique = true)
     private String dni;
 
 
