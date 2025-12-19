@@ -21,14 +21,14 @@ public class StoreEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Size(max = 15)
-    @NotNull
-    @Column(name = "store_name", nullable = false, length = 15)
-    private String storeName;
-
     @Size(max = 100)
     @NotNull
-    @Column(name = "address", nullable = false, length = 100)
+    @Column(name = "store_name", nullable = false, length = 100)
+    private String storeName;
+
+    @Size(max = 255)
+    @NotNull
+    @Column(name = "address", nullable = false)
     private String address;
 
     @Size(max = 100)
@@ -36,26 +36,25 @@ public class StoreEntity {
     @Column(name = "city", nullable = false, length = 100)
     private String city;
 
-    @Size(max = 20)
+    @Size(max = 100)
     @NotNull
-    @Column(name = "phone", nullable = false, length = 20)
+    @Column(name = "phone", nullable = false, length = 100)
     private String phone;
 
     @Size(max = 20)
-    @NotNull
-    @Column(name = "postal_code", length = 20, nullable = false)
+    @Column(name = "postal_code", length = 20)
     private String postalCode;
 
-    @Size(max = 100)
-    @Column(name = "facebook", length = 100)
+    @Size(max = 255)
+    @Column(name = "facebook", length = 255)
     private String facebook;
 
-    @Size(max = 100)
-    @Column(name = "instagram", length = 100)
+    @Size(max = 255)
+    @Column(name = "instagram", length = 255)
     private String instagram;
 
-    @Size(max = 100)
-    @Column(name = "twitter", length = 100)
+    @Size(max = 255)
+    @Column(name = "twitter", length = 255)
     private String twitter;
 
     @OneToMany(mappedBy = "store", fetch = FetchType.LAZY)

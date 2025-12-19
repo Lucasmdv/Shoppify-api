@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 @Configuration
 public class MercadoPagoIntegrationConfig implements InitializingBean {
-    private static final String DEFAULT_FRONTEND_BASE = "http://localhost:4200";
 
     @Value("${TEST_ACCESS_TOKEN}")
     private String accessToken;
@@ -38,43 +37,14 @@ public class MercadoPagoIntegrationConfig implements InitializingBean {
     }
 
     public String getSuccessUrl() {
-        return buildPurchaseUrl(null);
+        return frontendBase + "/purchases";
     }
 
     public String getPendingUrl() {
-        return buildPurchaseUrl(null);
+        return frontendBase + "/purchases";
     }
 
     public String getFailureUrl() {
-        return buildPurchaseUrl(null);
-    }
-
-    public String getSuccessUrl(Long saleId) {
-        return buildPurchaseUrl(saleId);
-    }
-
-    public String getPendingUrl(Long saleId) {
-        return buildPurchaseUrl(saleId);
-    }
-
-    public String getFailureUrl(Long saleId) {
-        return buildPurchaseUrl(saleId);
-    }
-
-    private String buildPurchaseUrl(Long saleId) {
-        String base = normalizeFrontendBase();
-        if (saleId == null) {
-            return base + "/purchases";
-        }
-        return base + "/purchase/" + saleId;
-    }
-
-    private String normalizeFrontendBase() {
-        String base = frontendBase;
-        if (base == null || base.isBlank()) {
-            log.warn("mp.frontend-base.url is blank; using default {}", DEFAULT_FRONTEND_BASE);
-            base = DEFAULT_FRONTEND_BASE;
-        }
-        return base.endsWith("/") ? base.substring(0, base.length() - 1) : base;
+        return frontendBase + "/purchases";
     }
 }

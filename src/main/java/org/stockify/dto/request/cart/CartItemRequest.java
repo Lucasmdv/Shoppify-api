@@ -18,7 +18,7 @@ public class CartItemRequest {
     @NotNull(message = "Product identifier is required")
     private Long productId;
 
-    @Schema(description = "Quantity of items for this product", example = "2", minimum = "1")
+    @Schema(description = "Quantity of items for this product", example = "2")
     @NotNull(message = "Quantity is required")
     @Min(value = 1, message = "Quantity must be at least 1")
     private Long quantity;

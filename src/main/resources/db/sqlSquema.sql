@@ -2,8 +2,8 @@ create table public.categories
 (
     id      serial
         primary key,
-    img_url varchar(200),
-    name    varchar(50) not null
+    img_url varchar(255),
+    name    varchar(255) not null
         unique
 );
 
@@ -33,10 +33,10 @@ create table public.credentials
         unique
         constraint fkiqlblk63xq1ylv3hhuoj6mdrq
             references public.users,
-    email    varchar(255) not null
+    email    varchar(255)
         unique,
-    password varchar(100) not null,
-    username varchar(50) not null
+    password varchar(255),
+    username varchar(255)
 );
 
 alter table public.credentials
@@ -60,20 +60,20 @@ alter table public.permits
 create table public.products
 (
     discount_percentage numeric(5, 2)  default 0,
-    price               numeric(10, 2) default 0 not null,
-    unit_price          numeric(10, 2) default 0 not null,
+    price               numeric(10, 2) default 0,
+    unit_price          numeric(10, 2) default 0,
     id                  bigserial
         primary key,
     sold_quantity       bigint         default 0,
-    stock_quantity      bigint         default 0 not null,
-    barcode             varchar(12) not null
+    stock_quantity      bigint         default 0,
+    barcode             varchar(255)
         unique,
-    brand               varchar(50) not null,
+    brand               varchar(255),
     img_url             varchar(255),
-    name                varchar(50) not null
+    name                varchar(255) not null
         unique,
-    sku                 varchar(12)   default '-1'::integer not null,
-    description         varchar(500)
+    sku                 varchar(255)   default '-1'::integer,
+    description         text
 );
 
 alter table public.products
@@ -102,7 +102,7 @@ create table public.providers
         unique,
     business_name varchar(255)         not null
         unique,
-    contact_name  varchar(100)         not null,
+    contact_name  varchar(255)         not null,
     email         varchar(255)         not null
         unique,
     phone         varchar(255)
@@ -227,16 +227,12 @@ create table public.stores
     id         bigserial
         primary key,
     city       varchar(100) not null,
-    phone      varchar(20) not null,
-    store_name varchar(15) not null,
-    address    varchar(100) not null,
-    postal_code varchar(20) not null,
-    facebook   varchar(100),
-    instagram  varchar(100),
-    twitter    varchar(100),
-    shipping_cost_small numeric(10, 2),
-    shipping_cost_medium numeric(10, 2),
-    shipping_cost_large numeric(10, 2)
+    phone      varchar(100) not null,
+    store_name varchar(100) not null,
+    address    varchar(255) not null,
+    facebook   varchar(255),
+    instagram  varchar(255),
+    twitter    varchar(255)
 );
 
 alter table public.stores
@@ -251,7 +247,7 @@ create table public.store_home_carousel
             references public.stores,
     href     varchar(512),
     url      varchar(512),
-    title    varchar(80)
+    title    varchar(255)
 );
 
 alter table public.store_home_carousel

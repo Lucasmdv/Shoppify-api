@@ -51,7 +51,7 @@ public class UserEntity {
     @OneToOne(mappedBy = "user")
     private CartEntity cart ;
 
-    @Column(name = "user_img", length = 255)
+    @Column(name = "user_img")
     private String img;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)

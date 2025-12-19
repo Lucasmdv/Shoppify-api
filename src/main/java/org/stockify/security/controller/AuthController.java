@@ -93,7 +93,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Invalid request format")
     })
     public ResponseEntity<LoginResponse> login(
-            @Parameter(description = "Authentication credentials") @Valid @RequestBody AuthRequest authRequest) {
+            @Parameter(description = "Authentication credentials") @RequestBody AuthRequest authRequest) {
         UserDetails userDetails = authService.authenticate(authRequest);
         String token = jwtService.generateToken(userDetails);
         org.stockify.security.model.entity.CredentialsEntity cred = (org.stockify.security.model.entity.CredentialsEntity) userDetails;
@@ -133,6 +133,7 @@ public class AuthController {
         summary = "Register user profile and credentials",
         description = "Registers a new user profile and credentials in one step and assigns default USER role")
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
+        System.out.println(request);
         org.stockify.security.model.entity.CredentialsEntity saved = authService.register(request);
         String token = jwtService.generateToken(saved);
         UserResponse profile = userMapper.toDto(saved.getUser());

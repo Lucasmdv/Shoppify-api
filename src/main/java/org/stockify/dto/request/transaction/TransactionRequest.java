@@ -1,7 +1,6 @@
 package org.stockify.dto.request.transaction;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,8 +21,7 @@ public class TransactionRequest {
     private PaymentMethod paymentMethod;
 
     @Schema(description = "List of transaction details")
-    @NotEmpty(message = "Details are required")
-    @Valid
+    @NotNull(message = "Details are required")
     private List<DetailTransactionRequest> detailTransactions;
 
     @Schema(description = "Optional description of the transaction", example = "Customer paid in cash")

@@ -75,7 +75,6 @@ public class MercadoPagoService {
 
         String idempotencyKey = generateIdempotencyKey(request);
         Long transactionId;
-        Long saleId = null;
         TransactionEntity transactionToUse = transactionRepository
                 .findFirstByIdempotencyKeyAndPaymentStatusAndType(
                         idempotencyKey,
@@ -104,7 +103,6 @@ public class MercadoPagoService {
             if (transactionToUse != null) {
                 transactionId = transactionToUse.getId();
                 log.info("Reusing pending transaction {} with idempotencyKey {}", transactionId, idempotencyKey);
-                saleId = saleRepository.findSaleIdByTransactionId(transactionId).orElse(null);
             } else {
                 if (keyUsedByClosedTransaction) {
                     idempotencyKey = idempotencyKey + ":" + UUID.randomUUID();
@@ -113,7 +111,6 @@ public class MercadoPagoService {
                 }
                 SaleResponse saleResponse = saleService.createSale(request, idempotencyKey);
                 transactionId = saleResponse.getTransaction().getId();
-                saleId = saleResponse.getId();
             }
         } catch (DataIntegrityViolationException e) {
             // Ya existe una transaccion PENDING con la misma key: reutilizarla
@@ -126,7 +123,6 @@ public class MercadoPagoService {
                             "Existing pending transaction not found for idempotency key"));
             transactionId = transactionToUse.getId();
             log.info("Reusing pending transaction {} with idempotencyKey {}", transactionId, idempotencyKey);
-            saleId = saleRepository.findSaleIdByTransactionId(transactionId).orElse(null);
         }
 
         // Intentar obtener el email del usuario desde el SecurityContext
@@ -165,9 +161,9 @@ public class MercadoPagoService {
         }
 
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
-                .success(mercadoPagoConfig.getSuccessUrl(saleId))
-                .pending(mercadoPagoConfig.getPendingUrl(saleId))
-                .failure(mercadoPagoConfig.getFailureUrl(saleId))
+                .success(mercadoPagoConfig.getSuccessUrl())
+                .pending(mercadoPagoConfig.getPendingUrl())
+                .failure(mercadoPagoConfig.getFailureUrl())
                 .build();
 
         PreferenceRequest.PreferenceRequestBuilder preferenceRequestBuilder = PreferenceRequest.builder()

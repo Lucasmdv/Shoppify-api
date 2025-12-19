@@ -19,18 +19,18 @@ public class ProductEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name", unique = true, nullable = false, length = 50)
+    @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-    @Column(name = "description", length = 500)
+    @Column(name = "description", length = Integer.MAX_VALUE)
     private String description;
 
     @ColumnDefault("0")
-    @Column(name = "price", precision = 10, scale = 2, nullable = false)
+    @Column(name = "price", precision = 10, scale = 2)
     private BigDecimal price;
 
     @ColumnDefault("0")
-    @Column(name = "unit_price", precision = 10, scale = 2, nullable = false)
+    @Column(name = "unit_price", precision = 10, scale = 2)
     private BigDecimal unitPrice;
 
     @ColumnDefault("0")
@@ -38,20 +38,20 @@ public class ProductEntity {
     private BigDecimal discountPercentage = BigDecimal.ZERO;
 
     @ColumnDefault("-1")
-    @Column(name = "sku", unique = false, length = 12, nullable = false)
+    @Column(name = "sku", unique = false)
     private String sku;
 
-    @Column(name = "barcode", unique = true, length = 12, nullable = false)
+    @Column(name = "barcode", unique = true)
     private String barcode;
 
-    @Column(name = "brand", length = 50, nullable = false)
+    @Column(name = "brand")
     private String brand;
 
-    @Column(name = "img_URL", length = 255)
+    @Column(name = "img_URL")
     private String imgURL;
 
     @ColumnDefault("0")
-    @Column(name = "stock_quantity", nullable = false)
+    @Column(name = "stock_quantity")
     private Long stock = 0L;
 
     @ColumnDefault("0")
