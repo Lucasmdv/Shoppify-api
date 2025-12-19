@@ -37,6 +37,15 @@ public class ShipmentService {
     public ShipmentEntity mapShipment(ShipmentRequest request, SaleEntity sale) {
         ShipmentEntity shipment = shipmentMapper.toEntity(request, sale);
 
+        if (Boolean.TRUE.equals(request.getPickup())) {
+            StoreEntity store = storeRepository.findById(1L)
+                    .orElseThrow(() -> new NotFoundException("Store not found"));
+            shipment.setStreet(store.getAddress());
+            shipment.setNumber(null);
+            shipment.setCity(store.getCity());
+            shipment.setZip(parsePostalCode(store.getPostalCode()));
+        }
+
         long quantity = sale.getTransaction() == null ? 0
                 : sale.getTransaction().getDetailTransactions().stream()
                 .mapToLong(org.stockify.model.entity.DetailTransactionEntity::getQuantity)
@@ -49,6 +58,21 @@ public class ShipmentService {
         }
 
         return shipment;
+    }
+
+    private Integer parsePostalCode(String postalCode) {
+        if (postalCode == null || postalCode.isBlank()) {
+            return null;
+        }
+        String digits = postalCode.replaceAll("\\D+", "");
+        if (digits.isBlank()) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(digits);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     public Double calculateShippingCost(long quantity) {

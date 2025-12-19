@@ -7,8 +7,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.stockify.dto.request.notifications.NotificationRequest;
+import org.stockify.model.entity.ShipmentEntity;
 import org.stockify.model.enums.NotificationType;
 import org.stockify.model.event.ShipmentStateUpdatedEvent;
+import org.stockify.model.repository.ShipmentRepository;
 import org.stockify.model.service.NotificationService;
 
 @Component
@@ -17,12 +19,20 @@ import org.stockify.model.service.NotificationService;
 public class ShipmentEventListener {
 
     private final NotificationService notificationService;
+    private final ShipmentRepository shipmentRepository;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void handleShipmentStateUpdate(ShipmentStateUpdatedEvent event) {
-        String oldState = event.oldState().getTranslation();
-        String newState = event.newState().getTranslation();
+        boolean isPickup = false;
+        if (event.shipmentId() != null) {
+            isPickup = shipmentRepository.findById(event.shipmentId())
+                    .map(ShipmentEntity::getPickup)
+                    .orElse(false);
+        }
+
+        String oldState = getStateLabel(event.oldState(), isPickup);
+        String newState = getStateLabel(event.newState(), isPickup);
 
         notifySubscribers(event.shipmentId(),
                 "Actualizacion de tu envio",
@@ -30,6 +40,16 @@ public class ShipmentEventListener {
                 "truck",
                 event.saleId(),
                 event.userId());
+    }
+
+    private String getStateLabel(org.stockify.model.enums.OrderStatus state, boolean isPickup) {
+        if (state == null) {
+            return "";
+        }
+        if (isPickup && state == org.stockify.model.enums.OrderStatus.SHIPPED) {
+            return "Listo para retirar";
+        }
+        return state.getTranslation();
     }
 
     private void notifySubscribers(Long shipmentId, String title, String message, String icon, Long saleId,
