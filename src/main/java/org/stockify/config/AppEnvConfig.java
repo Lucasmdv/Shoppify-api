@@ -21,5 +21,6 @@ public final class AppEnvConfig {
         System.setProperty("TEST_ACCESS_TOKEN", Objects.requireNonNull(dotenv.get("TEST_ACCESS_TOKEN")));
         System.setProperty("MERCADOPAGO_WEBHOOK_SECRET", Objects.requireNonNull(dotenv.get("MERCADOPAGO_WEBHOOK_SECRET")));
         System.setProperty("NOTIFICATION_URL", Objects.requireNonNull(dotenv.get("NOTIFICATION_URL")));
+        System.setProperty("FRONTEND_BASE", Objects.requireNonNull(dotenv.get("FRONTEND_BASE")));
     }
 }
