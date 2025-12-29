@@ -2,12 +2,14 @@ package org.stockify.dto.response;
 
 import lombok.Value;
 import org.stockify.model.enums.PaymentMethod;
+import org.stockify.model.enums.PaymentStatus;
 import org.stockify.model.enums.TransactionType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
+import org.stockify.dto.response.PaymentDetailResponse;
 
 @Value
 public class TransactionResponse {
@@ -30,9 +32,16 @@ public class TransactionResponse {
     @Schema(description = "Type of the transaction", example = "SALE")
     TransactionType type;
 
+    @Schema(description = "Detail of the payment received for this transaction")
+    PaymentDetailResponse paymentDetail;
+
+    PaymentStatus paymentStatus;
 
     @Schema(description = "Name of the store where the transaction took place", example = "Downtown Store")
     String storeName;
+
+    @Schema(description = "Payment URL for pending transactions")
+    String paymentLink;
 
     @Schema(description = "Set of detailed transactions")
     Set<DetailTransactionResponse> detailTransactions;

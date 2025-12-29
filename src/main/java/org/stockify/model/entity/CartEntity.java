@@ -1,0 +1,29 @@
+package org.stockify.model.entity;
+import jakarta.persistence.*;
+import lombok.*;
+import org.springframework.core.annotation.Order;
+
+import java.util.HashSet;
+import java.util.Set;
+
+@Getter
+@Setter
+@Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "cart")
+public class CartEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private UserEntity user;
+
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OrderBy ("id desc")
+    private Set<CartItemEntity> products = new HashSet<>();
+}

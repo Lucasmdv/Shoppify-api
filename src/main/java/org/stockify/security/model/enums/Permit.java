@@ -8,6 +8,8 @@ public enum Permit {
     WRITE("Write", "Permission to create and update data"),
     DELETE("Delete", "Permission to delete data"),
     ADMIN("Admin", "Administrative permissions"),
+    USER("User", "User permissions"),
+
     MANAGE_USERS("Manage Users", "Permission to manage user accounts"),
     MANAGE_ROLES("Manage Roles", "Permission to manage roles and permissions"),
     GENERATE_REPORTS("Generate Reports", "Permission to generate and view reports");

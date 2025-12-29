@@ -5,24 +5,28 @@ import org.stockify.dto.request.user.UserRequest;
 import org.stockify.dto.response.UserResponse;
 import org.stockify.model.entity.UserEntity;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring" ,uses = CartMapper.class)
+
 public interface UserMapper {
 
     @Mapping(target = "sales", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dateOfRegistration", ignore = true)
-    UserEntity toEntity(UserRequest clientRequest);
+    UserEntity toEntity(UserRequest userRequest);
     @Mapping(target = "links", ignore = true)
-    UserResponse toDto(UserEntity clientEntity);
+    @Mapping(target = "dateOfRegistration", source = "dateOfRegistration", dateFormat = "yyyy-MM-dd")
+    @Mapping(target = "email", source = "credentials.email")
+    @Mapping(target = "cart" , source = "cart")
+    UserResponse toDto(UserEntity userEntity);
 
     @Mapping(target = "sales", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dateOfRegistration", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void partialUpdateClientEntity(UserRequest clientRequest, @MappingTarget UserEntity clientEntity);
+    void partialUpdateUserEntity(UserRequest userRequest, @MappingTarget UserEntity userEntity);
 
     @Mapping(target = "sales", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dateOfRegistration", ignore = true)
-    void updateClientEntity(UserRequest clientRequest, @MappingTarget UserEntity clientEntity);
+    void updateUserEntity(UserRequest userRequest, @MappingTarget UserEntity userEntity);
 }

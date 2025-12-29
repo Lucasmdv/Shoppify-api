@@ -13,12 +13,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class UserModelAssembler implements RepresentationModelAssembler<UserResponse, EntityModel<UserResponse>> {
 
     @Override
-    public EntityModel<UserResponse> toModel(UserResponse clientResponse) {
-        return EntityModel.of(clientResponse,
-                linkTo(methodOn(UserController.class).getUserById(clientResponse.getId())).withSelfRel(),
-                linkTo(methodOn(UserController.class).getAllUsers(new UserFilterRequest(),0, 20, null)).withRel("clients"),
-                linkTo(methodOn(UserController.class).deleteUserById(clientResponse.getId())).withRel("delete"),
-                linkTo(methodOn(UserController.class).putUser(clientResponse.getId(), null)).withRel("update"),
-                linkTo(methodOn(UserController.class).patchUser(clientResponse.getId(), null)).withRel("partial-update"));
+    public EntityModel<UserResponse> toModel(UserResponse userResponse) {
+        return EntityModel.of(userResponse,
+                linkTo(methodOn(UserController.class).getUserById(userResponse.getId())).withSelfRel(),
+                linkTo(methodOn(UserController.class).getAllUsers(new UserFilterRequest(),0, 20, null)).withRel("users"),
+                linkTo(methodOn(UserController.class).deleteUserById(userResponse.getId())).withRel("delete"),
+                linkTo(methodOn(UserController.class).putUser(userResponse.getId(), null)).withRel("update"),
+                linkTo(methodOn(UserController.class).patchUser(userResponse.getId(), null)).withRel("partial-update"));
     }
 }

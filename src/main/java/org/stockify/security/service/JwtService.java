@@ -20,6 +20,7 @@ import java.security.Key;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+
 /**
  * Service responsible for JWT (JSON Web Token) operations.
  * Handles token generation, validation, extraction of claims, and token invalidation.
@@ -65,13 +66,42 @@ public class JwtService {
      */
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", userDetails.getAuthorities());
+
+        // Build permits claim: uppercase enum names, ordered, no duplicates
+        java.util.Set<String> permits = new java.util.TreeSet<>();
+
+        if (userDetails instanceof org.stockify.security.model.entity.CredentialsEntity cred) {
+            claims.put("email", cred.getEmail());
+            permits.addAll(
+                    cred.getRoles().stream()
+                            .filter(java.util.Objects::nonNull)
+                            .map(org.stockify.security.model.entity.RoleEntity::getPermits)
+                            .filter(java.util.Objects::nonNull)
+                            .flatMap(java.util.Set::stream)
+                            .filter(java.util.Objects::nonNull)
+                            .map(org.stockify.security.model.entity.PermitEntity::getPermit)
+                            .filter(java.util.Objects::nonNull)
+                            .map(Enum::name)
+                            .collect(java.util.stream.Collectors.toSet()));
+        } else {
+            // Fallback: derive from GrantedAuthorities excluding ROLE_*
+            for (org.springframework.security.core.GrantedAuthority a : userDetails.getAuthorities()) {
+                String auth = a.getAuthority();
+                if (auth != null && !auth.startsWith("ROLE_")) {
+                    permits.add(auth);
+                }
+            }
+        }
+
+        claims.put("permits", permits);
         return buildToken(claims, userDetails, jwtExpiration);
     }
+
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
+
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()
@@ -80,6 +110,7 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
     /**
      * Validates if a token is valid for the specified user
      * Checks if the token belongs to the user, is not expired, and the user account is valid
@@ -88,19 +119,18 @@ public class JwtService {
      * @param userDetails The user details to validate against
      * @return True if the token is valid, false otherwise
      */
-    public boolean isTokenValid(String token, UserDetails userDetails)
-    {
+    public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()))
                 && !isTokenExpired(token)
                 && userDetails.isAccountNonLocked()
                 && userDetails.isEnabled();
     }
+
     private String buildToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails,
-            long expiration
-    ) {
+            long expiration) {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
@@ -111,6 +141,7 @@ public class JwtService {
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecretKey);
         return Keys.hmacShaKeyFor(keyBytes);
@@ -155,7 +186,6 @@ public class JwtService {
 
         return authHeader.substring(7);
     }
-
 
     /**
      * Checks if a token has been invalidated

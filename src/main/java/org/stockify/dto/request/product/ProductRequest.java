@@ -1,6 +1,8 @@
 package org.stockify.dto.request.product;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
@@ -26,8 +28,13 @@ public record ProductRequest(
         @Schema(description = "Unit price of the product", example = "899.99")
         BigDecimal unitPrice,
 
+        @Schema(description = "Discount percentage applied to the price", example = "15.0")
+        @DecimalMin(value = "0.0", message = "Discount cannot be negative")
+        @DecimalMax(value = "100.0", message = "Discount cannot exceed 100%")
+        BigDecimal discountPercentage,
+
         @Schema(description = "Available stock quantity", example = "100")
-        BigDecimal stock,
+        Long stock,
 
         @Schema(description = "SKU code (Stock Keeping Unit)", example = "PHONE-001")
         String sku,
@@ -39,9 +46,36 @@ public record ProductRequest(
         String brand,
 
         @Schema(description = "Set of categories the product belongs to", example = "[\"Electronics\", \"Mobile\"]")
-        Set<String> categories
-) {
+        Set<String> categories,
+
+        @Schema(description = "Indicates if the product is inactive", example = "false")
+        Boolean inactive
+    ) {
+
     public ProductRequest {
-        if (categories == null) categories = Set.of();
+        if (discountPercentage == null)
+            discountPercentage = BigDecimal.ZERO;
+        if (categories == null)
+            categories = Set.of();
+        if (price == null)
+            price = BigDecimal.ZERO;
+        if (unitPrice == null)
+            unitPrice = BigDecimal.ZERO;
+        if (stock == null)
+            stock = 0L;
+        if (sku == null)
+            sku = "";
+        if (barcode == null)
+            barcode = "";
+        if (brand == null)
+            brand = "";
+        if (description == null)
+            description = "";
+        if (imgURL == null)
+            imgURL = "";
+        if (inactive == null)
+            inactive = false;
+        if (name == null)
+            name = "Unknown Product";
     }
 }

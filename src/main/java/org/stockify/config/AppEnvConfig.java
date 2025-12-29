@@ -1,4 +1,5 @@
 package org.stockify.config;
+
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.NoArgsConstructor;
 import java.util.Objects;
@@ -17,5 +18,9 @@ public final class AppEnvConfig {
         System.setProperty("EMAIL_PORT", Objects.requireNonNull(dotenv.get("EMAIL_PORT")));
         System.setProperty("EMAIL_USERNAME", Objects.requireNonNull(dotenv.get("EMAIL_USERNAME")));
         System.setProperty("EMAIL_PASSWORD", Objects.requireNonNull(dotenv.get("EMAIL_PASSWORD")));
+        System.setProperty("TEST_ACCESS_TOKEN", Objects.requireNonNull(dotenv.get("TEST_ACCESS_TOKEN")));
+        System.setProperty("MERCADOPAGO_WEBHOOK_SECRET", Objects.requireNonNull(dotenv.get("MERCADOPAGO_WEBHOOK_SECRET")));
+        System.setProperty("NOTIFICATION_URL", Objects.requireNonNull(dotenv.get("NOTIFICATION_URL")));
+        System.setProperty("FRONTEND_BASE", Objects.requireNonNull(dotenv.get("FRONTEND_BASE")));
     }
 }

@@ -66,7 +66,12 @@ public class CategoryService {
      * @param id the ID of the category to delete
      */
     public void deleteById(int id) {
-        categoryRepository.deleteById(id);
+        CategoryEntity category = findEntityById(id);
+
+        category.getProducts().forEach(product -> product.getCategories().remove(category));
+        category.getProducts().clear();
+
+        categoryRepository.delete(category);
     }
 
     /**

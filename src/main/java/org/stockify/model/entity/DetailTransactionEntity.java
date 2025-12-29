@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 
@@ -27,10 +29,11 @@ public class DetailTransactionEntity {
     @ManyToOne
     @JoinColumn(name = "product_id")
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private ProductEntity product;
 
     @Column(name = "quantity", nullable = false)
-        private BigDecimal quantity;
+    private Long quantity;
 
     @Column(name = "subtotal", precision = 20, scale = 2)
     private BigDecimal subtotal;

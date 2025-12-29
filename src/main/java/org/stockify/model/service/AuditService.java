@@ -131,9 +131,9 @@ public class AuditService {
      * <p>
      * For each Sale entity, this method fetches all its audit revisions,
      * loads associated transaction details manually if present,
-     * and converts the data into a list of SaleAuditDTOs including client information.
+     * and converts the data into a list of SaleAuditDTOs including user information.
      *
-     * @return List of SaleAuditDTO containing revision data, transaction details, and client ID.
+     * @return List of SaleAuditDTO containing revision data, transaction details, and user ID.
      */
     public Page<SaleAuditDTO> getAllSaleAudits(Pageable pageable, SaleAuditFilterRequest filter) {
         AuditReader auditReader = AuditReaderFactory.get(entityManager);
@@ -166,7 +166,7 @@ public class AuditService {
                         .revisionType(revisionTypeStr)
                         .id(auditedSale.getId())
                         .transaction(transactionMapper.toDto(transaction))
-                        .clientId(auditedSale.getClient() != null ? auditedSale.getClient().getId() : null)
+                        .userId(auditedSale.getUser() != null ? auditedSale.getUser().getId() : null)
                         .build();
 
                 auditList.add(auditDTO);
@@ -180,8 +180,8 @@ public class AuditService {
             .filter(audit -> filter.getSaleId() == null || audit.getId().equals(filter.getSaleId()))
             .filter(audit -> filter.getTransactionId() == null ||
                     (audit.getTransaction() != null && audit.getTransaction().getId().equals(filter.getTransactionId())))
-            .filter(audit -> filter.getClientId() == null ||
-                    (audit.getClientId() != null && audit.getClientId().equals(filter.getClientId())))
+            .filter(audit -> filter.getUserId() == null ||
+                    (audit.getUserId() != null && audit.getUserId().equals(filter.getUserId())))
             .collect(Collectors.toList());
 
         // Apply pagination

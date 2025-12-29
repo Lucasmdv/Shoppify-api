@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -34,10 +36,39 @@ public class StoreEntity {
     @Column(name = "city", nullable = false, length = 100)
     private String city;
 
+    @Size(max = 100)
+    @NotNull
+    @Column(name = "phone", nullable = false, length = 100)
+    private String phone;
+
+    @Size(max = 20)
+    @Column(name = "postal_code", length = 20)
+    private String postalCode;
+
+    @Size(max = 255)
+    @Column(name = "facebook", length = 255)
+    private String facebook;
+
+    @Size(max = 255)
+    @Column(name = "instagram", length = 255)
+    private String instagram;
+
+    @Size(max = 255)
+    @Column(name = "twitter", length = 255)
+    private String twitter;
 
     @OneToMany(mappedBy = "store", fetch = FetchType.LAZY)
     private Set<TransactionEntity> transactions;
 
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<CarouselItem> homeCarousel = new ArrayList<>();
 
+    @Column(name = "shipping_cost_small", precision = 10, scale = 2)
+    private java.math.BigDecimal shippingCostSmall;
 
+    @Column(name = "shipping_cost_medium", precision = 10, scale = 2)
+    private java.math.BigDecimal shippingCostMedium;
+
+    @Column(name = "shipping_cost_large", precision = 10, scale = 2)
+    private java.math.BigDecimal shippingCostLarge;
 }

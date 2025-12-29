@@ -31,10 +31,17 @@ public class TransactionController {
             @ApiResponse(responseCode = "400", description = "Validation error")
     })
     @PostMapping("/transactions")
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('WRITE')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('WRITE')")
     public ResponseEntity<TransactionResponse> createTransaction(
             @Parameter(description = "Transaction payload") @RequestBody @Valid TransactionCreatedRequest request) {
         return ResponseEntity.ok(transactionService.saveTransaction(request, TransactionType.OTHER));
+    }
+
+    @Operation(summary = "Cancel a transaction and restore stock")
+    @PostMapping("/transactions/{id}/cancel")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> cancelTransaction(@PathVariable Long id) {
+        transactionService.cancelTransactionById(id, "USER_CANCELLATION");
+        return ResponseEntity.ok().build();
     }
 }

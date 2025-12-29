@@ -32,8 +32,7 @@ public class TransactionPurchaseController {
             @ApiResponse(responseCode = "400", description = "Validation error")
     })
     @PostMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('WRITE') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('WRITE')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @Transactional
     public ResponseEntity<PurchaseResponse> create(
             @Parameter(description = "Purchase request body") @Valid @RequestBody PurchaseRequest request) {

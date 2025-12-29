@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.stockify.dto.response.ErrorResponse;
 import org.zalando.problem.spring.web.advice.ProblemHandling;
+import org.stockify.security.exception.AuthenticationException;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDateTime;
 
@@ -22,8 +24,7 @@ public class GlobalExceptionHandler implements ProblemHandling {
     @ExceptionHandler(DuplicatedUniqueConstraintException.class)
     public ResponseEntity<ErrorResponse> handleDuplicatedUniqueConstraintException(
             DuplicatedUniqueConstraintException ex,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         return buildErrorResponse(HttpStatus.CONFLICT, ex, request);
     }
 
@@ -36,7 +37,7 @@ public class GlobalExceptionHandler implements ProblemHandling {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFoundException(
             EntityNotFoundException ex,
-            HttpServletRequest request){
+            HttpServletRequest request) {
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex, request);
     }
 
@@ -46,7 +47,7 @@ public class GlobalExceptionHandler implements ProblemHandling {
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrity(HttpServletRequest request,
-                                                             DataIntegrityViolationException ex) {
+            DataIntegrityViolationException ex) {
         String raw = ex.getMostSpecificCause().getMessage().toLowerCase();
         String field = "campo único";
 
@@ -63,15 +64,13 @@ public class GlobalExceptionHandler implements ProblemHandling {
         return buildErrorResponse(
                 HttpStatus.CONFLICT,
                 new DuplicatedUniqueConstraintException(msg),
-                request
-        );
+                request);
     }
 
     @ExceptionHandler(InvalidSessionStatusException.class)
     public ResponseEntity<ErrorResponse> handleInvalidSessionStatus(
             InvalidSessionStatusException ex,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         return buildErrorResponse(HttpStatus.CONFLICT, ex, request);
     }
 
@@ -111,6 +110,20 @@ public class GlobalExceptionHandler implements ProblemHandling {
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex, request);
     }
 
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleCustomAuthenticationException(
+            AuthenticationException ex,
+            HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.CONFLICT, ex, request);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(
+            AccessDeniedException ex,
+            HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.FORBIDDEN, ex, request);
+    }
+
     /**
      * Método genérico para construir la respuesta de error.
      */
@@ -122,8 +135,7 @@ public class GlobalExceptionHandler implements ProblemHandling {
                 ex.getClass().getSimpleName(),
                 status.value(),
                 request.getRequestURI(),
-                LocalDateTime.now()
-        );
+                LocalDateTime.now());
         return ResponseEntity.status(status).body(errorResponse);
     }
 }

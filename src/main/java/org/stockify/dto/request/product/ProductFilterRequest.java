@@ -11,18 +11,21 @@ public class ProductFilterRequest {
     @Schema(description = "Exact price to filter", example = "99.99", nullable = true)
     private Double price;
 
+    @Schema(description = "Exact discount percentage to filter", example = "15.0", nullable = true)
+    private Double discountPercentage;
+
     @Schema(description = "Exact stock quantity to filter", example = "100", nullable = true)
-    private Double stock;
+    private Long stock;
 
     @Schema(description = "Filter for stock greater than this value", example = "50", nullable = true)
-    private Double stockGreaterThan;
+    private Long stockGreaterThan;
 
     @Schema(description = "Filter for stock less than this value", example = "200", nullable = true)
-    private Double stockLessThan;
+    private Long stockLessThan;
 
     @Schema(description = "Filter for stock between two values (min and max)", example = "[50, 150]", nullable = true)
     @Size(min = 2, max = 2, message = "stockBetween needs exactly 2 parameters")
-    private List<Double> stockBetween;
+    private List<Long> stockBetween;
 
     @Schema(description = "Filter by product name", example = "Smartphone", nullable = true)
     private String name;
@@ -60,4 +63,26 @@ public class ProductFilterRequest {
 
     @Schema(description = "Filter for price less than this value", example = "500.00", nullable = true)
     private Double priceLess;
+
+    @Schema(description = "Filter for discount greater than this value", example = "5.0", nullable = true)
+    private Double discountGreater;
+
+    @Schema(description = "Filter for discount less than this value", example = "30.0", nullable = true)
+    private Double discountLess;
+
+    @Schema(description = "Filter for discount between two values (min and max)", example = "[5.0, 20.0]", nullable = true)
+    @Size(min = 2, max = 2, message = "discountBetween needs exactly 2 parameters")
+    private List<Double> discountBetween;
+
+    @Schema(description = "Filter matching either product name or category name", example = "electronics", nullable = true)
+    private String productOrCategory;
+
+    @Schema(description = "Sort direction for sold quantity (asc or desc)", example = "desc", nullable = true)
+    private String sortBySoldQuantity;
+
+    @Schema(description = "Sort direction for discount percentage (asc or desc)", example = "asc", nullable = true)
+    private String sortByDiscountPercentage;
+
+    @Schema(description = "Filter by inactive status. If not provided, it will show only active products.", example = "false", nullable = true)
+    private Boolean inactive;
 }

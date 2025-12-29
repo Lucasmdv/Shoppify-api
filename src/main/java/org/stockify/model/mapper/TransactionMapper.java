@@ -11,7 +11,7 @@ import org.stockify.dto.request.transaction.TransactionRequest;
 import org.stockify.dto.response.TransactionResponse;
 import org.stockify.model.entity.TransactionEntity;
 
-@Mapper(componentModel = "spring", uses = {ProviderMapper.class, DetailTransactionMapper.class})
+@Mapper(componentModel = "spring", uses = {ProviderMapper.class, DetailTransactionMapper.class, PaymentDetailMapper.class})
 public interface TransactionMapper {
     @Mapping(target = "type", ignore = true)
     @Mapping(target = "total", ignore = true)
@@ -19,8 +19,10 @@ public interface TransactionMapper {
     @Mapping(target = "purchase", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dateTime", ignore = true)
+    @Mapping(target = "idempotencyKey", ignore = true)
     TransactionEntity toEntity(TransactionRequest transactionRequest);
 
+    @Mapping(target = "idempotencyKey", ignore = true)
     TransactionEntity toEntity(TransactionCreatedRequest transactionCreatedRequest);
 
     @Mapping(target = "storeName", source = "store.storeName")
@@ -34,6 +36,7 @@ public interface TransactionMapper {
     @Mapping(target = "purchase", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dateTime", ignore = true)
+    @Mapping(target = "idempotencyKey", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     TransactionEntity partialUpdate(TransactionRequest transactionRequest, @MappingTarget TransactionEntity transactionEntity);
 }

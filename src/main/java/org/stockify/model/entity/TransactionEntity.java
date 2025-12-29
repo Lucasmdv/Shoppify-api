@@ -9,7 +9,9 @@ import lombok.Setter;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.stockify.model.enums.PaymentMethod;
+import org.stockify.model.enums.PaymentStatus;
 import org.stockify.model.enums.TransactionType;
+import org.stockify.model.entity.PaymentDetailEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -21,7 +23,9 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "transactions")
+@Table(name = "transactions", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "idempotency_key", "payment_status" })
+})
 @Audited
 public class TransactionEntity {
     @Id
@@ -45,13 +49,21 @@ public class TransactionEntity {
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus;
+
+    @Column(name = "idempotency_key", length = 128)
+    private String idempotencyKey;
+
+    @Column(name = "payment_link")
+    private String paymentLink;
 
     @ManyToOne
     @JoinColumn(name = "store_id")
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private StoreEntity store;
 
-    @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private Set<DetailTransactionEntity> detailTransactions;
 
@@ -59,13 +71,18 @@ public class TransactionEntity {
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private PurchaseEntity purchase;
 
+    @OneToOne(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+    private PaymentDetailEntity paymentDetail;
+
     @OneToOne(mappedBy = "transaction", cascade = CascadeType.ALL)
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private SaleEntity sale;
 
     @PrePersist
-    public void prePersist(){
+    public void prePersist() {
         this.dateTime = LocalDateTime.now();
+        this.paymentMethod = this.paymentMethod == null ? PaymentMethod.CASH : this.paymentMethod;
     }
 
 }

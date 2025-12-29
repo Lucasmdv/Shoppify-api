@@ -15,9 +15,10 @@ public interface CredentialRepository extends JpaRepository<CredentialsEntity, L
     Optional<CredentialsEntity> findByEmail(String email);
 
     @Query("""
-    SELECT c FROM CredentialsEntity c
-    JOIN FETCH c.roles r
-    JOIN FETCH r.permits
+    SELECT DISTINCT c FROM CredentialsEntity c
+    LEFT JOIN FETCH c.user
+    LEFT JOIN FETCH c.roles r
+    LEFT JOIN FETCH r.permits
     WHERE c.email = :email
     """)
     Optional<CredentialsEntity> findByEmailWithRolesAndPermits(@Param("email") String email);

@@ -22,10 +22,8 @@ public class ProductEntity {
     @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-
     @Column(name = "description", length = Integer.MAX_VALUE)
     private String description;
-
 
     @ColumnDefault("0")
     @Column(name = "price", precision = 10, scale = 2)
@@ -34,6 +32,10 @@ public class ProductEntity {
     @ColumnDefault("0")
     @Column(name = "unit_price", precision = 10, scale = 2)
     private BigDecimal unitPrice;
+
+    @ColumnDefault("0")
+    @Column(name = "discount_percentage", precision = 5, scale = 2)
+    private BigDecimal discountPercentage = BigDecimal.ZERO;
 
     @ColumnDefault("-1")
     @Column(name = "sku", unique = false)
@@ -45,13 +47,22 @@ public class ProductEntity {
     @Column(name = "brand")
     private String brand;
 
-
     @Column(name = "img_URL")
     private String imgURL;
 
     @ColumnDefault("0")
-    @Column(name = "stock_quantity", precision = 15, scale = 2)
-    private BigDecimal stock = BigDecimal.ZERO;
+    @Column(name = "stock_quantity")
+    private Long stock = 0L;
+
+    @ColumnDefault("0")
+    @Column(name = "sold_quantity")
+    private Long soldQuantity = 0L;
+
+    @ColumnDefault("false")
+    private Boolean deleted = false;
+
+    @ColumnDefault("false")
+    private Boolean inactive = false;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "products_categories",
@@ -70,8 +81,6 @@ public class ProductEntity {
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private Set<DetailTransactionEntity> detailTransactions = new HashSet<>();
 
-    public ProductEntity() {
-        this.stock = BigDecimal.ZERO;
-    }
 
 }
+

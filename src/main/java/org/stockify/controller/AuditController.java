@@ -48,8 +48,7 @@ public class AuditController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Transaction audit logs retrieved successfully")
     })
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('READ') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('READ')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('GENERATE_REPORTS')")
     @GetMapping("/transactions")
     public ResponseEntity<PagedModel<EntityModel<TransactionAuditDTO>>> getAllTransactionAudit(
             @Parameter(hidden = true) Pageable pageable,
@@ -69,8 +68,7 @@ public class AuditController {
             @ApiResponse(responseCode = "200", description = "Purchase audit logs retrieved successfully")
     })
     @GetMapping("/purchases")
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('READ') or " +
-            "hasRole('ROLE_MANAGER') and hasAuthority('READ')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('GENERATE_REPORTS')")
     public ResponseEntity<PagedModel<EntityModel<PurchaseAuditDTO>>> getAllPurchaseAudit(
             @Parameter(hidden = true) Pageable pageable,
             @ParameterObject PurchaseAuditFilterRequest filter,
@@ -88,7 +86,7 @@ public class AuditController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Sale audit logs retrieved successfully")
     })
-    @PreAuthorize("hasAuthority('READ')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('GENERATE_REPORTS')")
     @GetMapping("/sales")
     public ResponseEntity<PagedModel<EntityModel<SaleAuditDTO>>> getAllSaleAudit(
             @Parameter(hidden = true) Pageable pageable,

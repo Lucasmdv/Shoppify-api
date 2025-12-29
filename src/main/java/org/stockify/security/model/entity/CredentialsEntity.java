@@ -4,6 +4,7 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.stockify.model.entity.UserEntity;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -23,11 +24,17 @@ public class CredentialsEntity implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String username;
+
     @Column(unique = true)
     private String email;
+
     private String password;
 
+    @OneToOne
+    @JoinColumn(name = "user_id", unique = true)
+    private UserEntity user;
 
     @ManyToMany(cascade = CascadeType.MERGE,fetch = FetchType.EAGER)
     @JoinTable(
@@ -43,7 +50,7 @@ public class CredentialsEntity implements UserDetails {
 
         // Roles como: ROLE_ADMIN, ROLE_MANAGER...
         roles.forEach(role -> authorities.add(
-                new SimpleGrantedAuthority("ROLE_" + role.getRole().name())));
+                new SimpleGrantedAuthority("ROLE_" + role.getName().toUpperCase())));
 
         // Permisos que vienen del rol
         roles.forEach(role -> {

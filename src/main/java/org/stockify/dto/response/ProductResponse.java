@@ -17,8 +17,17 @@ public record ProductResponse(
         @Schema(description = "Unit price of the product", example = "5.20")
         double unitPrice,
 
+        @Schema(description = "Discount percentage applied to the price", example = "10.0")
+        double discountPercentage,
+
+        @Schema(description = "Final price after applying discount", example = "23.39")
+        double priceWithDiscount,
+
         @Schema(description = "Available stock quantity", example = "100.0")
-        double stock,
+        long stock,
+
+        @Schema(description = "Total quantity sold for this product", example = "250.0")
+        long soldQuantity,
 
         @Schema(description = "SKU (Stock Keeping Unit) code", example = "WM-12345")
         String sku,
@@ -39,7 +48,10 @@ public record ProductResponse(
         Set<String> categories,
 
         @Schema(description = "Provider IDs associated with the product")
-        Set<Long> providers
+        Set<Long> providers,
+
+        @Schema(description = "Whether the product is inactive", example = "false")
+        boolean inactive
 ) {
     public ProductResponse {
         if (categories == null) categories = Set.of();
